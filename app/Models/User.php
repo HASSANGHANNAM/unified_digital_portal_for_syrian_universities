@@ -18,13 +18,17 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+
     protected $fillable = [
-        'Email',
+        'username',
         'password',
-        'email_verified_at',
-
+        'new_password',
+        'email',
+        'email_verified',
+        'status',
+        'last_login',
+        'person_id'
     ];
-
     /**
      * The attributes that should be hidden for serialization.
      *
@@ -33,7 +37,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'new_password'
     ];
+
     /**
      * The attributes that should be cast.
      *
@@ -43,4 +49,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+    public function person()
+    {
+        return $this->belongsTo(Person::class);
+    }
+
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'account_role', 'account_id', 'role_id');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(UserNotification::class, 'account_id');
+    }
 }

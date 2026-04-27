@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
-use App\Http\Requests\RefreshToken;
-use App\Http\Requests\RegisterUser;
-use App\Http\Requests\VerifyEmailRequest;
+use App\Http\Requests\V1\LoginRequest;
+use App\Http\Requests\V1\RefreshToken;
+use App\Http\Requests\V1\VerifyEmailRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Responses\Response;
