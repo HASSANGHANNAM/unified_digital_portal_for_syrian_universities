@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('username');
             $table->string('email')->nullable();
-            $table->string('status');
+            $table->enum('status', ['active', 'inactive', 'pending']);
             $table->dateTime('last_login')->nullable();
             $table->uuid('person_id')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();

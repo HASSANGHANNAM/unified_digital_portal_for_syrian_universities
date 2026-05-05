@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyEmailRequest extends FormRequest
+class CompleteProfileRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,11 @@ class VerifyEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'Email' => 'required|email|exists:users,email',
-            'code' => 'required|numeric|digits:6',
+            'full_name' => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'birth_date' => 'nullable|date',
+            'national_number' => 'nullable|string|max:50',
+            'address' => 'nullable|string|max:255',
         ];
     }
 }

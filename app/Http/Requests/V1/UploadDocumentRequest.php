@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyEmailRequest extends FormRequest
+class UploadDocumentRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,8 @@ class VerifyEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'Email' => 'required|email|exists:users,email',
-            'code' => 'required|numeric|digits:6',
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
+            'name' => 'required|string|max:255',
         ];
     }
 }

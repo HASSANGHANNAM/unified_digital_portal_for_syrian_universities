@@ -11,6 +11,7 @@ interface UserRepositoryInterface
     public function update(User $user, array $data): bool;
     public function all(): Collection;
     public function findByEmail(string $email): ?User;
+    public function findByUserName(string $username): ?User;
     public function findById(int $id): ?User;
     public function assignRole(User $user, string $roleName): void;
     public function getProfile(User $user): array;

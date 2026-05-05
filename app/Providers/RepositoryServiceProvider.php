@@ -35,8 +35,8 @@ use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 use App\Repositories\Contracts\DepartmentHeadRepositoryInterface;
 use App\Repositories\Contracts\CollegeDeanRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeAvailabilityRepositoryInterface;
-// use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
-// use App\Repositories\Contracts\NotificationRepositoryInterface; 
+use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
+// use App\Repositories\Contracts\NotificationRepositoryInterface;
 
 use App\Repositories\UniversityRepository;
 use App\Repositories\UserRepository;
@@ -69,7 +69,7 @@ use App\Repositories\PersonAttachmentRepository;
 use App\Repositories\DepartmentHeadRepository;
 use App\Repositories\CollegeDeanRepository;
 use App\Repositories\RequestTypeAvailabilityRepository;
-// use App\Repositories\EmailVerificationRepository;
+use App\Repositories\EmailVerificationRepository;
 // use App\Repositories\NotificationRepository; // استبدلناها بـ UserNotificationRepository
 
 
@@ -108,7 +108,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(DepartmentHeadRepositoryInterface::class, DepartmentHeadRepository::class);
         $this->app->bind(CollegeDeanRepositoryInterface::class, CollegeDeanRepository::class);
         $this->app->bind(RequestTypeAvailabilityRepositoryInterface::class, RequestTypeAvailabilityRepository::class);
-        // $this->app->bind(EmailVerificationRepositoryInterface::class, EmailVerificationRepository::class);
+        $this->app->bind(EmailVerificationRepositoryInterface::class, EmailVerificationRepository::class);
         // $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
     }
 

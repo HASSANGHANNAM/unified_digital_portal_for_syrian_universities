@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class VerifyEmailRequest extends FormRequest
+class SetupAccountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,9 @@ class VerifyEmailRequest extends FormRequest
     public function rules(): array
     {
         return [
-            // 'Email' => 'required|email|exists:users,email',
-            'code' => 'required|numeric|digits:6',
+            'email' => 'required|email|unique:users,email',
+            'new_password' => 'required|min:8|confirmed',
+
         ];
     }
 }
