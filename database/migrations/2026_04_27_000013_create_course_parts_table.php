@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('course_parts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->id();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->integer('percentage');
             $table->string('name');
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('course_parts');
     }

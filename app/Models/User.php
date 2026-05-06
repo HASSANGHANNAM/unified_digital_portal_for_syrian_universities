@@ -54,11 +54,6 @@ class User extends Authenticatable
         return $this->belongsTo(Person::class);
     }
 
-    public function roles()
-    {
-        return $this->belongsToMany(Role::class, 'account_role', 'account_id', 'role_id');
-    }
-
     public function notifications()
     {
         return $this->hasMany(UserNotification::class, 'account_id');

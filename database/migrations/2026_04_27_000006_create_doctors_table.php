@@ -6,21 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('doctors', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('doctor_id_number')->unique();
-            $table->foreignUuid('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->string('title')->nullable();
             $table->date('hire_date');
             $table->string('employment_status');
-            $table->foreignUuid('person_id')->constrained('persons')->cascadeOnDelete();
+            $table->foreignId('person_id')->constrained('persons')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('doctors');
     }

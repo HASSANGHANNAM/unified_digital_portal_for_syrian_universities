@@ -6,18 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('person_attachments', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('name');
             $table->string('path');
-            $table->foreignUuid('person_id')->constrained('persons')->cascadeOnDelete();
+            $table->foreignId('person_id')->constrained('persons')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('person_attachments');
     }

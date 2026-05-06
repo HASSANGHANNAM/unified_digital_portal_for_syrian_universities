@@ -21,13 +21,13 @@ class EmailVerificationRepository implements EmailVerificationRepositoryInterfac
         ]);
 
         Mail::raw("كود التحقق الخاص بك هو: {$code}", function ($message) use ($user) {
-            $message->to($user->Email)->subject('رمز التحقق لحسابك');
+            $message->to($user->email)->subject('رمز التحقق لحسابك');
         });
     }
 
-    public function resendCode(string $Email): string
+    public function resendCode(string $email): string
     {
-        $user = User::where('Email', $Email)->first();
+        $user = User::where('email', $email)->first();
         if (!$user) {
             throw new \Exception('البريد الإلكتروني غير موجود');
         }
@@ -58,7 +58,7 @@ class EmailVerificationRepository implements EmailVerificationRepositoryInterfac
         ]);
 
         Mail::raw("رمز التحقق الجديد الخاص بك هو: {$code}", function ($message) use ($user) {
-            $message->to($user->Email)->subject('رمز التحقق الجديد لحسابك');
+            $message->to($user->email)->subject('رمز التحقق الجديد لحسابك');
         });
 
         return 'تم إرسال رمز تحقق جديد إلى بريدك الإلكتروني';

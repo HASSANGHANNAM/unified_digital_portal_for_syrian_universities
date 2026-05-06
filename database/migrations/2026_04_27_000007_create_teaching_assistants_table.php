@@ -6,20 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('teaching_assistants', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('ta_id_number')->unique();
-            $table->foreignUuid('department_id')->nullable()->constrained('departments')->nullOnDelete();
-            $table->foreignUuid('supervisor_id')->nullable()->constrained('staff')->nullOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('supervisor_id')->nullable()->constrained('staff')->nullOnDelete();
             $table->date('assignment_date');
-            $table->foreignUuid('person_id')->constrained('persons')->cascadeOnDelete();
+            $table->foreignId('person_id')->constrained('persons')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('teaching_assistants');
     }

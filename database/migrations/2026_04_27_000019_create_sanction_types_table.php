@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('sanction_types', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('reason');
             $table->string('name');
             $table->integer('years')->default(0);
@@ -19,7 +19,7 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('sanction_types');
     }

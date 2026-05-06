@@ -6,22 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('schedules', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('day_of_week');
             $table->string('start_time');
             $table->string('end_time');
             $table->string('location');
             $table->string('semester');
             $table->integer('year');
-            $table->foreignUuid('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('schedules');
     }

@@ -6,10 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('persons', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('national_id')->nullable();
             $table->string('full_name');
             $table->string('phone')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['person_id']);

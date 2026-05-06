@@ -9,15 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('username');
             $table->string('email')->nullable();
-            $table->string('status');
+            $table->enum('status', ['active', 'inactive', 'pending']);
             $table->dateTime('last_login')->nullable();
-            $table->uuid('person_id')->nullable()->unique();
+            $table->foreignId('person_id')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('new_password')->nullable();
@@ -29,7 +29,7 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('users');
     }

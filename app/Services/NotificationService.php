@@ -2,96 +2,169 @@
 
 namespace App\Services;
 
-use App\Models\Notification as NotificationModel;
-use Illuminate\Support\Facades\Log;
-use App\Models\Notification;
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\Messaging\CloudMessage;
+use App\Jobs\ProcessQueryableUserNotificationsJob;
+use App\Models\User;
+use App\Services\Traits\HasCache;
+use App\Services\Traits\HasLogging;
+use App\Support\NotificationChunkWriter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
+use Laravel\SerializableClosure\SerializableClosure;
 
 class NotificationService
 {
+    use HasCache;
+    use HasLogging;
 
-    public function index()
+    public function sendToUser(User $user, Notification $notification): void
     {
-        return auth()->user()->notifications;
-    }
+        $this->logInfo('notification.send_to_user', ['user_id' => $user->id, 'type' => $notification::class]);
 
+        if ($this->shouldQueueNotification($notification)) {
+            $user->notify($notification);
 
-
-    public function send($user, $title, $message, $type = 'basic')
-    {
-        if (empty($user->fcm_token)) {
-            Log::warning("FCM token is missing for user ID: {$user->id}");
-            return ['status' => false, 'message' => 'FCM token is missing'];
+            return;
         }
 
-        // Path to the service account key JSON file
-        $serviceAccountPath = storage_path('app/firebase/echo_of_the_syrian_citizen_firebase_adminsdk_fbsvc_9e64271c2a.json');
+        $user->notifyNow($notification);
+    }
 
-        // Initialize the Firebase Factory with the service account
-        $factory = (new Factory)->withServiceAccount($serviceAccountPath);
+    /**
+     * @param  iterable<int>|array<int>  $userIds
+     */
+    public function sendToUsers(iterable $userIds, Notification $notification): void
+    {
+        $ids = $this->normalizeIds($userIds);
+        $count = count($ids);
 
-        // Create the Messaging instance
-        $messaging = $factory->createMessaging();
+        if ($count === 0) {
+            return;
+        }
 
-        // Prepare the notification array
-        $notification = [
-            'title' => $title,
-            'body'  => $message,
-            'sound' => 'default',
-        ];
+        $this->logInfo('notification.send_to_users', ['count' => $count, 'type' => $notification::class]);
 
-        // Additional data payload
-        $data = [
-            'type'    => $type,
-            'id'      => $user->id,
-            'message' => $message,
-        ];
+        if ($count <= $this->syncThreshold()) {
+            $this->sendToUserIdsSynchronously($ids, $notification);
 
-        // Create the CloudMessage instance
-        $cloudMessage = CloudMessage::withTarget('token', $user->fcm_token)
-            ->withNotification($notification)
-            ->withData($data);
+            return;
+        }
 
-        try {
-            $messaging->send($cloudMessage);
+        $this->dispatchBulkJob(
+            $notification,
+            new SerializableClosure(fn () => User::query()->whereIn('id', $ids)->orderBy('id'))
+        );
+    }
 
+    public function sendToRole(string $roleName, Notification $notification): void
+    {
+        $query = User::query()->whereHas('roles', fn (Builder $q) => $q->where('name', $roleName));
+        $count = (clone $query)->count();
 
-            Notification::create([
-                'user_id' => $user->id,
-                'message' => $message,
-                'send_at' => now(),
-            ]);
+        $this->logInfo('notification.send_to_role', ['role' => $roleName, 'count' => $count, 'type' => $notification::class]);
 
-            return ['status' => true, 'message' => 'Notification sent'];
-        } catch (\Kreait\Firebase\Exception\MessagingException $e) {
-            Log::error($e->getMessage());
-            return ['status' => false, 'message' => 'Notification not sent'];
-        } catch (\Kreait\Firebase\Exception\FirebaseException $e) {
-            Log::error($e->getMessage());
-            return ['status' => false, 'message' => 'Notification not sent'];
+        if ($count === 0) {
+            return;
+        }
+
+        if ($count <= $this->syncThreshold()) {
+            $chunk = (int) config('notifications.chunk_size', 500);
+            (clone $query)->chunkById($chunk, function (Collection $users) use ($notification): void {
+                NotificationChunkWriter::writeAndBroadcast($users, $notification);
+            });
+
+            return;
+        }
+
+        $this->dispatchBulkJob(
+            $notification,
+            new SerializableClosure(fn () => User::query()->whereHas('roles', fn (Builder $q) => $q->where('name', $roleName))->orderBy('id'))
+        );
+    }
+
+    /**
+     * The closure must return an Eloquent Builder for {@see User} (ordered by id for chunkById).
+     */
+    public function sendToCustomQuery(callable $userQueryFactory, Notification $notification): void
+    {
+        /** @var Builder $query */
+        $query = $userQueryFactory(User::query());
+
+        if (! $query instanceof Builder) {
+            $this->logWarning('notification.send_to_custom_query.invalid_builder');
+
+            return;
+        }
+
+        $count = (clone $query)->count();
+
+        $this->logInfo('notification.send_to_custom_query', ['count' => $count, 'type' => $notification::class]);
+
+        if ($count === 0) {
+            return;
+        }
+
+        if ($count <= $this->syncThreshold()) {
+            $chunk = (int) config('notifications.chunk_size', 500);
+            (clone $query)->chunkById($chunk, function (Collection $users) use ($notification): void {
+                NotificationChunkWriter::writeAndBroadcast($users, $notification);
+            });
+
+            return;
+        }
+
+        $this->dispatchBulkJob(
+            $notification,
+            new SerializableClosure(function () use ($userQueryFactory) {
+                $built = $userQueryFactory(User::query());
+
+                return $built instanceof Builder ? $built->orderBy('id') : User::query()->whereRaw('1 = 0');
+            })
+        );
+    }
+
+    protected function syncThreshold(): int
+    {
+        return max(1, (int) config('notifications.sync_recipient_threshold', 1));
+    }
+
+    protected function shouldQueueNotification(Notification $notification): bool
+    {
+        return $notification instanceof \Illuminate\Contracts\Queue\ShouldQueue;
+    }
+
+    /**
+     * @param  array<int>  $ids
+     */
+    protected function sendToUserIdsSynchronously(array $ids, Notification $notification): void
+    {
+        $chunkSize = (int) config('notifications.chunk_size', 500);
+
+        foreach (array_chunk($ids, $chunkSize) as $chunk) {
+            $users = User::query()->whereIn('id', $chunk)->get();
+
+            foreach ($users as $user) {
+                if ($this->shouldQueueNotification($notification)) {
+                    $user->notify($notification);
+                } else {
+                    $user->notifyNow($notification);
+                }
+            }
         }
     }
 
-
-    public function markAsRead($notificationId): bool
+    protected function dispatchBulkJob(Notification $notification, SerializableClosure $factory): void
     {
-        $notification = auth()->user()->notifications()->findOrFail($notificationId);
-
-        if(isset($notification)) {
-            $notification->markAsRead();
-            return true;
-        }else return false;
+        Bus::dispatch(new ProcessQueryableUserNotificationsJob($notification, $factory));
     }
 
-    public function destroy($id): bool
+    /**
+     * @param  iterable<int>|array<int>  $userIds
+     * @return array<int>
+     */
+    protected function normalizeIds(iterable $userIds): array
     {
-        $notification = auth()->user()->notifications()->findOrFail($id);
-
-        if(isset($notification)) {
-            $notification->delete();
-            return true;
-        }else return false;
+        return array_values(array_unique(array_map('intval', is_array($userIds) ? $userIds : iterator_to_array($userIds))));
     }
-
 }

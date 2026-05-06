@@ -22,16 +22,22 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'Email' => 'required|email',
+            'email' => 'email',
             'password' => 'required|string|min:6',
+            'username' => 'required|string',
+            'new_password'=>'string|min:6',
+            'email_verified'=>'nullable',
+            'status'=>'string',
+            'last_login'=>'nullable',
+            'person_id'=>'nullable'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'Email.required' => 'Email is required',
-            'Email.email' => 'The email format is incorrect',
+            'username.required' => 'username is required',
+            'email.email' => 'The email format is incorrect',
             'password.required' => 'Password is required',
         ];
     }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Responses;
 
-use Illuminate\Http\jsonResponse;
+use Illuminate\Http\JsonResponse;
 
 class Response
 {

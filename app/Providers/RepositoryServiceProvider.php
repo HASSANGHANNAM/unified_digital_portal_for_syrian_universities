@@ -30,12 +30,11 @@ use App\Repositories\Contracts\StudentRequestRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeMediaRepositoryInterface;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use App\Repositories\Contracts\SuggestionRepositoryInterface;
-use App\Repositories\Contracts\UserNotificationRepositoryInterface;
 use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 use App\Repositories\Contracts\DepartmentHeadRepositoryInterface;
 use App\Repositories\Contracts\CollegeDeanRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeAvailabilityRepositoryInterface;
-// use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
+use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
 // use App\Repositories\Contracts\NotificationRepositoryInterface; 
 
 use App\Repositories\UniversityRepository;
@@ -64,14 +63,11 @@ use App\Repositories\StudentRequestRepository;
 use App\Repositories\RequestTypeMediaRepository;
 use App\Repositories\RequestMediaRepository;
 use App\Repositories\SuggestionRepository;
-use App\Repositories\UserNotificationRepository;
 use App\Repositories\PersonAttachmentRepository;
 use App\Repositories\DepartmentHeadRepository;
 use App\Repositories\CollegeDeanRepository;
 use App\Repositories\RequestTypeAvailabilityRepository;
-// use App\Repositories\EmailVerificationRepository;
-// use App\Repositories\NotificationRepository; // استبدلناها بـ UserNotificationRepository
-
+use App\Repositories\EmailVerificationRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -103,12 +99,11 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(RequestTypeMediaRepositoryInterface::class, RequestTypeMediaRepository::class);
         $this->app->bind(RequestMediaRepositoryInterface::class, RequestMediaRepository::class);
         $this->app->bind(SuggestionRepositoryInterface::class, SuggestionRepository::class);
-        $this->app->bind(UserNotificationRepositoryInterface::class, UserNotificationRepository::class);
         $this->app->bind(PersonAttachmentRepositoryInterface::class, PersonAttachmentRepository::class);
         $this->app->bind(DepartmentHeadRepositoryInterface::class, DepartmentHeadRepository::class);
         $this->app->bind(CollegeDeanRepositoryInterface::class, CollegeDeanRepository::class);
         $this->app->bind(RequestTypeAvailabilityRepositoryInterface::class, RequestTypeAvailabilityRepository::class);
-        // $this->app->bind(EmailVerificationRepositoryInterface::class, EmailVerificationRepository::class);
+        $this->app->bind(EmailVerificationRepositoryInterface::class, EmailVerificationRepository::class);
         // $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
     }
 

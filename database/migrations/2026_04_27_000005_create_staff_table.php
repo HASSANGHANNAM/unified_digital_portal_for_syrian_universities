@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('staff', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->string('staff_id_number')->unique();
-            $table->foreignUuid('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->date('hire_date');
             $table->string('employment_status');
-            $table->foreignUuid('person_id')->constrained('persons')->cascadeOnDelete();
+            $table->foreignId('person_id')->constrained('persons')->cascadeOnDelete();
             $table->timestamps();
         });
 
@@ -24,7 +24,7 @@ return new class extends Migration
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::table('colleges', function (Blueprint $table) {
             $table->dropForeign(['dean_id']);

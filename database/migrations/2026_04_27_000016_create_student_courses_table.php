@@ -6,19 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('student_courses', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('course_id')->constrained('courses')->cascadeOnDelete();
+            $table->id();
+            $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->float('credits')->default(0);
             $table->enum('status', ['pass', 'fail', 'helped pass']);
-            $table->foreignUuid('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('student_courses');
     }

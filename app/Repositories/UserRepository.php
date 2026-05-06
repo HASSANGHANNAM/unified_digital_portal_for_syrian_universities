@@ -15,25 +15,14 @@ class UserRepository implements UserRepositoryInterface
     public function create(array $data): User
     {
         return $this->user->create([
-            'FirstnameAr' => $data['FirstnameAr'],
-            'FirstnameEn' => $data['FirstnameEn'] ?? null,
-            'MiddlenameAr' => $data['MiddlenameAr'] ?? null,
-            'MiddlenameEn' => $data['MiddlenameEn'] ?? null,
-            'LastnameAr' => $data['LastnameAr'],
-            'LastnameEn' => $data['LastnameEn'] ?? null,
-            'BirthPlaceAr' => $data['BirthPlaceAr'],
-            'BirthPlaceEn' => $data['BirthPlaceEn'] ?? null,
-            'BirthDate' => $data['BirthDate'],
-            'NationalNumber' => $data['NationalNumber'],
-            'IdFrontFace' => $data['IdFrontFace'] ?? null,
-            'IdBackFace' => $data['IdBackFace'] ?? null,
-            'CurrentLocationAr' => $data['CurrentLocationAr'],
-            'CurrentLocationEn' => $data['CurrentLocationEn'] ?? null,
-            'ContactNumber' => $data['ContactNumber'],
-            'Email' => $data['Email'],
+            'username' => $data['username'],
+            'email' => $data['email'] ?? null,
+            'last_login' => $data['last_login'] ?? null,
+            'new_password' => $data['new_password'] ?? null,
+            'status' => $data['status'] ?? 'active',
             'password' => Hash::make($data['password']),
             'email_verified_at' => $data['email_verified_at'] ?? null,
-            'fcm_token'=>$data['fcm_token'] ?? null
+            'person_id' => $data['person_id'] ?? null,
         ]);
     }
     public function all(): Collection
@@ -43,6 +32,11 @@ class UserRepository implements UserRepositoryInterface
     public function findByEmail(string $Email): ?User
     {
         return $this->user->where('Email', $Email)->first();
+    }
+
+    public function findByUserName(string $username): ?User
+    {
+        return $this->user->where('username', $username)->first();
     }
 
     public function findById(int $id): ?User
@@ -64,22 +58,11 @@ class UserRepository implements UserRepositoryInterface
     {
         return [
             'id' => $user->id,
-            'FirstnameAr' => $user->FirstnameAr,
-            'FirstnameEn' => $user->FirstnameEn,
-            'MiddlenameAr' => $user->MiddlenameAr,
-            'MiddlenameEn' => $user->MiddlenameEn,
-            'LastnameAr' => $user->LastnameAr,
-            'LastnameEn' => $user->LastnameEn,
-            'BirthPlaceAr' => $user->BirthPlaceAr,
-            'BirthPlaceEn' => $user->BirthPlaceEn,
-            'BirthDate' => $user->BirthDate,
-            'NationalNumber' => $user->NationalNumber,
-            'NationalNumber' => $user->NationalNumber,
-            'CurrentLocationEn' => $user->CurrentLocationEn,
-            'ContactNumber' => $user->ContactNumber,
-            'Email' => $user->Email,
-            'IdFrontFace' => $user->IdFrontFace ? url("/api/users/{$user->id}/id-front") : null,
-            'IdBackFace' => $user->IdBackFace ? url("/api/users/{$user->id}/id-back") : null,
+            'username' => $user->username,
+            'email' => $user->email,
+            'status' => $user->status,
+            'last_login' => $user->last_login,
+            'created_at' => $user->created_at,
         ];
     }
 }

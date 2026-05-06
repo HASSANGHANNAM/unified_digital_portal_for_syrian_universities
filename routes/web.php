@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Events\TestWebSocket;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,4 +20,9 @@ Route::get('/', function () {
 Route::get('/session-test', function () {
     session(['user_id' => 123]);
     return session('user_id');
+});
+
+Route::get('/test-broadcast', function () {
+    event(new TestWebSocket('مرحباً من Reverb!'));
+    return 'تم إرسال الحدث.';
 });

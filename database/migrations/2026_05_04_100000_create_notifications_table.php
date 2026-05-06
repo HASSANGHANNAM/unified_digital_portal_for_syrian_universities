@@ -6,21 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    /**
+     * Laravel database notifications (polymorphic notifiable).
+     *
+     * @see \Illuminate\Notifications\Notifiable
+     */
+    public function up()
     {
         Schema::create('notifications', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('title');
-            $table->text('message');
-            $table->dateTime('sent_date');
-            $table->boolean('is_read')->default(false);
             $table->string('type');
-            // $table->foreignUuid('account_id')->constrained('users')->cascadeOnDelete();
+            $table->morphs('notifiable');
+            $table->text('data');
+            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('notifications');
     }

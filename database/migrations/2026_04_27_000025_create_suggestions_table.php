@@ -6,19 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+    public function up()
     {
         Schema::create('suggestions', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+            $table->id();
             $table->text('content');
             $table->dateTime('submission_date');
             $table->string('status');
-            $table->foreignUuid('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
             $table->timestamps();
         });
     }
 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('suggestions');
     }
