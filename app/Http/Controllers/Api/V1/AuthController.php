@@ -86,42 +86,4 @@ class AuthController extends Controller
         }
     }
 
-    public function setupAccount(SetupAccountRequest $request): JsonResponse
-    {
-        try {
-            $data = $this->authServices->setupAccount(auth()->user(), $request->validated());
-            return Response::success($data['data'], $data['message'], $data['code']);
-        } catch (Throwable $th) {
-            return Response::Error([], $th->getMessage(), 400);
-        }
-    }
-    public function uploadDocument(UploadDocumentRequest $request)
-    {
-        try {
-            $data = $this->authServices->uploadDocument(auth()->user(), $request);
-            return Response::success($data, 'تم رفع الملف بنجاح', 200);
-        } catch (\Throwable $th) {
-            return Response::Error([], $th->getMessage());
-        }
-    }
-    public function completeProfile(CompleteProfileRequest $request)
-    {
-        try {
-            $data = $this->authServices->completeProfile(auth()->user(), $request->validated());
-            return Response::success($data['data'], $data['message'], $data['code']);
-        } catch (\Throwable $th) {
-            return Response::Error([], $th->getMessage());
-        }
-    }
-
-    public function submit()
-    {
-        try {
-            $data = $this->authServices->submit(auth()->user());
-
-            return Response::success($data['data'], $data['message'], $data['code']);
-        } catch (\Throwable $th) {
-            return Response::Error([], $th->getMessage());
-        }
-    }
 }
