@@ -2,10 +2,12 @@
 
 namespace App\Services;
 
+use App\Events\SendUserNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Auth\Events\Login;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 use App\Repositories\Contracts\PersonRepositoryInterface;
@@ -14,7 +16,8 @@ use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
-
+use App\Notifications\CustomNotification;
+use App\Notifications\LoginSuccessNotification;
 
 class AuthServices
 {
@@ -27,34 +30,6 @@ class AuthServices
         private TokenServices $tokenService,
         private NotificationService $notificationService
     ) {}
-
-    public function registerUser($request): array
-    {
-        return DB::transaction(function () use ($request) {
-            if (isset($request['IdFrontFace']) && $request['IdFrontFace']->isValid()) {
-                $idFrontPath = $this->storeIdFile($request['IdFrontFace'], 'front');
-                $request['IdFrontFace'] = $idFrontPath;
-            }
-            if (isset($request['IdBackFace']) && $request['IdBackFace']->isValid()) {
-                $idBackPath = $this->storeIdFile($request['IdBackFace'], 'back');
-                $request['IdBackFace'] = $idBackPath;
-            }
-            $user = $this->userRepo->create($request);
-            $this->userRepo->assignRole($user, 'user');
-            $this->emailRepo->sendCode($user);
-            // notification
-            $this->notificationService->send(
-                $user,
-                'تم إنشاء حساب مريض',
-                "مرحباً {$user->FirstnameAr}، تم إنشاء حسابك بنجاح",
-                'user_created'
-            );
-            $data = $this->tokenService->createAuthTokens($user);
-            $code = 200;
-            $message = 'User created successfully!';
-            return ['data' => $data, 'message' => $message, 'code' => $code];
-        });
-    }
 
     public function login($request): array
     {
@@ -74,13 +49,8 @@ class AuthServices
         }
         $user->refresh();
         $data = $this->tokenService->createAuthTokens($user);
-        //notification
-        // $this->notificationService->send(
-        //     $user,
-        //     'تسجيل دخول',
-        //     'تم تسجيل الدخول بنجاح',
-        //     'login'
-        // );
+        $user->notify(new LoginSuccessNotification('succsess Login notify'));
+        // event(new SendUserNotification($user, 'succsess Login'));
         $message = 'Login successful';
         $code = 200;
         return [
@@ -101,12 +71,12 @@ class AuthServices
     {
         $this->tokenService->revokeAllTokens($user);
         //notification
-        $this->notificationService->send(
-            $user,
-            'تسجيل خروج',
-            'تم تسجيل الخروج من الحساب',
-            'logout'
-        );
+        // $this->notificationService->send(
+        //     $user,
+        //     'تسجيل خروج',
+        //     'تم تسجيل الخروج من الحساب',
+        //     'logout'
+        // );
         $data = [];
         $message = 'Logged out successfully';
         $code = 200;
@@ -297,63 +267,4 @@ class AuthServices
             'code' => 200
         ];
     }
-
-
-
-
-
-    // public function updateIdFiles($userId, array $fileData): void
-    // {
-    //     try {
-    //         $user = $this->user->findOrFail($userId);
-    //         $oldFiles = []; // لتخزين مسارات الملفات القديمة
-
-    //         // معالجة الوجه الأمامي
-    //         if (isset($fileData['IdFrontFace']) && $fileData['IdFrontFace']->isValid()) {
-    //             $oldFiles['front'] = $user->IdFrontFace;
-    //             $user->IdFrontFace = $this->storeIdFile($fileData['IdFrontFace'], 'front');
-    //         }
-
-    //         // معالجة الوجه الخلفي
-    //         if (isset($fileData['IdBackFace']) && $fileData['IdBackFace']->isValid()) {
-    //             $oldFiles['back'] = $user->IdBackFace;
-    //             $user->IdBackFace = $this->storeIdFile($fileData['IdBackFace'], 'back');
-    //         }
-
-    //         // حفظ التغييرات في الداتابيز
-    //         $user->save();
-
-    //         // حذف الملفات القديم بعد التأكد من حفظ الجديد
-    //         $this->deleteOldFiles($oldFiles);
-    //     } catch (\Exception $e) {
-    //         // في حالة خطأ، حذف الملفات الجديدة التي تم رفعها
-    //         $this->rollbackNewFiles($user, $fileData);
-    //         throw new \Exception("فشل في تحديث ملفات الهوية: " . $e->getMessage());
-    //     }
-    // }
-
-    // private function deleteOldFiles(array $oldFiles): void
-    // {
-    //     foreach ($oldFiles as $oldPath) {
-    //         if ($oldPath && Storage::disk('secure_documents')->exists($oldPath)) {
-    //             Storage::disk('secure_documents')->delete($oldPath);
-    //         }
-    //     }
-    // }
-
-    // private function rollbackNewFiles(User $user, array $fileData): void
-    // {
-    //     // حذف الملفات الجديدة في حالة فشل العملية
-    //     if (isset($fileData['IdFrontFace']) && $user->IdFrontFace) {
-    //         Storage::disk('secure_documents')->delete($user->IdFrontFace);
-    //     }
-    //     if (isset($fileData['IdBackFace']) && $user->IdBackFace) {
-    //         Storage::disk('secure_documents')->delete($user->IdBackFace);
-    //     }
-    // }
-    // public function getIdFilePath($userId, $type)
-    // {
-    //     $user = $this->user->findOrFail($userId);
-    //     return $type === 'front' ? $user->IdFrontFace : $user->IdBackFace;
-    // }
 }

@@ -41,9 +41,17 @@ class ImportantAnnouncementNotification extends Notification implements ShouldBr
 
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return (new BroadcastMessage($this->payload()))->on([
-            new PrivateChannel('App.Models.User.'.$notifiable->id),
-        ]);
+        return new BroadcastMessage($this->payload());
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'notification.created';
+    }
+
+    public function broadcastOn($notifiable): array
+    {
+        return [new PrivateChannel('App.Models.User.' . $notifiable->id)];
     }
 
     public function broadcastAs(): string
