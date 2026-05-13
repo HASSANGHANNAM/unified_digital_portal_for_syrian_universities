@@ -1,6 +1,6 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Core;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -23,7 +23,7 @@ class UsersSeeder extends Seeder
         $users = [
             [
                 'username' => 'dean.ahmed',
-                // 'email' => 'dean@university.edu',
+                'email' => 'dean@university.edu',
                 'password' => 'Dean@123456',
                 'status' => 'inactive',
                 'email_verified_at' => now(),

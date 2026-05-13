@@ -23,7 +23,7 @@ class UploadDocumentRequest extends FormRequest
     {
         return [
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
-            'name' => 'required|string|max:255',
+            'name' => 'string|max:255',
         ];
     }
 }

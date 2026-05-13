@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -33,12 +34,12 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
-    Route::post('/setup-account', [AuthController::class, 'setupAccount']);
     Route::post('/resend-code', [AuthController::class, 'resendCode']);
     Route::post('/verify-code', [AuthController::class, 'verifyCode']);
-    Route::post('/upload-document', [AuthController::class, 'uploadDocument']);
-    Route::post('/complete-profile', [AuthController::class, 'completeProfile']);
-    Route::post('/submit', [AuthController::class, 'submit']);
+    Route::post('/setup-account', [ProfileController::class, 'setupAccount']);
+    Route::post('/upload-document', [ProfileController::class, 'uploadDocument']);
+    Route::post('/complete-profile', [ProfileController::class, 'completeProfile']);
+    Route::post('/submit', [ProfileController::class, 'submit']);
 });
 
 
