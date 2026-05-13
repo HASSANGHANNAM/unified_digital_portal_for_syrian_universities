@@ -2,9 +2,8 @@
 
 namespace App\Listeners;
 
-use App\Notifications\CustomNotification;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Support\Facades\Log;
+use App\Events\SendUserNotification;
+use App\Notifications\UserNotification;
 
 class SendUserNotificationListener
 {
@@ -16,7 +15,6 @@ class SendUserNotificationListener
      */
     public function handle(SendUserNotification $event)
     {
-        Log::info('SendUserNotificationListener: Sending notification to user '.$event->user->id);
-        $event->user->notify(new CustomNotification($event->message));
+        $event->user->notify(new UserNotification($event->message));
     }
 }

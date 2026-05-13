@@ -2,12 +2,11 @@
 
 namespace App\Services;
 
-use App\Events\SendUserNotification;
+use App\Events\SendLoginSuccessNotification;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\Login;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 use App\Repositories\Contracts\PersonRepositoryInterface;
@@ -16,8 +15,6 @@ use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
-use App\Notifications\CustomNotification;
-use App\Notifications\LoginSuccessNotification;
 
 class AuthServices
 {
@@ -49,8 +46,9 @@ class AuthServices
         }
         $user->refresh();
         $data = $this->tokenService->createAuthTokens($user);
-        $user->notify(new LoginSuccessNotification('succsess Login notify'));
-        // event(new SendUserNotification($user, 'succsess Login'));
+
+        event(new SendLoginSuccessNotification($user, 'Login successful'));
+
         $message = 'Login successful';
         $code = 200;
         return [

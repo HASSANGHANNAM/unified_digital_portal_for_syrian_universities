@@ -8,7 +8,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Notification;
 
-class CustomNotification extends Notification implements ShouldBroadcastNow
+class UserNotification extends Notification implements ShouldBroadcastNow
 {
     use Queueable;
 

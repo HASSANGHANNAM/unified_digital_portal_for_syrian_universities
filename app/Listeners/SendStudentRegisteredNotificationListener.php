@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Notifications\StudentRegisteredNotification;
 use App\Services\NotificationService;
 
-class SendStudentRegisteredNotification
+class SendStudentRegisteredNotificationListener
 {
     public function __construct(protected NotificationService $notificationService) {}
 

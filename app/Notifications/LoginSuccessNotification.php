@@ -12,32 +12,85 @@ class LoginSuccessNotification extends Notification implements ShouldBroadcastNo
 {
     use Queueable;
 
-    public function __construct(public string $message) {}
+    public string $message;
 
+    protected $notifiable;
+
+    /**
+     * Create a new notification instance.
+     *
+     * @param  string  $message
+     * @return void
+     */
+    public function __construct(string $message)
+    {
+        $this->message = $message;
+    }
+
+    /**
+     * Get the notification's delivery channels.
+     *
+     * @param  object  $notifiable
+     * @return array
+     */
     public function via(object $notifiable): array
     {
+        $this->notifiable = $notifiable;
         return ['database', 'broadcast'];
     }
 
+    /**
+     * Get the array representation of the notification.
+     *
+     * @param  object  $notifiable
+     * @return array
+     */
     public function toDatabase(object $notifiable): array
     {
         return $this->payload($notifiable);
     }
 
+    /**
+     * Get the broadcastable representation of the notification.
+     *
+     * @param  object  $notifiable
+     * @return BroadcastMessage
+     */
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage($this->payload($notifiable));
     }
 
-    public function broadcastAs(): string
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return array
+     */
+    public function broadcastOn(): array
     {
-        return 'login.success';
+        return [new PrivateChannel('App\Models.User.' . $this->notifiable->id)];
     }
 
+    /**
+     * Get the event name for the broadcast.
+     *
+     * @return string
+     */
+    public function broadcastAs(): string
+    {
+        return 'custom.notification';
+    }
+
+    /**
+     * Get the notification payload.
+     *
+     * @param  object  $notifiable
+     * @return array
+     */
     protected function payload(object $notifiable): array
     {
         return [
-            'title' => 'تسجيل دخول ناجح',
+            'title' => 'LOGIN ',
             'body' => $this->message,
             'user_id' => $notifiable->id,
             'username' => $notifiable->username ?? null,

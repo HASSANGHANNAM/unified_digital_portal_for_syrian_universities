@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Events\SendLoginSuccessNotification;
+use App\Events\SendUserNotification;
 use App\Events\StudentRegistered;
-use App\Listeners\SendLoginSuccessNotification;
-use App\Listeners\SendStudentRegisteredNotification;
-use Illuminate\Auth\Events\Login;
+use App\Listeners\SendLoginSuccessNotificationListener;
+use App\Listeners\SendStudentRegisteredNotificationListener;
+use App\Listeners\SendUserNotificationListener;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -13,18 +15,19 @@ use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvi
 class EventServiceProvider extends ServiceProvider
 {
     protected $listen = [
-        Login::class => [
-            SendLoginSuccessNotification::class,
+        SendLoginSuccessNotification::class => [
+            SendLoginSuccessNotificationListener::class,
         ],
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
         StudentRegistered::class => [
-            SendStudentRegisteredNotification::class,
+            SendStudentRegisteredNotificationListener::class,
         ],
         SendUserNotification::class => [
             SendUserNotificationListener::class,
         ],
+
     ];
 
     /**
