@@ -14,6 +14,8 @@ use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\DTOs\UserDTO;
+use App\DTOs\DocumentUploadDTO;
 
 
 class ProfileService
@@ -75,13 +77,10 @@ class ProfileService
             'person_id' => $user->person_id,
         ]);
 
+        $dto = DocumentUploadDTO::fromModel($attachment);
+
         return [
-            'data' => [
-                'id' => $attachment->id,
-                'name' => $attachment->name,
-                'path' => $attachment->path,
-                'url' => Storage::disk('public')->url($attachment->path),
-            ],
+            'data' => $dto->toArray(),
             'message' => 'تم رفع الملف بنجاح',
             'code' => 200,
         ];
@@ -92,9 +91,10 @@ class ProfileService
     {
         if ($user->person) {
             $this->personRepo->update($user->person, $data);
+            $user->refresh();
 
             return [
-                'data' => [],
+                'data' => UserDTO::fromModel($user)->toArray(),
                 'message' => 'تم تحديث البيانات بنجاح',
                 'code' => 200
             ];
@@ -115,7 +115,7 @@ class ProfileService
         $user->refresh();
 
         return [
-            'data' => [],
+            'data' => UserDTO::fromModel($user)->toArray(),
             'message' => 'تم إكمال البيانات بنجاح',
             'code' => 200
         ];
