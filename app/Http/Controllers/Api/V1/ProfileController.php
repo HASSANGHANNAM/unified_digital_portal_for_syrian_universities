@@ -12,6 +12,8 @@ use App\Http\Requests\V1\SetupAccountRequest;
 use App\Http\Requests\V1\VerifyEmailRequest;
 use App\Http\Requests\V1\UploadDocumentRequest;
 use App\Http\Requests\V1\CompleteProfileRequest;
+use App\Http\Responses\Response;
+use Throwable;
 
 class ProfileController extends Controller
 {
