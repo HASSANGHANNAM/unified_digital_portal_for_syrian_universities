@@ -112,3 +112,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
+Route::prefix('v1')->middleware('throttle:api')->group(function () {
+});
+
+Route::prefix('v1')->group(function () {
+    Route::middleware('throttle:login')->group(function () {
+    });
+});
+
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:premium-api'])->group(function () {
+    Route::middleware('throttle:heavy')->group(function () {
+    });
+});
