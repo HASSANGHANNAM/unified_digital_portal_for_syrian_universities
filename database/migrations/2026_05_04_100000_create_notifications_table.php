@@ -28,3 +28,11 @@ return new class extends Migration
         Schema::dropIfExists('notifications');
     }
 };
+            // $table->uuid('notification_id')->primary();
+            // $table->string('title');
+            // $table->string('message');
+            // $table->dateTime('sent_date');
+            // $table->boolean('is_read')->default(false);
+            // $table->string('type');
+            // $table->foreignUuid('account_id')->constrained('accounts','account_id')->cascadeOnDelete();
+            // $table->timestamps();

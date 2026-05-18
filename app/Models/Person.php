@@ -9,14 +9,11 @@ class Person extends Model
 {
     use HasFactory;
 
-    public $incrementing = false;
-    protected $keyType = 'string';
-
     protected $table = 'persons';
 
     protected $fillable = [
         'id',
-        'national_id', 'full_name', 'phone',
+         'national_id', 'full_name', 'phone',
         'birth_date', 'national_number', 'address'
     ];
 
@@ -52,8 +49,8 @@ class Person extends Model
         return $this->hasMany(PersonAttachment::class);
     }
 
-    public function academicRecords()
-    {
-        return $this->hasMany(StudentAcademicRecord::class);
-    }
+    // public function academicRecords()
+    // {
+    //     return $this->hasMany(StudentAcademicRecord::class);
+    // }
 }
