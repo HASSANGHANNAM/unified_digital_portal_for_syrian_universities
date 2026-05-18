@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\DTOs\AllGradesDTO;
+use App\Imports\StudentMarksImport;
+use App\Models\Course;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GradeService
 {
@@ -26,13 +29,41 @@ class GradeService
 
     public function addGrade(array $data): array
     {
-        $message = 'إدخال أو تعديل علامة طالب.';
-        $code = 200;
-        $data = $data;
+        $course = Course::find($data['course_id']);
+        if (!$course) {
+            return [
+                'data' => [],
+                'message' => 'Course not found.',
+                'code' => 404,
+            ];
+        }
+        $import = new StudentMarksImport($course->id);
+
+        try {
+            Excel::import($import, $data['file']);
+        } catch (\Maatwebsite\Excel\Exceptions\ValidationException $exception) {
+            return [
+                'data' => [
+                    'errors' => $exception->errors(),
+                ],
+                'message' => 'Excel validation failed.',
+                'code' => 422,
+            ];
+        } catch (\Throwable $exception) {
+            return [
+                'data' => [
+                    'exception' => $exception->getMessage(),
+                ],
+                'message' => 'Failed importing grades.',
+                'code' => 500,
+            ];
+        }
+
+        $report = $import->getReport();
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => $report,
+            'message' => 'تم رفع العلامات بنجاح.',
+            'code' => 200,
         ];
     }
 

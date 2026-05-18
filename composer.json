@@ -15,6 +15,7 @@
         "laravel/reverb": "^1.10",
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
+        "maatwebsite/excel": "3.1.48",
         "masbug/flysystem-google-drive-ext": "*",
         "predis/predis": "^3.4",
         "spatie/laravel-backup": "^9.3",

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\V1\StudentMarksImportController;
 use App\Http\Controllers\Api\V1\AcademicController;
 use App\Http\Controllers\Api\V1\AdminController;
 use App\Http\Controllers\Api\V1\AdmissionController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RequestController;
 use App\Http\Controllers\Api\V1\SanctionController;
 use App\Http\Controllers\Api\V1\UserController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -38,7 +38,7 @@ Route::prefix('V1')->group(function () {
 
 
 
-    
+
 
         Route::get('/users', [UserController::class, 'getUsers']);
         Route::post('/user', [UserController::class, 'addUser']);
@@ -87,7 +87,9 @@ Route::prefix('V1')->group(function () {
     // });
 });
 
+Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
+Route::post('/courses/{course}/marks/import', [StudentMarksImportController::class, 'import']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -101,6 +103,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload-document', [ProfileController::class, 'uploadDocument']);
     Route::post('/complete-profile', [ProfileController::class, 'completeProfile']);
     Route::post('/submit', [ProfileController::class, 'submit']);
+
 });
 
 

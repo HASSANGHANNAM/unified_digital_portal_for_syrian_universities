@@ -13,6 +13,9 @@ class AddGradeRequest extends FormRequest
 
     public function rules(): array
     {
-        return [];
+        return [
+            'course_id' => ['required', 'integer', 'exists:courses,id'],
+            'file' => ['required', 'file', 'mimes:xlsx,xls'],
+        ];
     }
 }

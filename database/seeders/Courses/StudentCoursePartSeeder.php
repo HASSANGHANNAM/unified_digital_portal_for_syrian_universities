@@ -21,24 +21,24 @@ class StudentCoursePartSeeder extends Seeder
         foreach ($studentCourses as $studentCourse) {
 
             $courseParts = CoursePart::where('course_id', $studentCourse->course_id)
-                ->whereIn('name', ['عملي', 'نظري'])
+                ->whereIn('name', ['practical', 'theoretical'])
                 ->get();
 
             foreach ($courseParts as $part) {
 
                 // الدرجة حسب نوع الجزء
-                $score = match ($part->name) {
-                    'عملي' => rand(15, 20),   // العملي من 15 إلى 20
-                    'نظري' => rand(40, 60),   // النظري من 40 إلى 60
+                $credits = match ($part->name) {
+                    'practical' => rand(15, 20),   // العملي من 15 إلى 20
+                    'theoretical' => rand(40, 60),   // النظري من 40 إلى 60
                     default => 0,
                 };
 
-                DB::transaction(function () use ($studentCourse, $part, $score) {
+                DB::transaction(function () use ($studentCourse, $part, $credits) {
 
                     $this->studentCoursePartRepo->create([
                         'student_course_id' => $studentCourse->id,
                         'course_part_id' => $part->id,
-                        'score' => $score,
+                        'credits' => $credits,
                         'published' => true,
                     ]);
 

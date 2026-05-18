@@ -21,13 +21,13 @@ class CoursePartSeeder extends Seeder
 
                 [
                     'course_id' => $course->id,
-                    'name' => 'العملي',
+                    'name' => 'practical',
                     'percentage' => 30,
                 ],
 
                 [
                     'course_id' => $course->id,
-                    'name' => 'النظري',
+                    'name' => 'theoretical',
                     'percentage' => 70,
                 ],
 

@@ -32,7 +32,6 @@ use Database\Seeders\Requests\RequestSeeder;
 use Database\Seeders\Sanctions\SanctionSeeder;
 use Database\Seeders\Students\SuggestionSeeder;
 
-// LEVEL 7
 use Database\Seeders\Courses\StudentCoursePartSeeder;
 
 
