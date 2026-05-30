@@ -11,6 +11,7 @@ use App\Http\Requests\V1\GetAllRequestsRequest;
 use App\Http\Requests\V1\GetRequestDetailsRequest;
 use App\Http\Requests\V1\GetStudentRequestsRequest;
 use App\Http\Requests\V1\ReviewRequestRequest;
+use App\Http\Requests\V1\RequestsInStudentCollegeRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -77,6 +78,15 @@ class RequestController extends Controller
     {
         try {
             $data = $this->requestService->reviewRequest($reviewRequestRequest->validated(), $requestId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function requestsInStudentCollege(RequestsInStudentCollegeRequest $requestsInStudentCollegeRequest): JsonResponse
+    {
+        try {
+            $data = $this->requestService->requestsInStudentCollege($requestsInStudentCollegeRequest->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

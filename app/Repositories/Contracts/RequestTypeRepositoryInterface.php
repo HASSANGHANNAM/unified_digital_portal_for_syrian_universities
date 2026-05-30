@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\RequestType;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface RequestTypeRepositoryInterface
 {
@@ -12,4 +13,5 @@ interface RequestTypeRepositoryInterface
     public function update(RequestType $requestType, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?RequestType;
+    public function getByCollegeId(int $collegeId, array $request): Collection|LengthAwarePaginator;
 }

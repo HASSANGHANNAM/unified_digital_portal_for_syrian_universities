@@ -90,5 +90,65 @@ class SanctionSeeder extends Seeder
             ]);
         });
 
+        // ========== البيانات الجديدة من dummyData.ts ==========
+        // 1. عقوبة إنذار كتابي للطالب "يوسف سامر الحموي"
+        $student1 = Student::whereHas('person', fn($q) => $q->where('full_name', 'يوسف سامر الحموي'))->first();
+        $staff1 = Staff::whereHas('person', fn($q) => $q->where('full_name', 'أحمد محمود'))->first();
+        $course1 = Course::where('code', 'MATH101')->first();
+        $type1 = SanctionType::where('name', 'إنذار كتابي')->first();
+        if ($student1 && $staff1 && $course1 && $type1) {
+            $this->sanctionRepo->create([
+                'sanction_type_id' => $type1->id,
+                'status' => 'expired',
+                'issued_date' => '2024-10-01',
+                'expiry_date' => '2025-01-01',
+                'notes' => 'تغيب 3 مرات متتالية',
+                'student_response' => null,
+                'staff_response' => null,
+                'student_id' => $student1->id,
+                'staff_id' => $staff1->id,
+                'course_id' => $course1->id,
+            ]);
+        }
+
+        // 2. عقوبة فصل مؤقت للطالب "أحمد محمد العلي"
+        $student2 = Student::whereHas('person', fn($q) => $q->where('full_name', 'أحمد محمد العلي'))->first();
+        $staff2 = Staff::whereHas('person', fn($q) => $q->where('full_name', 'محمد علي'))->first();
+        $course2 = Course::where('code', 'CS201')->first();
+        $type2 = SanctionType::where('name', 'فصل مؤقت')->first();
+        if ($student2 && $staff2 && $course2 && $type2) {
+            $this->sanctionRepo->create([
+                'sanction_type_id' => $type2->id,
+                'status' => 'ongoing', // تم تغييرها من 'active' إلى 'ongoing'
+                'issued_date' => '2025-02-15',
+                'expiry_date' => '2025-08-15',
+                'notes' => 'ضبط بحالة غش في مادة هياكل البيانات',
+                'student_response' => 'أقر بالخطأ',
+                'staff_response' => 'تم اتخاذ الإجراء',
+                'student_id' => $student2->id,
+                'staff_id' => $staff2->id,
+                'course_id' => $course2->id,
+            ]);
+        }
+
+        // 3. عقوبة حرمان من التقدم للامتحانات للطالبة "لينا جمال عزام"
+        $student3 = Student::whereHas('person', fn($q) => $q->where('full_name', 'لينا جمال عزام'))->first();
+        $staff3 = Staff::whereHas('person', fn($q) => $q->where('full_name', 'سارة حسن'))->first();
+        $course3 = Course::where('code', 'MED201')->first();
+        $type3 = SanctionType::where('name', 'حرمان من التقدم للامتحانات')->first();
+        if ($student3 && $staff3 && $course3 && $type3) {
+            $this->sanctionRepo->create([
+                'sanction_type_id' => $type3->id,
+                'status' => 'مناقشة الطعن',   // تم التغيير من 'appealDiscussion'
+                'issued_date' => '2025-03-20',
+                'expiry_date' => '2025-06-05',
+                'notes' => 'إساءة لفظية تجاه معيد',
+                'student_response' => 'قدم التماساً',
+                'staff_response' => null,
+                'student_id' => $student3->id,
+                'staff_id' => $staff3->id,
+                'course_id' => $course3->id,
+            ]);
+        }
     }
 }

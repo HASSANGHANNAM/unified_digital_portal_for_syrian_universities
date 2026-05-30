@@ -55,6 +55,18 @@ class CollegeSeeder extends Seeder
                 'name' => 'كلية العلوم',
                 'university_id' => $homssUniversity->id,
             ],
+            [
+                'name' => 'كلية العلوم',
+                'university_id' => $damascusUniversity->id,
+            ],
+            [
+                'name' => 'كلية الآداب والعلوم الإنسانية',
+                'university_id' => $damascusUniversity->id,
+            ],
+            [
+                'name' => 'كلية الاقتصاد',
+                'university_id' => $damascusUniversity->id,
+            ],
 
         ];
 
@@ -63,9 +75,7 @@ class CollegeSeeder extends Seeder
             DB::transaction(function () use ($college) {
 
                 $this->collegeRepo->create($college);
-
             });
-
         }
     }
 }

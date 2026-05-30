@@ -16,7 +16,7 @@ class SanctionTypeSeeder extends Seeder
     public function run(): void
     {
         $types = [
-
+            // ========== الأنواع الموجودة مسبقاً ==========
             [
                 'name' => 'إنذار امتحاني',
                 'reason' => 'استخدام وسائل غير مسموحة أثناء الامتحان',
@@ -36,7 +36,7 @@ class SanctionTypeSeeder extends Seeder
                 'reason' => 'تجاوز نسبة الغياب المسموح بها',
                 'years' => 0,
                 'months' => 0,
-                'days' => 0, // دائم حتى نهاية الفصل
+                'days' => 0,
             ],
             [
                 'name' => 'حرمان من مقرر',
@@ -64,7 +64,7 @@ class SanctionTypeSeeder extends Seeder
                 'reason' => 'تكرار المخالفات الخطيرة بعد الفصل المؤقت',
                 'years' => 0,
                 'months' => 0,
-                'days' => 0, // دائم (لا عودة)
+                'days' => 0,
             ],
             [
                 'name' => 'إنذار تأخر',
@@ -109,6 +109,28 @@ class SanctionTypeSeeder extends Seeder
                 'days' => 0,
             ],
 
+            // ========== الأنواع الجديدة من dummyData.ts ==========
+            [
+                'name' => 'إنذار كتابي',
+                'reason' => 'الغياب المتكرر',
+                'years' => 0,
+                'months' => 3,
+                'days' => 0,
+            ],
+            [
+                'name' => 'فصل مؤقت',
+                'reason' => 'الغش في الامتحان',
+                'years' => 0,
+                'months' => 6,
+                'days' => 0,
+            ],
+            [
+                'name' => 'حرمان من التقدم للامتحانات',
+                'reason' => 'سلوك غير لائق',
+                'years' => 0,
+                'months' => 2,
+                'days' => 15,
+            ],
         ];
 
         foreach ($types as $type) {
@@ -119,6 +141,5 @@ class SanctionTypeSeeder extends Seeder
                 );
             });
         }
-
     }
 }

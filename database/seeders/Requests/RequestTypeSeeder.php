@@ -17,7 +17,7 @@ class RequestTypeSeeder extends Seeder
     {
         $types = [
 
-            // طلابية
+            // ========== الأنواع الموجودة مسبقاً ==========
             [
                 'name' => 'اعتراض على علامة',
                 'description' => 'طلب اعتراض على نتيجة مقرر دراسي',
@@ -129,6 +129,37 @@ class RequestTypeSeeder extends Seeder
                 'doctor_acceptance' => false,
             ],
 
+            // ========== الأنواع الجديدة من dummyData.ts ==========
+            [
+                'name' => 'طلب تأجيل امتحان',
+                'description' => 'يقدم الطالب طلب تأجيل امتحان لمقرر معين لأسباب قاهرة',
+                'university_director_acceptance' => false,
+                'college_dean_acceptance' => true,
+                'department_head_acceptance' => true,
+                'student_stuff_acceptance' => true,
+                'exams_stuff_acceptance' => true,
+                'doctor_acceptance' => true,
+            ],
+            [
+                'name' => 'طلب اعتذار عن فصل دراسي',
+                'description' => 'طلب انقطاع مؤقت عن الدراسة',
+                'university_director_acceptance' => true,
+                'college_dean_acceptance' => true,
+                'department_head_acceptance' => true,
+                'student_stuff_acceptance' => true,
+                'exams_stuff_acceptance' => false,
+                'doctor_acceptance' => false,
+            ],
+            [
+                'name' => 'طلب إعادة تصحيح',
+                'description' => 'التماس إعادة تصحيح مادة امتحانية',
+                'university_director_acceptance' => false,
+                'college_dean_acceptance' => true,
+                'department_head_acceptance' => true,
+                'student_stuff_acceptance' => true,
+                'exams_stuff_acceptance' => true,
+                'doctor_acceptance' => true,
+            ],
         ];
 
         foreach ($types as $type) {
@@ -139,6 +170,5 @@ class RequestTypeSeeder extends Seeder
                 );
             });
         }
-
     }
 }

@@ -16,21 +16,10 @@ class CourseSeeder extends Seeder
 
     public function run(): void
     {
-        // جلب جميع الأقسام
-        $departments = Department::whereIn('name', [
-            'هندسة البرمجيات',
-            'الذكاء الاصطناعي',
-            'الشبكات',
-            'الأمن السيبراني',
-            'الجراحة العامة',
-            'طب الأطفال',
-            'طب النساء والتوليد',
-            'الفيزياء',
-            'الكيمياء',
-            'الأحياء',
-        ])->get()->keyBy('name');
+        // جلب جميع الأقسام (بدون فلتر) لتشمل الأقسام الجديدة
+        $departments = Department::all()->keyBy('name');
 
-        // تعريف المقررات لكل قسم
+        // تعريف المقررات لكل قسم (الموجودة مسبقاً)
         $coursesByDepartment = [
             'هندسة البرمجيات' => [
                 ['course_name' => 'قواعد البيانات', 'code' => 'SE301', 'credits' => 4],
@@ -94,38 +83,93 @@ class CourseSeeder extends Seeder
             ],
         ];
 
-        // إنشاء المقررات لكل قسم
+        // -------------------- إضافة المقررات الجديدة من dummyData.ts --------------------
+        // أقسام جديدة قد لا تكون موجودة في المصفوفة أعلاه
+        $coursesByDepartment['رياضيات'] = [
+            ['course_name' => 'التحليل الرياضي 1', 'code' => 'MATH101', 'credits' => 3],
+            ['course_name' => 'نظرية الأعداد', 'code' => 'MATH301', 'credits' => 3],
+        ];
+
+        $coursesByDepartment['إدارة أعمال'] = [
+            ['course_name' => 'مبادئ الاقتصاد', 'code' => 'ECO101', 'credits' => 3],
+        ];
+
+        $coursesByDepartment['تاريخ'] = [
+            ['course_name' => 'تاريخ الحضارات', 'code' => 'HIST101', 'credits' => 2],
+        ];
+
+        $coursesByDepartment['محاسبة'] = [
+            ['course_name' => 'محاسبة مالية', 'code' => 'ACC201', 'credits' => 4],
+        ];
+
+        // إضافة مقررات إضافية للأقسام الموجودة (دمج مع القديم)
+        // تصحيح: استخدام 'هندسة البرمجيات' بدلاً من 'هندسة برمجيات'
+        if (isset($coursesByDepartment['هندسة البرمجيات'])) {
+            $coursesByDepartment['هندسة البرمجيات'] = array_merge($coursesByDepartment['هندسة البرمجيات'], [
+                ['course_name' => 'مقدمة في البرمجة', 'code' => 'CS101', 'credits' => 3],
+                ['course_name' => 'هياكل البيانات', 'code' => 'CS201', 'credits' => 4],
+            ]);
+        } else {
+            $coursesByDepartment['هندسة البرمجيات'] = [
+                ['course_name' => 'مقدمة في البرمجة', 'code' => 'CS101', 'credits' => 3],
+                ['course_name' => 'هياكل البيانات', 'code' => 'CS201', 'credits' => 4],
+            ];
+        }
+
+        // تصحيح: استخدام 'الفيزياء' بدلاً من 'فيزياء'
+        if (isset($coursesByDepartment['الفيزياء'])) {
+            $coursesByDepartment['الفيزياء'] = array_merge($coursesByDepartment['الفيزياء'], [
+                ['course_name' => 'الفيزياء العامة', 'code' => 'PHY101', 'credits' => 4],
+            ]);
+        } else {
+            $coursesByDepartment['الفيزياء'] = [
+                ['course_name' => 'الفيزياء العامة', 'code' => 'PHY101', 'credits' => 4],
+            ];
+        }
+
+        if (isset($coursesByDepartment['الجراحة العامة'])) {
+            $coursesByDepartment['الجراحة العامة'] = array_merge($coursesByDepartment['الجراحة العامة'], [
+                ['course_name' => 'علم التشريح', 'code' => 'MED201', 'credits' => 5],
+            ]);
+        } else {
+            $coursesByDepartment['الجراحة العامة'] = [
+                ['course_name' => 'علم التشريح', 'code' => 'MED201', 'credits' => 5],
+            ];
+        }
+
+        // -------------------- إنشاء المقررات لكل قسم --------------------
         foreach ($coursesByDepartment as $departmentName => $courses) {
+            // التأكد من وجود القسم في قاعدة البيانات
+            if (!isset($departments[$departmentName])) {
+                continue;
+            }
+
             $department = $departments[$departmentName];
 
             foreach ($courses as $courseData) {
                 DB::transaction(function () use ($courseData, $department) {
-                    // البحث عن UniversalCourse
-                    $universalCourse = UniversalCourse::where('name', $courseData['course_name'])->first();
+                    // البحث عن UniversalCourse أو إنشاؤه
+                    $universalCourse = UniversalCourse::firstOrCreate(
+                        ['name' => $courseData['course_name']],
+                        ['image' => null]
+                    );
 
-                    // إذا لم يوجد UniversalCourse، قم بإنشاؤه تلقائياً
-                    if (!$universalCourse) {
-                        $universalCourse = UniversalCourse::create([
-                            'name' => $courseData['course_name'],
+                    // التحقق من عدم وجود المقرر بنفس الكود والقسم
+                    $exists = \App\Models\Course::where('code', $courseData['code'])
+                        ->where('department_id', $department->id)
+                        ->exists();
+
+                    if (!$exists) {
+                        $this->courseRepo->create([
+                            'code' => $courseData['code'],
+                            'credits' => $courseData['credits'],
+                            'universal_course_id' => $universalCourse->id,
+                            'college_id' => $department->college_id,
+                            'department_id' => $department->id,
                         ]);
                     }
-
-                    $this->courseRepo->create([
-                        'code' => $courseData['code'],
-                        'credits' => $courseData['credits'],
-                        'universal_course_id' => $universalCourse->id,
-                        'college_id' => $department->college_id,
-                        'department_id' => $department->id,
-                    ]);
                 });
             }
         }
-
-        // عرض ملخص
-        // $this->command->info('تم إنشاء المقررات بنجاح!');
-        // foreach ($departments as $department) {
-        //     $count = DB::table('courses')->where('department_id', $department->id)->count();
-        //     // $this->command->line("- {$department->name}: {$count} مقرر");
-        // }
     }
 }

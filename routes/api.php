@@ -28,7 +28,7 @@ use App\Http\Controllers\Api\V1\UserController;
 */
 
 Route::prefix('V1')->group(function () {
-    // Route::middleware('auth:sanctum')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::get('notifications', [NotificationController::class, 'index']);
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount']);
         Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
@@ -57,6 +57,7 @@ Route::prefix('V1')->group(function () {
         Route::put('/materials/{materialId}', [MaterialController::class, 'updateMaterial']);
         Route::delete('/materials/{materialId}', [MaterialController::class, 'deleteMaterial']);
         Route::get('/materials/{materialId}/download', [MaterialController::class, 'downloadMaterial']);
+        Route::get('/requestsInStudentCollege', [RequestController::class, 'requestsInStudentCollege']);
         Route::get('/requests', [RequestController::class, 'getStudentRequests']);
         Route::post('/requests', [RequestController::class, 'createRequest']);
         Route::get('/requests/{requestId}', [RequestController::class, 'getRequestDetails']);
@@ -83,13 +84,12 @@ Route::prefix('V1')->group(function () {
         Route::delete('/sanctions/{sanctionId}', [SanctionController::class, 'deleteSanction']);
         Route::post('/student/{studentId}/documents', [DocumentController::class, 'addDocument']);
         Route::get('/students/{studentId}/documents', [DocumentController::class, 'getDocuments']);
-
-    // });
+    });
 });
 
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
-Route::post('/courses/{course}/marks/import', [StudentMarksImportController::class, 'import']);
+// Route::post('/courses/{course}/marks/import', [StudentMarksImportController::class, 'import']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -103,7 +103,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload-document', [ProfileController::class, 'uploadDocument']);
     Route::post('/complete-profile', [ProfileController::class, 'completeProfile']);
     Route::post('/submit', [ProfileController::class, 'submit']);
-
 });
 
 
@@ -117,15 +116,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-Route::prefix('v1')->middleware('throttle:api')->group(function () {
-});
+Route::prefix('v1')->middleware('throttle:api')->group(function () {});
 
 Route::prefix('v1')->group(function () {
-    Route::middleware('throttle:login')->group(function () {
-    });
+    Route::middleware('throttle:login')->group(function () {});
 });
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:premium-api'])->group(function () {
-    Route::middleware('throttle:heavy')->group(function () {
-    });
+    Route::middleware('throttle:heavy')->group(function () {});
 });

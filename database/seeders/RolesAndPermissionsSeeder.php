@@ -8,14 +8,17 @@ use Illuminate\Database\Seeder;
 
 class RolesAndPermissionsSeeder extends Seeder
 {
-    public function run() {
+    public function run()
+    {
         $deanRole = Role::create(['name' => 'Dean']);
         $headofdepartmentRole = Role::create(['name' => 'HeadOfDepartment']);
         $examinationRole = Role::create(['name' => 'Examination']);
-        $studentaffairsRole = Role::create(['name'=>'StudentAffairs']);
-        $instructorRole = Role::create(['name'=>'Instructor']);
-        $teachingassistantRole = Role::create(['name'=>'TeachingAssistant']);
-        $studentRole = Role::create(['name'=>'Student']);
+        $studentaffairsRole = Role::create(['name' => 'StudentAffairs']);
+        $instructorRole = Role::create(['name' => 'Instructor']);
+        $teachingassistantRole = Role::create(['name' => 'TeachingAssistant']);
+        $studentRole = Role::create(['name' => 'Student']);
+        $administrativeStaffRole = Role::create(['name' => 'AdministrativeStaff']);
+        $systemAdministratorRole = Role::create(['name' => 'SystemAdministrator']);
 
 
         $permissions = [
@@ -38,7 +41,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit_exam',
             'view_exam_results',
             'approve_exam',
-            
+
             'view_dashboard',
             'manage_users',
             'view_reports',
@@ -56,6 +59,7 @@ class RolesAndPermissionsSeeder extends Seeder
         $instructorRole->givePermissionTo([]);
         $teachingassistantRole->givePermissionTo([]);
         $studentRole->givePermissionTo([]);
-
+        $administrativeStaffRole->givePermissionTo([]);
+        $systemAdministratorRole->givePermissionTo([]);
     }
 }

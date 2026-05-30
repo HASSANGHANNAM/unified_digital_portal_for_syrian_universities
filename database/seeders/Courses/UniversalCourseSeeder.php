@@ -72,19 +72,27 @@ class UniversalCourseSeeder extends Seeder
             ['name' => 'علم الخلية'],
             ['name' => 'علم البيئة'],
 
+            ['name' => 'مقدمة في البرمجة'],
+            ['name' => 'هياكل البيانات'],
+            ['name' => 'التحليل الرياضي 1'],
+            ['name' => 'الفيزياء العامة'],
+            ['name' => 'علم التشريح'],
+            ['name' => 'مبادئ الاقتصاد'],
+            ['name' => 'تاريخ الحضارات'],
+            ['name' => 'قواعد البيانات'],
+            ['name' => 'نظرية الأعداد'],
+            ['name' => 'محاسبة مالية'],
         ];
 
-    foreach ($courses as $course) {
-        DB::transaction(function () use ($course) {
+        foreach ($courses as $course) {
+            DB::transaction(function () use ($course) {
 
-            $exists = UniversalCourse::where('name', $course['name'])->exists();
+                $exists = UniversalCourse::where('name', $course['name'])->exists();
 
-            if (!$exists) {
-                UniversalCourse::create($course);
-            }
-        });
-    }
-
-     
+                if (!$exists) {
+                    UniversalCourse::create($course);
+                }
+            });
+        }
     }
 }

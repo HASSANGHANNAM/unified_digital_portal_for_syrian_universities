@@ -88,6 +88,59 @@ class SuggestionSeeder extends Seeder
             }
         }
 
- 
+        // ========== إضافة الاقتراحات الثابتة من dummyData.ts ==========
+        $staticSuggestions = [
+            [
+                'content' => 'إضافة مكتبة إلكترونية للمراجع',
+                'submission_date' => '2025-03-15',
+                'status' => 'accepted',
+                'student_name' => 'أحمد محمد العلي',
+            ],
+            [
+                'content' => 'تعديل مواعيد المحاضرات المسائية',
+                'submission_date' => '2025-04-10',
+                'status' => 'pending',
+                'student_name' => 'لينا جمال عزام',
+            ],
+            [
+                'content' => 'توفير وجبات طعام في الكلية',
+                'submission_date' => '2025-04-20',
+                'status' => 'refused',
+                'student_name' => 'فاطمة خالد الحسين',
+            ],
+            [
+                'content' => 'زيادة ساعات المخابر الحاسوبية',
+                'submission_date' => '2025-05-05',
+                'status' => 'accepted',
+                'student_name' => 'ميساء أنور حمود',
+            ],
+        ];
+
+        foreach ($staticSuggestions as $suggestion) {
+            // البحث عن الطالب عبر اسمه الكامل
+            $student = Student::whereHas('person', function ($q) use ($suggestion) {
+                $q->where('full_name', $suggestion['student_name']);
+            })->first();
+
+            if (!$student) {
+                continue;
+            }
+
+            // تجنب التكرار (نفس المحتوى ونفس الطالب)
+            $exists = \App\Models\Suggestion::where('content', $suggestion['content'])
+                ->where('student_id', $student->id)
+                ->exists();
+
+            if (!$exists) {
+                DB::transaction(function () use ($suggestion, $student) {
+                    $this->suggestionRepo->create([
+                        'content' => $suggestion['content'],
+                        'submission_date' => $suggestion['submission_date'],
+                        'status' => $suggestion['status'],
+                        'student_id' => $student->id,
+                    ]);
+                });
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\RequestType;
 use App\Repositories\Contracts\RequestTypeRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
 class RequestTypeRepository implements RequestTypeRepositoryInterface
@@ -37,5 +38,32 @@ class RequestTypeRepository implements RequestTypeRepositoryInterface
     public function findById(string $id): ?RequestType
     {
         return $this->model->find($id);
+    }
+
+    public function getByCollegeId(int $collegeId, array $request): Collection|LengthAwarePaginator
+    {
+        $query = $this->model->query();
+        $name = $request['name'] ?? null;
+        $isAvailable = isset($request['is_available']) ? filter_var($request['is_available'], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+        $perPage = isset($request['per_page']) ? max(1, min(100, (int) $request['per_page'])) : 50;
+
+        $query->whereHas('availability', function ($q) use ($collegeId, $isAvailable) {
+            $q->where('college_id', $collegeId);
+            if ($isAvailable !== null) {
+                $q->where('is_available', $isAvailable);
+            }
+        })->with(['availability' => function ($q) use ($collegeId, $isAvailable) {
+            $q->where('college_id', $collegeId);
+            if ($isAvailable !== null) {
+                $q->where('is_available', $isAvailable);
+            }
+        }]);
+
+
+        if ($name !== null && $name !== '') {
+            $query->where('name', 'like', '%' . $name . '%');
+        }
+
+        return $query->paginate($perPage);
     }
 }

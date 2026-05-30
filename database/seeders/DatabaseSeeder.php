@@ -2,78 +2,84 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Database\Seeders\Academic\CollegeDeanSeeder;
 use Illuminate\Database\Seeder;
-// LEVEL 1
 use Database\Seeders\Academic\UniversitySeeder;
 use Database\Seeders\Core\PersonSeeder;
-
-// LEVEL 2
 use Database\Seeders\Academic\CollegeSeeder;
-
-// LEVEL 3
+use Database\Seeders\Academic\DepartmentHeadSeeder;
 use Database\Seeders\Academic\DepartmentSeeder;
+use Database\Seeders\Academic\GroupSeeder;
+use Database\Seeders\Academic\DoctorSeeder;
+use Database\Seeders\Academic\ScheduleGroupSeeder;
+use Database\Seeders\Academic\ScheduleSeeder;
 use Database\Seeders\Academic\StaffSeeder;
+use Database\Seeders\Academic\StudentGroupSeeder;
+use Database\Seeders\Academic\TeachingAssistantSeeder;
+use Database\Seeders\Core\PersonAttachmentSeeder;
 use Database\Seeders\Core\UsersSeeder;
-
-// LEVEL 4
 use Database\Seeders\Students\StudentSeeder;
 use Database\Seeders\Requests\RequestTypeSeeder;
 use Database\Seeders\Sanctions\SanctionTypeSeeder;
 use Database\Seeders\Courses\UniversalCourseSeeder;
-
-// LEVEL 5
 use Database\Seeders\Courses\CourseSeeder;
-
-// LEVEL 6
 use Database\Seeders\Courses\CoursePartSeeder;
+use Database\Seeders\Courses\CourseStaffSeeder;
+use Database\Seeders\Courses\LectureSeeder;
 use Database\Seeders\Courses\StudentCourseSeeder;
 use Database\Seeders\Requests\RequestSeeder;
 use Database\Seeders\Sanctions\SanctionSeeder;
 use Database\Seeders\Students\SuggestionSeeder;
-
 use Database\Seeders\Courses\StudentCoursePartSeeder;
-
+use Database\Seeders\Requests\RequestMediaSeeder;
+use Database\Seeders\Requests\RequestTypeMediaSeeder;
+use App\Models\University;
+use App\Models\Person;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
+        // تشغيل جميع السيدرات أولاً
         $this->call([
             RolesAndPermissionsSeeder::class,
-            // LEVEL 1
             UniversitySeeder::class,
             PersonSeeder::class,
-
-            // LEVEL 2
             CollegeSeeder::class,
-
-            // LEVEL 3
             DepartmentSeeder::class,
             StaffSeeder::class,
             UsersSeeder::class,
-
-            // LEVEL 4
+            DoctorSeeder::class,
+            TeachingAssistantSeeder::class,
+            DepartmentHeadSeeder::class,
+            CollegeDeanSeeder::class,
             StudentSeeder::class,
             RequestTypeSeeder::class,
             SanctionTypeSeeder::class,
             UniversalCourseSeeder::class,
-
-            // LEVEL 5
             CourseSeeder::class,
-
-            // LEVEL 6
             CoursePartSeeder::class,
             StudentCourseSeeder::class,
             RequestSeeder::class,
             SanctionSeeder::class,
             SuggestionSeeder::class,
-
-            // LEVEL 7
             StudentCoursePartSeeder::class,
+            LectureSeeder::class,
+            ScheduleSeeder::class,
+            GroupSeeder::class,
+            StudentGroupSeeder::class,
+            ScheduleGroupSeeder::class,
+            CourseStaffSeeder::class,
+            RequestTypeMediaSeeder::class,
+            RequestMediaSeeder::class,
+            PersonAttachmentSeeder::class,
         ]);
+
+        // بعد الانتهاء من جميع السيدرات، نقوم بتعيين مدير جامعة دمشق
+        $damascus = University::where('name', 'جامعة دمشق')->first();
+        $director = Person::where('national_id', '01012345690')->first();
+        if ($damascus && $director) {
+            $damascus->update(['university_director_id' => $director->id]);
+        }
     }
 }

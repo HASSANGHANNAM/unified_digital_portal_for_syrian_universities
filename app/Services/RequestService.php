@@ -3,11 +3,16 @@
 namespace App\Services;
 
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\RequestTypeRepositoryInterface;
+use App\DTOs\RequestTypeDTO;
+use App\Services\Traits\TokenDataTrait;
 
 class RequestService
 {
-     public function __construct(
-        private UserRepositoryInterface $userRepositoryInterface
+    use TokenDataTrait;
+    public function __construct(
+        private UserRepositoryInterface $userRepositoryInterface,
+        private RequestTypeRepositoryInterface $requestTypeRepository
     ) {}
 
     public function getStudentRequests(array $data): array
@@ -81,5 +86,19 @@ class RequestService
             'code' => $code,
         ];
     }
+    public function requestsInStudentCollege(array $request): array
+    {
+        $message = 'قائمة الطلبات التي يمكن أن يقدمها الطالب في الكلية.';
+        $code = 200;
+        $data = [];
+        $collegeId = $this->getStudentCollegeId();
+        $types = $this->requestTypeRepository->getByCollegeId($collegeId, $request);
 
+        $data = RequestTypeDTO::fromServiceData($types);
+        return [
+            'data' => $data,
+            'message' => $message,
+            'code' => $code,
+        ];
+    }
 }
