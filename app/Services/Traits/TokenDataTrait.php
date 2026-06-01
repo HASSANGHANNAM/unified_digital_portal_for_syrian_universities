@@ -7,7 +7,6 @@ trait TokenDataTrait
     protected function getCurrentPerson(): ?\App\Models\Person
     {
         $user = auth()->user();
-        dd($user);
         if (!$user) {
             return null;
         }

@@ -12,7 +12,8 @@ class RequestType extends Model
     protected $table = 'request_types';
 
     protected $fillable = [
-        'name', 'description',
+        'name',
+        'description',
         'university_director_acceptance',
         'college_dean_acceptance',
         'department_head_acceptance',
@@ -38,6 +39,11 @@ class RequestType extends Model
     public function mediaTypes()
     {
         return $this->hasMany(RequestTypeMedia::class);
+    }
+
+    public function requestTypeMedia()
+    {
+        return $this->hasMany(RequestTypeMedia::class, 'request_type_id', 'id');
     }
 
     public function availability()

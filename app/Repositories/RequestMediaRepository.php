@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\RequestMedia;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Str;
 
 class RequestMediaRepository implements RequestMediaRepositoryInterface
 {
@@ -17,6 +18,7 @@ class RequestMediaRepository implements RequestMediaRepositoryInterface
 
     public function create(array $data): RequestMedia
     {
+        $data['id'] = $data['id'] ?? Str::uuid()->toString();
         return $this->model->create($data);
     }
 
@@ -37,5 +39,10 @@ class RequestMediaRepository implements RequestMediaRepositoryInterface
     public function findById(string $id): ?RequestMedia
     {
         return $this->model->find($id);
+    }
+
+    public function findWithDetails(string $id): ?RequestMedia
+    {
+        return $this->model->with(['request.student'])->find($id);
     }
 }

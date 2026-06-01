@@ -40,6 +40,20 @@ class RequestTypeRepository implements RequestTypeRepositoryInterface
         return $this->model->find($id);
     }
 
+    public function getByIdWithMedia(string $id): ?RequestType
+    {
+        return $this->model->with('requestTypeMedia')->find($id);
+    }
+
+    public function getRequiredMediaTypes(string $requestTypeId): array
+    {
+        $type = $this->model->with('requestTypeMedia')->find($requestTypeId);
+        if (!$type) {
+            return [];
+        }
+        return $type->requestTypeMedia->pluck('type')->toArray();
+    }
+
     public function getByCollegeId(int $collegeId, array $request): Collection|LengthAwarePaginator
     {
         $query = $this->model->query();

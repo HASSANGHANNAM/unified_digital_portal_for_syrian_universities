@@ -12,4 +12,5 @@ interface RequestMediaRepositoryInterface
     public function update(RequestMedia $requestMedia, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?RequestMedia;
+    public function findWithDetails(string $id): ?RequestMedia;
 }

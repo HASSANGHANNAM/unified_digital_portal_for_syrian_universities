@@ -12,4 +12,5 @@ interface RequestTypeMediaRepositoryInterface
     public function update(RequestTypeMedia $requestTypeMedia, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?RequestTypeMedia;
+    public function getByRequestTypeId(int $requestTypeId): Collection;
 }

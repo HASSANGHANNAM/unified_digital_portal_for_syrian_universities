@@ -24,6 +24,7 @@ class RequestMediaSeeder extends Seeder
                     'name' => $item['name'],
                 ], [
                     'type' => $item['type'],
+                    'path' => $item['path'] ?? null,
                 ]);
             }
         }

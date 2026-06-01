@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->enum('type', ['image', 'video', 'pdf', 'excel', 'word', 'etc']);
+            $table->string('path')->nullable();
             $table->foreignId('request_id')->constrained('requests')->cascadeOnDelete();
             $table->timestamps();
         });

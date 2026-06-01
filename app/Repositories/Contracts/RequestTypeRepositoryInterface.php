@@ -14,4 +14,6 @@ interface RequestTypeRepositoryInterface
     public function delete(string $id): bool;
     public function findById(string $id): ?RequestType;
     public function getByCollegeId(int $collegeId, array $request): Collection|LengthAwarePaginator;
+    public function getByIdWithMedia(string $id): ?RequestType;
+    public function getRequiredMediaTypes(string $requestTypeId): array;
 }

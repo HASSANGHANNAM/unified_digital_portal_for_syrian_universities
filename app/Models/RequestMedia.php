@@ -11,10 +11,10 @@ class RequestMedia extends Model
 
     protected $table = 'request_media';
 
-    protected $fillable = ['name', 'type', 'request_id'];
+    protected $fillable = ['name', 'type', 'path', 'request_id'];
 
     public function request()
     {
-        return $this->belongsTo(StudentRequest::class, 'request_id');
+        return $this->belongsTo(Request::class, 'request_id', 'id');
     }
 }

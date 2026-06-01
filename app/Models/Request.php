@@ -9,13 +9,32 @@ class Request extends Model
 {
     use HasFactory;
 
-
     protected $table = 'requests';
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_UNIVERSITY_DIRECTOR_PROCESSING = 'university_director_processing';
+    public const STATUS_COLLEGE_DEAN = 'college_dean';
+    public const STATUS_DEPARTMENT_HEAD = 'department_head';
+    public const STATUS_STUDENT_STUFF_PROCESSING = 'student_stuff_processing';
+    public const STATUS_EXAMS_STUFF = 'exams_stuff';
+    public const STATUS_DOCTOR_PROCESSING = 'doctor_processing';
+
     protected $fillable = [
-         'request_type_id', 'reason', 'submission_date',
-        'decision_date', 'decision_reason', 'student_id',
-        'processed_by_staff_id', 'course_id'
+        'request_type_id',
+        'reason',
+        'submission_date',
+        'status',
+        'decision_date',
+        'decision_reason',
+        'student_id',
+        'processed_by_staff_id',
+        'course_id'
+    ];
+
+    protected $attributes = [
+        'status' => self::STATUS_PENDING,
     ];
 
     protected $casts = [
@@ -25,12 +44,12 @@ class Request extends Model
 
     public function requestType()
     {
-        return $this->belongsTo(RequestType::class, 'request_type_id', 'request_type_id');
+        return $this->belongsTo(RequestType::class, 'request_type_id', 'id');
     }
 
     public function student()
     {
-        return $this->belongsTo(Student::class, 'student_id', 'student_id');
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 
     public function processedBy()
@@ -40,11 +59,11 @@ class Request extends Model
 
     public function course()
     {
-        return $this->belongsTo(Course::class, 'course_id', 'course_id');
+        return $this->belongsTo(Course::class, 'course_id', 'id');
     }
 
     public function media()
     {
-        return $this->hasMany(RequestMedia::class, 'request_id', 'request_id');
+        return $this->hasMany(RequestMedia::class, 'request_id', 'id');
     }
 }

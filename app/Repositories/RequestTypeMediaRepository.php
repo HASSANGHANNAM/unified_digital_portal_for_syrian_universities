@@ -38,4 +38,9 @@ class RequestTypeMediaRepository implements RequestTypeMediaRepositoryInterface
     {
         return $this->model->find($id);
     }
+
+    public function getByRequestTypeId(int $requestTypeId): Collection
+    {
+        return $this->model->where('request_type_id', $requestTypeId)->get();
+    }
 }

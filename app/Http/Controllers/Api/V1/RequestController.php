@@ -12,6 +12,7 @@ use App\Http\Requests\V1\GetRequestDetailsRequest;
 use App\Http\Requests\V1\GetStudentRequestsRequest;
 use App\Http\Requests\V1\ReviewRequestRequest;
 use App\Http\Requests\V1\RequestsInStudentCollegeRequest;
+use App\Http\Requests\V1\StoreRequestRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -93,4 +94,23 @@ class RequestController extends Controller
         }
     }
 
+    public function store(StoreRequestRequest $storeRequestRequest): JsonResponse
+    {
+        try {
+            $files = $storeRequestRequest->file('media') ?? [];
+            $data = $this->requestService->store($storeRequestRequest->validated(), $files);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getMediaByRequestTypeId(int $requestTypeId): JsonResponse
+    {
+        try {
+            $data = $this->requestService->getMediaByRequestTypeId($requestTypeId);
+            return Response::Success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
 }

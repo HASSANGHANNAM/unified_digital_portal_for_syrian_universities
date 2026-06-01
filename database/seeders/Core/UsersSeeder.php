@@ -264,10 +264,10 @@ class UsersSeeder extends Seeder
             [
                 'person_id' => 17,
                 'username' => 'basel.nouri',
-                'email' => null,
+                'email' => 'basel.nouri@damascusuniv.edu.sy',
                 'password' => 'password123',
                 'status' => 'active',
-                'email_verified_at' => null,
+                'email_verified_at' => now(),
                 'last_login' => '2025-05-11',
                 'created_at' => '2023-09-01',
                 'role' => 'Student',

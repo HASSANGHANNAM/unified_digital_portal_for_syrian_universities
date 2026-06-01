@@ -13,6 +13,8 @@ return new class extends Migration
             $table->foreignId('request_type_id')->constrained('request_types')->cascadeOnDelete();
             $table->text('reason');
             $table->dateTime('submission_date');
+            $table->enum('status', ['pending', 'completed', 'rejected', 'university_director_processing', 'college_dean', 'department_head', 'student_stuff_processing', 'exams_stuff', 'doctor_processing'])->default('pending');
+
             $table->dateTime('decision_date')->nullable();
             $table->text('decision_reason')->nullable();
             $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
