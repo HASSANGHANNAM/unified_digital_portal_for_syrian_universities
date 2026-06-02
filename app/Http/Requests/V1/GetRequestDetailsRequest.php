@@ -11,8 +11,19 @@ class GetRequestDetailsRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->route('requestId') !== null) {
+            $this->merge([
+                'requestId' => $this->route('requestId'),
+            ]);
+        }
+    }
+
     public function rules(): array
     {
-        return [];
+        return [
+            'requestId' => ['required', 'integer', 'min:1'],
+        ];
     }
 }

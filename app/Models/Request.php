@@ -20,6 +20,7 @@ class Request extends Model
     public const STATUS_STUDENT_STUFF_PROCESSING = 'student_stuff_processing';
     public const STATUS_EXAMS_STUFF = 'exams_stuff';
     public const STATUS_DOCTOR_PROCESSING = 'doctor_processing';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'request_type_id',

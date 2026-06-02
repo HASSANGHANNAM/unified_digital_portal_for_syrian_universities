@@ -6,15 +6,20 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeRepositoryInterface;
 use App\DTOs\RequestTypeDTO;
 use App\DTOs\RequestTypeMediaDTO;
+use App\DTOs\RequestListDTO;
+use App\DTOs\RequestDetailsDTO;
 use App\Repositories\Contracts\RequestTypeMediaRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
 use App\Repositories\RequestRepository;
 use App\Repositories\RequestMediaRepository;
 use App\DTOs\RequestResponseDTO;
 use App\Services\Traits\RequestMediaValidationTrait;
+use Illuminate\Http\Request;
+use App\Models\Request as RequestModel;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class RequestService
 {
@@ -29,15 +34,49 @@ class RequestService
         private RequestMediaRepository $requestMediaRepository
     ) {}
 
-    public function getStudentRequests(array $data): array
+    public function getStudentRequests($request): array
     {
-        $message = 'قائمة الطلبات التي قدمها الطالب.';
-        $code = 200;
-        $data = $data;
+        $studentId = $this->getStudentId();
+        abort_if(!$studentId, 403);
+        $status = null;
+        $name = null;
+        $perPage = 15;
+
+        if ($request instanceof Request) {
+            $status = $request->input('status');
+            $name = $request->input('name');
+            $perPage = $request->input('per_page', 15);
+        } elseif (is_array($request)) {
+            $status = $request['status'] ?? null;
+            $name = $request['name'] ?? null;
+            $perPage = $request['per_page'] ?? 15;
+        }
+
+        $perPage = (int) $perPage;
+        $perPage = $perPage > 0 ? $perPage : 15;
+        $requests = $this->requestRepository->getStudentRequestsWithFilters(
+            $studentId,
+            ['status' => $status, 'name' => $name],
+            $perPage
+        );
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => RequestListDTO::fromPaginator($requests),
+            'message' => 'قائمة الطلبات التي قدمها الطالب.',
+            'code' => 200,
+        ];
+    }
+
+    public function getRequestDetails(int $requestId): array
+    {
+        $studentId = $this->getStudentId();
+        abort_if(!$studentId, 403);
+        $request = $this->requestRepository->findWithDetailsAndMedia($requestId, $studentId);
+        abort_if(!$request, 403);
+        return [
+            'data' => RequestDetailsDTO::fromModel($request)->toArray(),
+            'message' => 'تفاصيل الطلب المحدد.',
+            'code' => 200,
         ];
     }
 
@@ -53,28 +92,25 @@ class RequestService
         ];
     }
 
-    public function getRequestDetails(array $data, int $requestId): array
+    public function cancelRequest(int $requestId): array
     {
-        $message = 'عرض تفاصيل طلب معين وحالته.';
-        $code = 200;
-        $data = array_merge($data, ["requestId" => $requestId]);
-        return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
-        ];
-    }
-
-    public function cancelRequest(array $data, int $requestId): array
-    {
-        $message = 'إلغاء طلب (إذا لم تتم معالجته).';
-        $code = 200;
-        $data = array_merge($data, ["requestId" => $requestId]);
-        return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
-        ];
+        try {
+            $request = RequestModel::where('id', $requestId)->first();
+            if (!$request) {
+                return ['data' => [], 'message' => 'Request not found', 'code' => 404];
+            }
+            \Illuminate\Support\Facades\Gate::authorize('cancel', $request);
+            if ($request->status !== RequestModel::STATUS_PENDING) {
+                return ['data' => [], 'message' => 'Only pending requests can be cancelled', 'code' => 400];
+            }
+            $updated = $this->requestRepository->updateStatus($requestId, RequestModel::STATUS_CANCELLED);
+            if (!$updated) {
+                return ['data' => [], 'message' => 'Unable to cancel request', 'code' => 400];
+            }
+            return ['data' => ['id' => (string) $updated->id, 'status' => $updated->status], 'message' => 'Request cancelled', 'code' => 200];
+        } catch (Throwable $th) {
+            return ['data' => [], 'message' => $th->getMessage(), 'code' => 400];
+        }
     }
 
     public function getAllRequests(array $data): array

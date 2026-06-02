@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Services\RequestService;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Http\Requests\V1\CancelRequestRequest;
+
 use App\Http\Requests\V1\CreateRequestRequest;
 use App\Http\Requests\V1\GetAllRequestsRequest;
 use App\Http\Requests\V1\GetRequestDetailsRequest;
@@ -15,6 +15,7 @@ use App\Http\Requests\V1\RequestsInStudentCollegeRequest;
 use App\Http\Requests\V1\StoreRequestRequest;
 use App\Http\Responses\Response;
 use Throwable;
+use App\Models\Request as StudentRequestModel;
 
 class RequestController extends Controller
 {
@@ -23,6 +24,7 @@ class RequestController extends Controller
     public function __construct(RequestService $requestService)
     {
         $this->requestService = $requestService;
+        $this->middleware('auth:sanctum');
     }
 
     public function getStudentRequests(GetStudentRequestsRequest $getStudentRequestsRequest): JsonResponse
@@ -45,20 +47,28 @@ class RequestController extends Controller
         }
     }
 
-    public function getRequestDetails(GetRequestDetailsRequest $getRequestDetailsRequest, int $requestId): JsonResponse
+    public function getRequestDetails(GetRequestDetailsRequest $getRequestDetailsRequest): JsonResponse
     {
         try {
-            $data = $this->requestService->getRequestDetails($getRequestDetailsRequest->validated(), $requestId);
+            $validated = $getRequestDetailsRequest->validated();
+            $data = $this->requestService->getRequestDetails((int) $validated['requestId']);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }
     }
 
-    public function cancelRequest(CancelRequestRequest $cancelRequestRequest, int $requestId): JsonResponse
+    public function cancelRequest(int $requestId): JsonResponse
     {
         try {
-            $data = $this->requestService->cancelRequest($cancelRequestRequest->validated(), $requestId);
+            if (!is_numeric($requestId) || (int) $requestId < 1) {
+                return Response::Error([], 'Invalid request id', 400);
+            }
+            $requestModel = StudentRequestModel::where('id', $requestId)->first();
+            if (!$requestModel) {
+                return Response::Error([], 'Request not found', 404);
+            }
+            $data = $this->requestService->cancelRequest($requestId);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

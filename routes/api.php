@@ -61,7 +61,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/requests', [RequestController::class, 'getStudentRequests']);
         Route::post('/requests', [RequestController::class, 'store']);
         Route::get('/requests/{requestId}', [RequestController::class, 'getRequestDetails']);
-        Route::put('/requests/{requestId}/cancel', [RequestController::class, 'cancelRequest']);
+        Route::post('/requests/{requestId}/cancel', [RequestController::class, 'cancelRequest']);
         Route::get('/allRequests', [RequestController::class, 'getAllRequests']);
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest']);
         Route::get('/request-type-media/{request_type_id}', [RequestController::class, 'getMediaByRequestTypeId']);
