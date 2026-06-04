@@ -38,4 +38,22 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
     {
         return $this->model->find($id);
     }
+
+    public function findStudentCourse(int $studentId, int $courseId)
+    {
+        return $this->model
+            ->with('course')
+            ->where('student_id', $studentId)
+            ->where('course_id', $courseId)
+            ->first();
+    }
+
+    public function getStudentCoursesWithGrades(int $studentId)
+    {
+        return $this->model ->with([
+                'course',
+                'Parts.coursePart'
+            ])->where('student_id', $studentId)->get();
+    }
+
 }

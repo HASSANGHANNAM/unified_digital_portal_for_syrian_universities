@@ -28,6 +28,7 @@ class CourseSeeder extends Seeder
             'الفيزياء',
             'الكيمياء',
             'الأحياء',
+            
         ])->get()->keyBy('name');
 
         // تعريف المقررات لكل قسم
@@ -92,6 +93,11 @@ class CourseSeeder extends Seeder
                 ['course_name' => 'علم الخلية', 'code' => 'BIO302', 'credits' => 3],
                 ['course_name' => 'علم البيئة', 'code' => 'BIO401', 'credits' => 3],
             ],
+
+
+
+
+
         ];
 
         // إنشاء المقررات لكل قسم

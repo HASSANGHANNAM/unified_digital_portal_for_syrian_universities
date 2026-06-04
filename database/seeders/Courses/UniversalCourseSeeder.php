@@ -72,6 +72,7 @@ class UniversalCourseSeeder extends Seeder
             ['name' => 'علم الخلية'],
             ['name' => 'علم البيئة'],
 
+
         ];
 
     foreach ($courses as $course) {
@@ -85,6 +86,6 @@ class UniversalCourseSeeder extends Seeder
         });
     }
 
-     
+
     }
 }

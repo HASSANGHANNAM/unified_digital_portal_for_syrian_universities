@@ -24,6 +24,7 @@ use Database\Seeders\Courses\UniversalCourseSeeder;
 
 // LEVEL 5
 use Database\Seeders\Courses\CourseSeeder;
+use Database\Seeders\Courses\StudyPlanCourseSeeder;
 
 // LEVEL 6
 use Database\Seeders\Courses\CoursePartSeeder;
@@ -64,6 +65,7 @@ class DatabaseSeeder extends Seeder
 
             // LEVEL 5
             CourseSeeder::class,
+            StudyPlanCourseSeeder::class,
 
             // LEVEL 6
             CoursePartSeeder::class,

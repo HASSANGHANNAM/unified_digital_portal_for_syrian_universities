@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RequestController;
 use App\Http\Controllers\Api\V1\SanctionController;
 use App\Http\Controllers\Api\V1\UserController;
+use App\Http\Controllers\Api\V1\StudyPlanController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -65,6 +66,7 @@ Route::prefix('V1')->group(function () {
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest']);
         Route::get('/allGrades', [GradeController::class, 'getAllGrades']);
         Route::post('/addGrade', [GradeController::class, 'addGrade']);
+        Route::get('/grades/{courseId}', [GradeController::class, 'getgrade']);
         Route::get('/grades/appeals', [GradeController::class, 'getGradeAppeals']);
         Route::put('/grades/appeals/{appealId}', [GradeController::class, 'processAppeal']);
         Route::get('/invoices', [PaymentController::class, 'getInvoices']);
@@ -103,6 +105,23 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload-document', [ProfileController::class, 'uploadDocument']);
     Route::post('/complete-profile', [ProfileController::class, 'completeProfile']);
     Route::post('/submit', [ProfileController::class, 'submit']);
+    Route::get('/profile', [AuthController::class, 'getProfile']);
+    Route::get('/grades/{courseId}', [GradeController::class, 'getgrade']);
+    Route::get('/all-my-grades', [GradeController::class, 'getAllMyGrades']);
+    Route::get('/all-my-sanctions', [SanctionController::class, 'getAllSanctions']);
+    Route::get('/sanctions-details/{sanctionId}', [SanctionController::class, 'getSanctionDetails']);
+    Route::post('/sanctions-respond/{sanctionId}', [SanctionController::class, 'respondToSanction']);
+    Route::get('/study-plan', [StudyPlanController::class, 'getStudyPlan']);
+    Route::get('/study-plan/year/{year}', [StudyPlanController::class, 'getYearCourses']);
+    Route::get('/study-plan/course/{courseId}', [StudyPlanController::class, 'getCourseDetails']);
+    Route::get('/study-plan/search', [StudyPlanController::class, 'searchCourses']);
+    /*خالصين بس ما لحقت تست واتاكد من كلشي بعد التعديلات
+    Route::get('/current-semester', [StudyPlanController::class, 'getCurrentSemesterCourses']);
+    Route::get('/current-year', [StudyPlanController::class, 'getCurrentYearCourses']);
+    Route::get('/completed-courses', [StudyPlanController::class, 'getCompletedCourses']);
+    Route::get('/remaining-courses', [StudyPlanController::class, 'getRemainingCourses']);
+    Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress']);
+    */
 
 });
 

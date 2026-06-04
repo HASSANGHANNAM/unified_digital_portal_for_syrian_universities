@@ -63,4 +63,9 @@ class Course extends Model
     {
         return $this->hasMany(StudentRequest::class);
     }
+    
+    public function studyPlanCourses()
+    {
+        return $this->hasMany(StudyPlanCourse::class);
+    }
 }

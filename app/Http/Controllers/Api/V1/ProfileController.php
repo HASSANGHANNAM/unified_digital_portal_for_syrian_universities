@@ -37,7 +37,7 @@ class ProfileController extends Controller
     {
         try {
             $data = $this->profileService->uploadDocument(auth()->user(), $request);
-            return Response::success($data, 'تم رفع الملف بنجاح', 200);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (\Throwable $th) {
             return Response::Error([], $th->getMessage());
         }
