@@ -81,9 +81,11 @@ Route::prefix('V1')->group(function () {
         Route::get('/applications', [AdmissionController::class, 'getApplications']);
         Route::put('/applications/{id}/review', [AdmissionController::class, 'reviewApplication']);
         Route::get('/sanctions', [SanctionController::class, 'getSanctions']);
-        Route::post('/sanctions', [SanctionController::class, 'addSanction']);
+        Route::post('/sanction', [SanctionController::class, 'addSanction']);
         Route::put('/sanctions/{sanctionId}', [SanctionController::class, 'updateSanction']);
         Route::delete('/sanctions/{sanctionId}', [SanctionController::class, 'deleteSanction']);
+        Route::get('/sanction-types', [SanctionController::class, 'index']);
+        Route::post('/sanction-type', [SanctionController::class, 'store']);
         Route::post('/student/{studentId}/documents', [DocumentController::class, 'addDocument']);
         Route::get('/students/{studentId}/documents', [DocumentController::class, 'getDocuments']);
     });

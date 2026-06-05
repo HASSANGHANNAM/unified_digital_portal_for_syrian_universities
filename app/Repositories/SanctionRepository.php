@@ -3,12 +3,14 @@
 namespace App\Repositories;
 
 use App\Models\Sanction;
+use App\Models\SanctionType;
 use App\Repositories\Contracts\SanctionRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SanctionRepository implements SanctionRepositoryInterface
 {
-    public function __construct(private Sanction $model) {}
+    public function __construct(private Sanction $model, private SanctionType $sanctionTypeModel) {}
 
     public function all(): Collection
     {
@@ -37,5 +39,30 @@ class SanctionRepository implements SanctionRepositoryInterface
     public function findById(string $id): ?Sanction
     {
         return $this->model->find($id);
+    }
+
+    public function getPaginatedWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = $this->sanctionTypeModel->newQuery();
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['reason'])) {
+            $query->where('reason', 'like', '%' . $filters['reason'] . '%');
+        }
+
+        $query->orderBy('id', 'desc');
+
+        return $query->paginate($perPage);
+    }
+
+    public function createSanctionType(array $data): SanctionType
+    {
+        $data['years'] = isset($data['years']) ? (int) $data['years'] : 0;
+        $data['months'] = isset($data['months']) ? (int) $data['months'] : 0;
+        $data['days'] = isset($data['days']) ? (int) $data['days'] : 0;
+        return $this->sanctionTypeModel->create($data);
     }
 }

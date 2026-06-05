@@ -57,4 +57,21 @@ trait TokenDataTrait
         }
         return null;
     }
+
+    protected function getStaffId(): ?string
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return null;
+        }
+        $user->loadMissing(['person.staff']);
+        $staff = $user->person?->staff;
+        if (!$staff) {
+            return null;
+        }
+        if (isset($staff->id)) {
+            return (string) $staff->id;
+        }
+        return null;
+    }
 }

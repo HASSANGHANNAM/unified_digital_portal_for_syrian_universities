@@ -2,30 +2,38 @@
 
 namespace App\DTOs;
 
-use App\Models\User;
+use App\Models\Sanction;
 
 class SanctionDTO
 {
     public function __construct(
-        public readonly int $id,
-        public readonly string $username,
-        public readonly string $email,
-        public readonly string $status,
-        public readonly ?string $fullName = null,
-        public readonly ?string $phone = null,
-        public readonly array $roles = []
+        public string $id,
+        public int $sanction_type_id,
+        public string $status,
+        public ?string $issued_date,
+        public ?string $expiry_date,
+        public ?string $notes,
+        public ?string $student_response,
+        public ?string $staff_response,
+        public int $student_id,
+        public int $staff_id,
+        public ?int $course_id,
     ) {}
 
-    public static function fromModel(User $user): self
+    public static function fromModel(Sanction $model): self
     {
         return new self(
-            id: $user->id,
-            username: $user->username,
-            email: $user->email,
-            status: $user->status,
-            fullName: $user->person?->full_name,
-            phone: $user->person?->phone,
-            roles: $user->roles->pluck('name')->toArray()
+            (string) $model->id,
+            (int) $model->sanction_type_id,
+            $model->status ?? '',
+            $model->issued_date?->toDateString() ?? null,
+            $model->expiry_date?->toDateString() ?? null,
+            $model->notes ?? null,
+            $model->student_response ?? null,
+            $model->staff_response ?? null,
+            (int) $model->student_id,
+            (int) $model->staff_id,
+            $model->course_id ? (int) $model->course_id : null,
         );
     }
 
@@ -33,12 +41,16 @@ class SanctionDTO
     {
         return [
             'id' => $this->id,
-            'username' => $this->username,
-            'email' => $this->email,
+            'sanction_type_id' => $this->sanction_type_id,
             'status' => $this->status,
-            'full_name' => $this->fullName,
-            'phone' => $this->phone,
-            'roles' => $this->roles,
+            'issued_date' => $this->issued_date,
+            'expiry_date' => $this->expiry_date,
+            'notes' => $this->notes,
+            'student_response' => $this->student_response,
+            'staff_response' => $this->staff_response,
+            'student_id' => $this->student_id,
+            'staff_id' => $this->staff_id,
+            'course_id' => $this->course_id,
         ];
     }
 }
