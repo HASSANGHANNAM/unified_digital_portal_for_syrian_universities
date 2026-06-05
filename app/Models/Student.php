@@ -11,7 +11,8 @@ class Student extends Model
 
     protected $fillable = [
         'student_id_number', 'academic_status', 'major',
-        'enrollment_year', 'current_gpa', 'advisor_id',
+        'enrollment_year','current_year',
+        'current_semester','current_gpa', 'advisor_id',
         'person_id', 'college_id', 'department_id'
     ];
 

@@ -27,4 +27,5 @@ class StudentCourse extends Model
     {
         return $this->hasMany(StudentCoursePart::class);
     }
+    
 }

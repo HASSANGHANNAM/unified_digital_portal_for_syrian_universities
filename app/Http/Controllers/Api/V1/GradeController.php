@@ -60,5 +60,23 @@ class GradeController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+    public function getgrade(int $courseId): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->getgrade($courseId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getAllMyGrades(): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->getAllMyGrades();
+            return Response::success($data['data'],$data['message'],$data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
 
 }

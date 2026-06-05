@@ -65,4 +65,28 @@ class SanctionRepository implements SanctionRepositoryInterface
         $data['days'] = isset($data['days']) ? (int) $data['days'] : 0;
         return $this->sanctionTypeModel->create($data);
     }
+    public function getStudentSanctions(int $studentId)
+    {
+        return $this->model->with(['sanctionType', 'course'])
+            ->where('student_id', $studentId)
+            ->latest()
+            ->get();
+    }
+
+    public function getStudentSanctionById(int $studentId, int $sanctionId)
+    {
+        return $this->model->with(['sanctionType', 'course'])
+            ->where('student_id', $studentId)
+            ->where('id', $sanctionId)
+            ->first();
+    }
+
+    public function updateResponse(int $sanctionId, array $data): bool
+    {
+        $sanction = $this->findById($sanctionId);
+        if (!$sanction) {
+            return false;
+        }
+        return $sanction->update($data);
+    }
 }

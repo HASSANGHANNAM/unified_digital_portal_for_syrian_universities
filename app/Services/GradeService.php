@@ -6,12 +6,18 @@ use App\DTOs\AllGradesDTO;
 use App\Imports\StudentMarksImport;
 use App\Models\Course;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\StudentCoursePartRepositoryInterface;
+use App\Repositories\Contracts\StudentCourseRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
 
 class GradeService
 {
      public function __construct(
-        private UserRepositoryInterface $userRepositoryInterface
+        private UserRepositoryInterface $userRepositoryInterface,
+        private StudentCoursePartRepositoryInterface $studentCoursePartRepositoryInterface,
+        private StudentCourseRepositoryInterface $studentCourseRepositoryInterface,
     ) {}
 
     public function getAllGrades(array $data): array
@@ -90,5 +96,91 @@ class GradeService
             'code' => $code,
         ];
     }
+    // استعراض نتيجة مادة معينة للطالب مع حالة النجاح أو الرسوب
+    public function getgrade(int $courseId): array
+    {
+        $user = Auth::user();
+        $studentCourse = $this->studentCourseRepositoryInterface->findStudentCourse($user->id, $courseId);
+        if (!$studentCourse) {
+            return [
+                'data' => [],
+                'message' => 'Course not found for this student.',
+                'code' => 404,
+            ];
+        }
+        $grades = $this->studentCoursePartRepositoryInterface->getStudentCourseGrades($studentCourse->id);
+        if ($grades->isEmpty()) {
+
+            return [
+                'data' => [],
+                'message' => 'No grades found for this course.',
+                'code' => 404,
+            ];
+        }
+
+        $total = $grades->sum('credits');
+        $status = $total >= 60 ? 'passed' : 'failed';
+
+        return [
+            'data' => [
+                'course_id' => $courseId,
+                'course_name' => $studentCourse->course->name,
+                'total_grade' => $total,
+                'status' => $status,
+                'parts' => $grades->map(function ($grade) {
+                    return [
+                        'id' => $grade->id,
+                        'part_name' => $grade->coursePart->name,
+                        'percentage' => $grade->coursePart->percentage,
+                        'grade' => $grade->credits,
+                    ];
+                }),
+            ],
+            'message' => 'Grades retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+    // استعراض نتائج جميع المواد للطالب مع حالة النجاح أو الرسوب لكل مادة
+    public function getAllMyGrades(): array
+    {
+        $user = Auth::user();
+        $courses = $this->studentCourseRepositoryInterface->getStudentCoursesWithGrades($user->id);
+        if ($courses->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No grades found.',
+                'code' => 404,
+            ];
+        }
+        $data = $courses->map(function ($studentCourse) {
+                   $publishedGrades = collect($studentCourse->parts)
+            ->where('published', 1);
+            $total = $publishedGrades->sum('credits');
+            return [
+                'course_id' => $studentCourse->course_id,
+                'course_name' => $studentCourse->course->name,
+                'total' => $total,
+                'status' => $total >= 60
+                    ? 'passed'
+                    : 'failed',
+                'parts' => $publishedGrades->map(function ($part) {
+                    return [
+                        'name' => $part->coursePart->name,
+                        'grade' => $part->credits,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return [
+            'data' => $data,
+            'message' => 'Grades retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+
 
 }
+

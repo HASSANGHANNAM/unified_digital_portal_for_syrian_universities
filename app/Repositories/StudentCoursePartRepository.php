@@ -38,4 +38,9 @@ class StudentCoursePartRepository implements StudentCoursePartRepositoryInterfac
     {
         return $this->model->find($id);
     }
+
+    public function getStudentCourseGrades(int $studentCourseId)
+    {
+        return $this->model->with('coursePart')->where('student_course_id', $studentCourseId)->where('published', 1)->get();
+    }
 }
