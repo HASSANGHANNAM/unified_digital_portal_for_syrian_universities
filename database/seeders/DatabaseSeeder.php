@@ -35,6 +35,7 @@ use Database\Seeders\Requests\RequestMediaSeeder;
 use Database\Seeders\Requests\RequestTypeMediaSeeder;
 use App\Models\University;
 use App\Models\Person;
+use Database\Seeders\Courses\StudyPlanCourseSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -58,6 +59,7 @@ class DatabaseSeeder extends Seeder
             SanctionTypeSeeder::class,
             UniversalCourseSeeder::class,
             CourseSeeder::class,
+            StudyPlanCourseSeeder::class,
             CoursePartSeeder::class,
             StudentCourseSeeder::class,
             RequestSeeder::class,
