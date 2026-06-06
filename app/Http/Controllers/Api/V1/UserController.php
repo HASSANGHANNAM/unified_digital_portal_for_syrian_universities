@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Services\UserService;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Http\Requests\V1\AddUserRequest;
+use App\Http\Requests\V1\CreateUserRequest;
 use App\Http\Requests\V1\DeleteUserRequest;
 use App\Http\Requests\V1\GetUserPermissionsRequest;
+use App\Http\Requests\V1\GetUsersRequest;
 use App\Http\Requests\V1\ToggleUserActivationRequest;
 use App\Http\Requests\V1\UpdateUserRoleRequest;
 use App\Http\Responses\Response;
+use App\Services\UserService;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Throwable;
 
 class UserController extends Controller
@@ -22,20 +23,20 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function getUsers(): JsonResponse
+    public function getUsers(GetUsersRequest $request): JsonResponse
     {
         try {
-            $data = $this->userService->getUsers();
+            $data = $this->userService->listUsers($request->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }
     }
 
-    public function addUser(AddUserRequest $addUserRequest): JsonResponse
+    public function addUser(CreateUserRequest $createUserRequest): JsonResponse
     {
         try {
-            $data = $this->userService->addUser($addUserRequest->validated());
+            $data = $this->userService->createUser($createUserRequest->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -45,7 +46,7 @@ class UserController extends Controller
     public function updateUserRole(UpdateUserRoleRequest $updateUserRoleRequest, int $id): JsonResponse
     {
         try {
-            $data = $this->userService->updateUserRole($updateUserRoleRequest->validated(), $id);
+            $data = $this->userService->updateRole($updateUserRoleRequest->validated(), $id);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -65,7 +66,7 @@ class UserController extends Controller
     public function getUserPermissions(GetUserPermissionsRequest $getUserPermissionsRequest, int $id): JsonResponse
     {
         try {
-            $data = $this->userService->getUserPermissions($getUserPermissionsRequest->validated(), $id);
+            $data = $this->userService->getPermissions($getUserPermissionsRequest->validated(), $id);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -75,11 +76,10 @@ class UserController extends Controller
     public function toggleUserActivation(ToggleUserActivationRequest $toggleUserActivationRequest, int $id): JsonResponse
     {
         try {
-            $data = $this->userService->toggleUserActivation($toggleUserActivationRequest->validated(), $id);
+            $data = $this->userService->toggleActivation($toggleUserActivationRequest->validated(), $id);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-
 }

@@ -3,12 +3,12 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use Ramsey\Collection\Collection;
 
 class UserRepository implements UserRepositoryInterface
-
 {
     public function __construct(private User $user) {}
 
@@ -25,13 +25,15 @@ class UserRepository implements UserRepositoryInterface
             'person_id' => $data['person_id'] ?? null,
         ]);
     }
+
     public function all(): Collection
     {
         throw new \Exception('Not implemented');
     }
-    public function findByEmail(string $Email): ?User
+
+    public function findByEmail(string $email): ?User
     {
-        return $this->user->where('Email', $Email)->first();
+        return $this->user->where('email', $email)->first();
     }
 
     public function findByUserName(string $username): ?User
@@ -52,6 +54,31 @@ class UserRepository implements UserRepositoryInterface
     public function update(User $user, array $data): bool
     {
         return $user->update($data);
+    }
+
+    public function getUsersWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        return $this->user
+            ->with(['roles', 'person'])
+            ->when(isset($filters['role']), function ($query) use ($filters) {
+                $query->whereHas('roles', function ($roleQuery) use ($filters) {
+                    $roleQuery->where('name', $filters['role']);
+                });
+            })
+            ->when(isset($filters['status']), function ($query) use ($filters) {
+                $query->where('status', $filters['status']);
+            })
+            ->when(isset($filters['search']), function ($query) use ($filters) {
+                $query->where(function ($inner) use ($filters) {
+                    $inner->where('username', 'like', '%' . $filters['search'] . '%')
+                        ->orWhere('email', 'like', '%' . $filters['search'] . '%')
+                        ->orWhereHas('person', function ($personQuery) use ($filters) {
+                            $personQuery->where('full_name', 'like', '%' . $filters['search'] . '%');
+                        });
+                });
+            })
+            ->orderBy('id', 'desc')
+            ->paginate($perPage);
     }
 
     public function getProfile(User $user): array

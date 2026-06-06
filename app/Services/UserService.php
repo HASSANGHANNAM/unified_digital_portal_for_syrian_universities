@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
-use App\Repositories\Contracts\UserRepositoryInterface;
+use App\DTOs\PermissionsListDTO;
+use App\DTOs\UserDTO;
 use App\DTOs\UserListDTO;
-use App\DTOs\UserPermissionsDTO;
+use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 class UserService
 {
@@ -12,78 +16,119 @@ class UserService
         private UserRepositoryInterface $userRepositoryInterface
     ) {}
 
-    public function getUsers(): array
+    public function listUsers(array $filters = []): array
     {
-        $message = 'عرض قائمة المستخدمين مع إمكانية فلترتهم حسب الدور.';
-        $code = 200;
-        // use App\DTOs\UserListDTO;
-        $data = '';
+        $perPage = isset($filters['per_page']) ? (int) $filters['per_page'] : 15;
+        $users = $this->userRepositoryInterface->getUsersWithFilters($filters, $perPage);
+        $data = [
+            'data' => collect($users->items())->map(fn(User $user) => UserListDTO::fromModel($user)->toArray())->toArray(),
+            'meta' => [
+                'current_page' => $users->currentPage(),
+                'last_page' => $users->lastPage(),
+                'per_page' => $users->perPage(),
+                'total' => $users->total(),
+            ],
+        ];
+
         return [
             'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'message' => 'تمت جلب قائمة المستخدمين بنجاح.',
+            'code' => 200,
         ];
     }
 
-    public function addUser(array $data): array
+    public function createUser(array $data): array
     {
-        $message = 'إضافة مستخدم جديد (دكتور، معيد، إداري، رئيس قسم، عميد، مدير جامعة، وزارة).';
-        $code = 200;
-        $data = $data;
-        return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
-        ];
+        $role = Role::where('name', $data['role_name'])->first();
+        if (! $role) {
+            throw new \RuntimeException('الدور المطلوب غير موجود.');
+        }
+
+        return DB::transaction(function () use ($data, $role) {
+            $user = $this->userRepositoryInterface->create($data);
+            $this->userRepositoryInterface->assignRole($user, $role->name);
+            $user->load(['roles', 'person']);
+
+            return [
+                'data' => UserDTO::fromModel($user)->toArray(),
+                'message' => 'تم إنشاء المستخدم وربطه بالدور بنجاح.',
+                'code' => 201,
+            ];
+        });
     }
 
-    public function updateUserRole(array $data, int $id): array
+    public function updateRole(array $data, int $id): array
     {
-        $message = 'تعديل دور المستخدم.';
-        $code = 200;
-        $data = array_merge($data, ["id" => $id]);
+        $user = $this->userRepositoryInterface->findById($id);
+        if (! $user) {
+            throw new \RuntimeException('المستخدم غير موجود.');
+        }
+
+        $role = Role::where('name', $data['role_name'])->first();
+        if (! $role) {
+            throw new \RuntimeException('الدور المطلوب غير موجود.');
+        }
+
+        $user->syncRoles([$role->name]);
+        $user->load(['roles', 'person']);
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => UserDTO::fromModel($user)->toArray(),
+            'message' => 'تم تحديث دور المستخدم بنجاح.',
+            'code' => 200,
         ];
     }
 
     public function deleteUser(array $data, int $id): array
     {
-        $message = 'حذف مستخدم.';
-        $code = 200;
-        $data = array_merge($data, ["id" => $id]);
+        $user = $this->userRepositoryInterface->findById($id);
+        if (! $user) {
+            throw new \RuntimeException('المستخدم غير موجود.');
+        }
+
+        if ($user->hasRole('student')) {
+            throw new \RuntimeException('لا يمكن حذف مستخدم من نوع طالب.');
+        }
+
+        $user->delete();
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => ['id' => $id],
+            'message' => 'تم حذف المستخدم بنجاح.',
+            'code' => 200,
         ];
     }
 
-    public function getUserPermissions(array $data, int $id): array
+    public function getPermissions(array $data, int $id): array
     {
-        $message = 'عرض صلاحيات مستخدم معين.';
-        $code = 200;
-        // use App\DTOs\UserPermissionsDTO;
-        $data = array_merge($data, ["id" => $id]);
+        $user = $this->userRepositoryInterface->findById($id);
+        if (! $user) {
+            throw new \RuntimeException('المستخدم غير موجود.');
+        }
+
+        $permissions = $user->getAllPermissions()->pluck('name')->unique()->values()->toArray();
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => PermissionsListDTO::fromArray($permissions)->toArray(),
+            'message' => 'تمت جلب الصلاحيات بنجاح.',
+            'code' => 200,
         ];
     }
 
-    public function toggleUserActivation(array $data, int $id): array
+    public function toggleActivation(array $data, int $id): array
     {
-        $message = 'تفعيل أو تعطيل حساب مستخدم.';
-        $code = 200;
-        $data = array_merge($data, ["id" => $id]);
+        $user = $this->userRepositoryInterface->findById($id);
+        if (! $user) {
+            throw new \RuntimeException('المستخدم غير موجود.');
+        }
+
+        $newStatus = $data['status'] ?? ($user->status === 'active' ? 'inactive' : 'active');
+        $user->update(['status' => $newStatus]);
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => ['status' => $newStatus],
+            'message' => 'تم تحديث حالة التفعيل بنجاح.',
+            'code' => 200,
         ];
     }
-
 }
