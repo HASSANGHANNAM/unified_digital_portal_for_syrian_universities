@@ -4,10 +4,11 @@ namespace App\Repositories\Contracts;
 
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\StudyPlanCourse;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface StudyPlanCourseRepositoryInterface
 {
-    public function getAllPlanCourses(int $departmentId): Collection;
+    public function getAllPlanCourses(int $departmentId, int $perPage = 10): LengthAwarePaginator;
 
     public function getYearCourses(int $departmentId,int $year): Collection;
 

@@ -145,7 +145,10 @@ class GradeService
     public function getAllMyGrades(): array
     {
         $user = Auth::user();
-        $courses = $this->studentCourseRepositoryInterface->getStudentCoursesWithGrades($user->id);
+
+        $perPage = request()->input('per_page', 10);
+        $courses = $this->studentCourseRepositoryInterface->getStudentCoursesWithGrades($user->id, $perPage);
+
         if ($courses->isEmpty()) {
             return [
                 'data' => [],
@@ -153,17 +156,16 @@ class GradeService
                 'code' => 404,
             ];
         }
-        $data = $courses->map(function ($studentCourse) {
-                   $publishedGrades = collect($studentCourse->parts)
-            ->where('published', 1);
+
+        $data = collect($courses->items())->map(function ($studentCourse) {
+            $publishedGrades = collect($studentCourse->parts)->where('published', 1);
             $total = $publishedGrades->sum('credits');
+
             return [
                 'course_id' => $studentCourse->course_id,
                 'course_name' => $studentCourse->course->name,
                 'total' => $total,
-                'status' => $total >= 60
-                    ? 'passed'
-                    : 'failed',
+                'status' => $total >= 60 ? 'passed' : 'failed',
                 'parts' => $publishedGrades->map(function ($part) {
                     return [
                         'name' => $part->coursePart->name,
@@ -174,13 +176,19 @@ class GradeService
         });
 
         return [
-            'data' => $data,
+            'data' => [
+                'courses' => $data,
+                'meta' => [
+                    'current_page' => $courses->currentPage(),
+                    'last_page'    => $courses->lastPage(),
+                    'per_page'     => $courses->perPage(),
+                    'total'        => $courses->total(),
+                ]
+            ],
             'message' => 'Grades retrieved successfully.',
             'code' => 200,
         ];
     }
-
-
 
 }
 

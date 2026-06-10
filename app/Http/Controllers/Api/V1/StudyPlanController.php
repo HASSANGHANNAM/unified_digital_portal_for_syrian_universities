@@ -88,10 +88,10 @@ class StudyPlanController extends Controller
         }
     }
     // عرض المواد لسنة معينة
-    public function getCoursesByYear(int $year): JsonResponse
+    public function getYearCourses(int $year): JsonResponse
     {
         try {
-            $data = $this->studyPlanService->getCoursesByYear($year);
+            $data = $this->studyPlanService->getYearCourses($year);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

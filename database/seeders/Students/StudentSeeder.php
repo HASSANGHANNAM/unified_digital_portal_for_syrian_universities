@@ -39,7 +39,7 @@ class StudentSeeder extends Seeder
             ['person_name' => 'أحمد محمد العلي', 'student_id_number' => '20220001', 'academic_status' => 'مستمر', 'major' => 'هندسة البرمجيات', 'enrollment_year' => 2022, 'current_gpa' => 3.2],
             ['person_name' => 'فاطمة خالد الحسين', 'student_id_number' => '20220002', 'academic_status' => 'مستمر', 'major' => 'الذكاء الاصطناعي', 'enrollment_year' => 2022, 'current_gpa' => 3.5],
             ['person_name' => 'يوسف سامر الحموي', 'student_id_number' => '20220003', 'academic_status' => 'مستمر', 'major' => 'رياضيات', 'enrollment_year' => 2022, 'current_gpa' => 2.9],
-            ['person_name' => 'نورا علي حسين', 'student_id_number' => '20210014', 'academic_status' => 'مستمر', 'major' => 'فيزياء', 'enrollment_year' => 2021, 'current_gpa' => 3.7],  // تم تغيير الرقم المكرر
+            ['person_name' => 'نورا علي حسين', 'student_id_number' => '20210014', 'academic_status' => 'مستمر', 'major' => 'فيزياء', 'enrollment_year' => 2021, 'current_gpa' => 3.7],
             ['person_name' => 'لينا جمال عزام', 'student_id_number' => '20230005', 'academic_status' => 'مستمر', 'major' => 'طب بشري', 'enrollment_year' => 2023, 'current_gpa' => 3.9],
             ['person_name' => 'رامي عدنان الخطيب', 'student_id_number' => '20230006', 'academic_status' => 'مستمر', 'major' => 'إدارة أعمال', 'enrollment_year' => 2023, 'current_gpa' => 3.1],
             ['person_name' => 'دعاء إبراهيم الشيخ', 'student_id_number' => '20200007', 'academic_status' => 'متخرج', 'major' => 'لغة عربية', 'enrollment_year' => 2020, 'current_gpa' => 3.3],
@@ -47,8 +47,12 @@ class StudentSeeder extends Seeder
             ['person_name' => 'باسل أكرم النوري', 'student_id_number' => '20240009', 'academic_status' => 'مستمر', 'major' => 'تاريخ', 'enrollment_year' => 2024, 'current_gpa' => 3.6],
         ];
 
+
+        $semesters = [1, 2];
+        $years = [1, 2, 3, 4, 5];
+
         foreach ($students as $studentData) {
-            DB::transaction(function () use ($studentData, $departments) {
+            DB::transaction(function () use ($studentData, $departments, $semesters, $years) {
                 $person = Person::where('full_name', $studentData['person_name'])->first();
                 if (!$person) {
                     throw new \Exception("الشخص '{$studentData['person_name']}' غير موجود");
@@ -59,7 +63,6 @@ class StudentSeeder extends Seeder
                     throw new \Exception("القسم '{$studentData['major']}' غير موجود");
                 }
 
-                // تجنب التكرار: استخدم firstOrCreate بدلاً من create
                 $existing = Student::where('student_id_number', $studentData['student_id_number'])->first();
                 if (!$existing) {
                     $this->studentRepo->create([
@@ -71,6 +74,9 @@ class StudentSeeder extends Seeder
                         'person_id' => $person->id,
                         'college_id' => $department->college_id,
                         'department_id' => $department->id,
+                        // إدخال الأرقام عشوائياً
+                        'current_semester' => $semesters[array_rand($semesters)],
+                        'current_year' => $years[array_rand($years)],
                     ]);
                 } else {
                 }

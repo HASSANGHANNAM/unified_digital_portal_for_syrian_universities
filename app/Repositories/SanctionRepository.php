@@ -65,12 +65,12 @@ class SanctionRepository implements SanctionRepositoryInterface
         $data['days'] = isset($data['days']) ? (int) $data['days'] : 0;
         return $this->sanctionTypeModel->create($data);
     }
-    public function getStudentSanctions(int $studentId)
+    public function getStudentSanctions(int $studentId, int $perPage = 10)
     {
         return $this->model->with(['sanctionType', 'course'])
             ->where('student_id', $studentId)
             ->latest()
-            ->get();
+            ->paginate($perPage);
     }
 
     public function getStudentSanctionById(int $studentId, int $sanctionId)

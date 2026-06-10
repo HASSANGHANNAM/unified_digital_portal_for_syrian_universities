@@ -17,7 +17,7 @@ class StudyPlanService
     public function getStudyPlan(): array
     {
         $user = Auth::user();
-        $student = Student::where('person_id',$user->person_id)->first();
+        $student = Student::where('person_id', $user->person_id)->first();
         if (!$student) {
             return [
                 'data' => [],
@@ -25,21 +25,30 @@ class StudyPlanService
                 'code' => 404,
             ];
         }
+        $perPage = request()->input('per_page', 10);
+        $courses = $this->studyPlanCourseRepositoryInterface->getAllPlanCourses($student->department_id, $perPage);
 
-        $courses = $this->studyPlanCourseRepositoryInterface->getAllPlanCourses($student->department_id);
-
-        $data = $courses->map(function ($course) {
+        $data = collect($courses->items())->map(function ($course) {
             return [
                 'course_id' => $course->course_id,
-                'course_name' => $course->course->universalCourse->name,
-                'course_code' => $course->course->code,
-                'credits' => $course->course->credits,
+                'course_name' => $course->course->universalCourse->name ?? '',
+                'course_code' => $course->course->code ?? '',
+                'credits' => $course->course->credits ?? 0,
                 'year' => $course->year,
                 'semester' => $course->semester,
             ];
         });
+
         return [
-            'data' => $data,
+            'data' => [
+                'courses' => $data,
+                'meta' => [
+                    'current_page' => $courses->currentPage(),
+                    'last_page'    => $courses->lastPage(),
+                    'per_page'     => $courses->perPage(),
+                    'total'        => $courses->total(),
+                ]
+            ],
             'message' => 'Study plan retrieved successfully.',
             'code' => 200,
         ];
@@ -184,6 +193,14 @@ class StudyPlanService
         $courses = $this->studyPlanCourseRepositoryInterface
           ->getSemesterCourses($student->department_id,$student->current_year,$student->current_semester);
 
+          if ($courses->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No courses found for the current year and semester',
+                'code' => 200,
+            ];
+         }
+
         $data = $courses->map(function ($course) {
             return [
                 'course_id' => $course->course_id,
@@ -213,6 +230,13 @@ class StudyPlanService
         }
 
         $courses = $this->studentCourseRepositoryInterface->getPassedCourses($student->id);
+        if ($courses->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No completed courses found for this student.', // لا توجد مواد مكتملة لهذا الطالب
+                'code' => 200,
+            ];
+        }
         $data = $courses->map(function ($course) {
             return [
                 'course_id' => $course->course_id,
@@ -309,6 +333,23 @@ class StudyPlanService
         }
         $courses = $this->studyPlanCourseRepositoryInterface->getYearCourses($student->department_id,$student->current_year);
 
+        if ($courses->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No courses found for the current year and semester.',
+                'code' => 200,
+            ];
+        }
+
+         $data = $courses->map(function ($course) {
+            return [
+                'course_id' => $course->course_id,
+                'course_name' => $course->course->universalCourse->name,
+                'course_code' => $course->course->code,
+                'credits' => $course->course->credits,
+                'semester' => $course->semester,
+            ];
+        });
         $data = $courses->map(function ($course) {
             return [
                 'course_id' => $course->course_id,

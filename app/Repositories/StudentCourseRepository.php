@@ -48,12 +48,24 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->first();
     }
 
-    public function getStudentCoursesWithGrades(int $studentId)
+    public function getStudentCoursesWithGrades(int $studentId, int $perPage = 10)
     {
-        return $this->model ->with([
+        return $this->model->with([
                 'course',
                 'Parts.coursePart'
-            ])->where('student_id', $studentId)->get();
+            ])
+            ->where('student_id', $studentId)
+            ->paginate($perPage); // Replaced ->get() with ->paginate()
+    }
+
+        public function getPassedCourses(int $studentId): Collection
+    {
+        return $this->model
+            ->with(['course.universalCourse'])
+            ->where([
+                'student_id' => $studentId,
+                'status' => 'passed'
+            ])->get();
     }
 
 }

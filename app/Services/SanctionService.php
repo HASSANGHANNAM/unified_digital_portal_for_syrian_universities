@@ -130,7 +130,10 @@ class SanctionService
     public function getAllSanctions(): array
     {
         $user = Auth::user();
-        $sanctions = $this->sanctionRepositoryInterface->getStudentSanctions($user->id);
+        $perPage = request()->input('per_page', 10);
+
+        $sanctions = $this->sanctionRepositoryInterface->getStudentSanctions($user->id, $perPage);
+
         if ($sanctions->isEmpty()) {
             return [
                 'data' => [],
@@ -138,7 +141,8 @@ class SanctionService
                 'code' => 404,
             ];
         }
-        $data = $sanctions->map(function ($sanction) {
+
+        $data = collect($sanctions->items())->map(function ($sanction) {
             return [
                 'id' => $sanction->id,
                 'type' => $sanction->sanctionType->name ?? '',
@@ -148,8 +152,17 @@ class SanctionService
                 'expiry_date' => $sanction->expiry_date,
             ];
         });
+
         return [
-            'data' => $data,
+            'data' => [
+                'sanctions' => $data,
+                'meta' => [
+                    'current_page' => $sanctions->currentPage(),
+                    'last_page'    => $sanctions->lastPage(),
+                    'per_page'     => $sanctions->perPage(),
+                    'total'        => $sanctions->total(),
+                ]
+            ],
             'message' => 'Sanctions retrieved successfully.',
             'code' => 200,
         ];

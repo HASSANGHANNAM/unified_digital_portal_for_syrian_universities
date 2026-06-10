@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\StudyPlanCourse;
 use Illuminate\Database\Eloquent\Collection;
 use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
 {
@@ -12,14 +13,13 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
         private StudyPlanCourse $model
     ) {}
 
-    public function getAllPlanCourses(int $departmentId): Collection
+    public function getAllPlanCourses(int $departmentId, int $perPage = 10): LengthAwarePaginator
     {
-
         return $this->model->with(['course.universalCourse'])
             ->where('department_id', $departmentId)
             ->orderBy('year')
             ->orderBy('semester')
-            ->get();
+            ->paginate($perPage);
     }
 
     public function getYearCourses(int $departmentId,int $year): Collection
@@ -62,15 +62,15 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
             ->get();
     }
 
-    public function getPassedCourses(int $studentId): Collection
-    {
-        return $this->model
-            ->with(['course.universalCourse'])
-            ->where([
-                'student_id' => $studentId,
-                'status' => 'passed'
-            ])->get();
-    }
+    // public function getPassedCourses(int $studentId): Collection
+    // {
+    //     return $this->model
+    //         ->with(['course.universalCourse'])
+    //         ->where([
+    //             'student_id' => $studentId,
+    //             'status' => 'passed'
+    //         ])->get();
+    // }
 
 
 }
