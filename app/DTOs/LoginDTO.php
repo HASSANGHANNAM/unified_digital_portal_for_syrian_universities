@@ -30,6 +30,7 @@ class LoginDTO
             'refresh_token' => $this->refreshToken,
             'expires_in' => $this->expiresIn,
             'roles' => $this->roles,
+            'status' => $this->user->status,
         ];
     }
 }

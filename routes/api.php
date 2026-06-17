@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\V1\RequestController;
 use App\Http\Controllers\Api\V1\SanctionController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StudyPlanController;
+use App\Http\Controllers\Api\V1\StudentAttachment;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -98,11 +99,11 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 // Route::post('/courses/{course}/marks/import', [StudentMarksImportController::class, 'import']);
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
 
 
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
     Route::post('/resend-code', [AuthController::class, 'resendCode']);
     Route::post('/verify-code', [AuthController::class, 'verifyCode']);
     Route::post('/setup-account', [ProfileController::class, 'setupAccount']);
@@ -124,9 +125,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/completed-courses', [StudyPlanController::class, 'getCompletedCourses']);
     Route::get('/remaining-courses', [StudyPlanController::class, 'getRemainingCourses']);
     Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress']);
-    
-});
+    Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments']);
+    Route::post('/student-affairs/{personId}',[StudentAttachment::class, 'reviewStudent']);
 
+});
 
 Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);

@@ -36,6 +36,7 @@ use App\Repositories\Contracts\CollegeDeanRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeAvailabilityRepositoryInterface;
 use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
 use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
+use App\Repositories\Contracts\StudentVerificationRepositoryInterface;
 // use App\Repositories\Contracts\NotificationRepositoryInterface;
 
 use App\Repositories\UniversityRepository;
@@ -70,6 +71,7 @@ use App\Repositories\CollegeDeanRepository;
 use App\Repositories\RequestTypeAvailabilityRepository;
 use App\Repositories\EmailVerificationRepository;
 use App\Repositories\StudyPlanCourseRepository;
+use App\Repositories\StudentVerificationRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -107,6 +109,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(RequestTypeAvailabilityRepositoryInterface::class, RequestTypeAvailabilityRepository::class);
         $this->app->bind(EmailVerificationRepositoryInterface::class, EmailVerificationRepository::class);
         $this->app->bind(StudyPlanCourseRepositoryInterface::class, StudyPlanCourseRepository::class);
+        $this->app->bind(StudentVerificationRepositoryInterface::class, StudentVerificationRepository::class);
         // $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
     }
 

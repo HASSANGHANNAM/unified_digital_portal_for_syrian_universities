@@ -10,6 +10,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use App\Models\Student;
 use App\DTOs\LoginDTO;
 use App\DTOs\UserDTO;
 
@@ -51,14 +52,24 @@ class AuthServices
     public function getProfile(): array
     {
         $user = Auth::user();
-        $userDto = UserDTO::fromModel($user);
+
+        $student = Student::where('person_id', $user->person_id)->first();
 
         return [
-            'data' => $userDto->toArray(),
+            'data' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'full_name' => $user->person?->full_name,
+                'email' => $user->email,
+                'phone' => $user->person?->phone,
+                'address' => $user->person?->address,
+                'study_info' => 'السنة ' . $student?->current_year . ' - ' . $student?->major,
+            ],
             'message' => 'User profile retrieved successfully',
-            'code' => 200
+            'code' => 200,
         ];
     }
+
     public function logout($user): array
     {
         $this->tokenService->revokeAllTokens($user);
@@ -71,11 +82,18 @@ class AuthServices
             'code' => $code
         ];
     }
+
     public function refreshToken($request): array
     {
-        $tokenData = $this->tokenService->refreshTokens($request['refresh_token']);
-        $user = auth()->user();
-        $loginDto = LoginDTO::fromServiceData($tokenData, $user);
+        $tokenData = $this->tokenService->refreshTokens(
+            $request['refresh_token']
+        );
+
+        $loginDto = LoginDTO::fromServiceData(
+            $tokenData,
+            $tokenData['user']
+        );
+
         return [
             'data' => $loginDto->toArray(),
             'message' => 'Token refreshed successfully',

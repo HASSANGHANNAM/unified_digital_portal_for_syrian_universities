@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
+use Laravel\Sanctum\PersonalAccessToken;
 
 
 class TokenServices
@@ -28,14 +29,21 @@ class TokenServices
 
     public function refreshTokens(string $refreshToken): array
     {
-        $token = \Laravel\Sanctum\PersonalAccessToken::findToken($refreshToken);
+        $token = PersonalAccessToken::findToken($refreshToken);
+
         if (!$token || !$token->can('refresh')) {
-            throw ValidationException::withMessages(['token' => ['Invalid refresh token']]);
+            throw ValidationException::withMessages([
+                'token' => ['Invalid refresh token']
+            ]);
         }
+
         $user = $token->tokenable;
         $token->delete();
         $user->tokens()->where('name', 'access_token')->delete();
-        return $this->createAuthTokens($user);
+        $data = $this->createAuthTokens($user);
+        $data['user'] = $user;
+
+        return $data;
     }
 
     public function revokeAllTokens(User $user): void

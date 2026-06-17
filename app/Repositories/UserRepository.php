@@ -92,4 +92,11 @@ class UserRepository implements UserRepositoryInterface
             'created_at' => $user->created_at,
         ];
     }
+
+    public function findByPersonId(int $personId): ?User
+    {
+        return $this->user
+            ->where('person_id', $personId)
+            ->first();
+    }
 }

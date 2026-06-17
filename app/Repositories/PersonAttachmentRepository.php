@@ -38,4 +38,9 @@ class PersonAttachmentRepository implements PersonAttachmentRepositoryInterface
     {
         return $this->model->find($id);
     }
+
+    public function getByPersonId(int $personId): Collection
+    {
+        return $this->model->where('person_id', $personId)->latest()->get();
+    }
 }

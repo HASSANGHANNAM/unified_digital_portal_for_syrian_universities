@@ -17,4 +17,5 @@ interface UserRepositoryInterface
     public function assignRole(User $user, string $roleName): void;
     public function getUsersWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator;
     public function getProfile(User $user): array;
+    public function findByPersonId(int $personId): ?User;
 }
