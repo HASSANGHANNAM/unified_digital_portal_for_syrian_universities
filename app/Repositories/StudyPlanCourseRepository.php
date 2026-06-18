@@ -15,7 +15,11 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
 
     public function getAllPlanCourses(int $departmentId, int $perPage = 10): LengthAwarePaginator
     {
-        return $this->model->with(['course.universalCourse'])
+        return $this->model
+            ->with([
+                'course.universalCourse',
+                'department'
+            ])
             ->where('department_id', $departmentId)
             ->orderBy('year')
             ->orderBy('semester')
@@ -62,15 +66,17 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
             ->get();
     }
 
-    // public function getPassedCourses(int $studentId): Collection
-    // {
-    //     return $this->model
-    //         ->with(['course.universalCourse'])
-    //         ->where([
-    //             'student_id' => $studentId,
-    //             'status' => 'passed'
-    //         ])->get();
-    // }
+    public function getPassedCourses(int $studentId): Collection
+    {
+        return $this->model
+            ->with(['course.universalCourse', 'course.department'])
+            ->where([
+                'student_id' => $studentId,
+                'status'     => 'pass'
+            ])->get();
+    }
+
+
 
 
 }

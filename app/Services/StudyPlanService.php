@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Support\Facades\Auth;
 use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
 use App\Repositories\Contracts\StudentCourseRepositoryInterface;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Student;
 
 class StudyPlanService
@@ -216,75 +217,96 @@ class StudyPlanService
         ];
     }
 
-    //المواد التي تم اجتيازها
     public function getCompletedCourses(): array
     {
         $student = $this->getCurrentStudent();
 
         if (!$student) {
-            return [
-                'data' => [],
-                'message' => 'Student not found.',
-                'code' => 404,
-            ];
+            return ['data' => [], 'message' => 'Student not found.', 'code' => 404];
         }
 
-        $courses = $this->studentCourseRepositoryInterface->getPassedCourses($student->id);
-        if ($courses->isEmpty()) {
+        $perPage = request()->input('per_page', 10);
+
+
+        $paginatedCourses = \App\Models\StudentCourse::with(['course.universalCourse', 'course.department'])
+            ->where([
+                'student_id' => $student->id,
+                'status'     => 'pass'
+            ])
+            ->paginate($perPage);
+
+
+        $data = collect($paginatedCourses->items())->map(function ($course) {
             return [
-                'data' => [],
-                'message' => 'No completed courses found for this student.', // لا توجد مواد مكتملة لهذا الطالب
-                'code' => 200,
-            ];
-        }
-        $data = $courses->map(function ($course) {
-            return [
-                'course_id' => $course->course_id,
-                'course_name' => $course->course->universalCourse->name,
-                'status' => $course->status,
+                'course_id'       => $course->course_id,
+                'course_name'     => $course->course->universalCourse->name ?? 'N/A',
+                'course_code'     => $course->course->code ?? 'N/A',
+                'department_name' => $course->course->department->name ?? 'N/A',
+                'credits'         => $course->course->credits ?? 0,
+                'status'          => $course->status,
             ];
         });
+
         return [
-            'data' => $data,
+            'data' => [
+                'courses' => $data,
+                'meta' => [
+                    'current_page' => $paginatedCourses->currentPage(),
+                    'last_page'    => $paginatedCourses->lastPage(),
+                    'per_page'     => $paginatedCourses->perPage(),
+                    'total'        => $paginatedCourses->total(),
+                ]
+            ],
             'message' => 'Completed courses retrieved successfully.',
             'code' => 200,
         ];
     }
-
-    //المواد المتبقية
     public function getRemainingCourses(): array
     {
         $student = $this->getCurrentStudent();
 
         if (!$student) {
-            return [
-                'data' => [],
-                'message' => 'Student not found.',
-                'code' => 404,
-            ];
+            return ['data' => [], 'message' => 'Student not found.', 'code' => 404];
         }
 
-        $planCourses = $this->studyPlanCourseRepositoryInterface->getAllPlanCourses($student->department_id);
+        $perPage = request()->input('per_page', 10);
+        $passedIds = \App\Models\StudentCourse::where([
+            'student_id' => $student->id,
+            'status'     => 'pass'
+        ])->pluck('course_id')->toArray();
 
-        $passedIds = $this->studentCourseRepositoryInterface->getPassedCourses($student->id)->pluck('course_id')->toArray();
+        $paginatedRemaining = \App\Models\StudyPlanCourse::with(['course.universalCourse', 'department'])
+            ->where('department_id', $student->department_id)
+            ->whereNotIn('course_id', $passedIds)
+            ->paginate($perPage);
 
-        $remaining = $planCourses->whereNotIn('course_id', $passedIds);
-
-        $data = $remaining->map(function ($course) {
+        $data = collect($paginatedRemaining->items())->map(function ($course) {
             return [
-                'course_id' => $course->course_id,
-                'course_name' => $course->course->universalCourse->name,
-                'year' => $course->year,
-                'semester' => $course->semester,
+                'course_id'       => $course->course_id,
+                'course_name'     => $course->course->universalCourse->name ?? 'N/A',
+                'course_code'     => $course->course->code ?? 'N/A',
+                'department_name' => $course->department->name ?? 'N/A',
+                'year'            => $course->year,
+                'semester'        => $course->semester,
             ];
         });
 
         return [
-            'data' => $data,
+            'data' => [
+                'courses' => $data,
+                'meta' => [
+                    'current_page' => $paginatedRemaining->currentPage(),
+                    'last_page'    => $paginatedRemaining->lastPage(),
+                    'per_page'     => $paginatedRemaining->perPage(),
+                    'total'        => $paginatedRemaining->total(),
+                ]
+            ],
             'message' => 'Remaining courses retrieved successfully.',
             'code' => 200,
         ];
     }
+
+
 
     //التقدم الأكاديمي
     public function getAcademicProgress(): array
