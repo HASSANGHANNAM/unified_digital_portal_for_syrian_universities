@@ -80,4 +80,15 @@ class RequestTypeRepository implements RequestTypeRepositoryInterface
 
         return $query->paginate($perPage);
     }
+
+        public function getAvailableRequestTypesByCollege(int $collegeId): Collection
+    {
+        return $this->model
+            ->whereHas('availability', function ($q) use ($collegeId) {
+                $q->where('college_id', $collegeId)
+                ->where('is_available', true);
+            })
+            ->with('requestTypeMedia:id,request_type_id,name,type')
+            ->get(['id', 'name', 'description']);
+    }
 }

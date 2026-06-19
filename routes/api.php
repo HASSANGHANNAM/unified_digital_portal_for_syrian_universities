@@ -128,6 +128,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments']);
     Route::post('/student-affairs/{personId}',[StudentAttachment::class, 'reviewStudent']);
 
+    Route::get('/request-types', [RequestController::class, 'getRequestTypes']);
+    Route::get('/requests-list', [RequestController::class, 'getRequestsList']);
+    Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails']);
+
 });
 
 Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {

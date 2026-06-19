@@ -58,4 +58,32 @@ class RequestRepository
         $r->save();
         return $r;
     }
+
+        public function getStudentRequests(int $studentId, int $perPage = 15)
+    {
+        return $this->model
+            ->with([
+                'course.universalCourse',
+                'processedBy.person'
+            ])
+            ->where('student_id', $studentId)
+            ->orderByDesc('submission_date')
+            ->paginate($perPage);
+    }
+
+        public function findRequestDetails(int $requestId, int $studentId): ?Request
+    {
+        return $this->model
+            ->with([
+                'course.universalCourse',
+                'processedBy.person',
+                'media',
+                'requestType.requestTypeMedia'
+            ])
+            ->where('id', $requestId)
+            ->where('student_id', $studentId)
+            ->first();
+    }
+
+
 }

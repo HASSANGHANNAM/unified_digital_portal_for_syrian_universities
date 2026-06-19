@@ -123,4 +123,35 @@ class RequestController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+
+        public function getRequestTypes(): JsonResponse
+    {
+        try {
+            $data = $this->requestService->getAvailableRequestTypes();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getRequestsList(): JsonResponse
+    {
+        try {
+            $data = $this->requestService->getRequestsList();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+
+    public function RequestDetails(int $requestId): JsonResponse
+    {
+        try {
+            $data = $this->requestService->RequestDetails($requestId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+
+
 }

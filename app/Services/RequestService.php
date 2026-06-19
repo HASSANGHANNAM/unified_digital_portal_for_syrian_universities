@@ -19,6 +19,8 @@ use App\Models\Request as RequestModel;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Student;
 use Throwable;
 
 class RequestService
@@ -201,4 +203,192 @@ class RequestService
             'code' => 201,
         ];
     }
+
+        public function getAvailableRequestTypes(): array
+    {
+        $user = Auth::user();
+
+        $student = Student::where('person_id', $user->person_id)->first();
+
+        if (!$student) {
+            return [
+                'data' => [],
+                'message' => 'Student not found.',
+                'code' => 404,
+            ];
+        }
+
+        $requestTypes = $this->requestTypeRepository
+            ->getAvailableRequestTypesByCollege($student->college_id);
+
+
+
+        $data = $requestTypes->map(function ($type) {
+            return [
+                'request_type_id' => $type->id,
+                'name' => $type->name,
+                'description' => $type->description,
+                'requestTypeMedia' => $type->requestTypeMedia->map(function ($media) {
+                    return [
+                        'id' => $media->id,
+                        'request_type_id' => $media->request_type_id,
+                        'name' => $media->name,
+                        'type' => $media->type,
+                    ];
+                })->values(),
+            ];
+        });
+
+        return [
+            'data' => $data,
+            'message' => 'Request types retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+        public function getRequestsList(): array
+    {
+        $user = Auth::user();
+
+        $student = Student::where('person_id', $user->person_id)->first();
+
+        if (!$student) {
+            return [
+                'data' => [],
+                'message' => 'Student not found.',
+                'code' => 404,
+            ];
+        }
+
+        $perPage = request()->input('per_page', 10);
+
+        $requests = $this->requestRepository
+            ->getStudentRequests($student->id, $perPage);
+
+        $data = collect($requests->items())->map(function ($request) {
+
+            return [
+                'request_id' => $request->id,
+                'request_type_id' => $request->request_type_id,
+                'reason' => $request->reason,
+                'submission_date' => $request->submission_date,
+                'decision_date' => $request->decision_date,
+                'decision_reason' => $request->decision_reason,
+
+                'course' => $request->course
+                    ? [
+                        'name' => $request->course->universalCourse->name ?? '',
+                        'code' => $request->course->code ?? '',
+                    ]
+                    : null,
+
+                'status' => $request->status,
+
+                'staff' => $request->processedBy
+                    ? [
+                        'name' => $request->processedBy->person->full_name ?? '',
+                    ]
+                    : null,
+            ];
+        });
+
+        return [
+            'data' => [
+                'requests' => $data,
+                'meta' => [
+                    'current_page' => $requests->currentPage(),
+                    'last_page'    => $requests->lastPage(),
+                    'per_page'     => $requests->perPage(),
+                    'total'        => $requests->total(),
+                ]
+            ],
+            'message' => 'Requests retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+        public function RequestDetails(int $requestId): array
+    {
+        $user = Auth::user();
+        $student = Student::where('person_id', $user->person_id)->first();
+
+        if (!$student) {
+            return [
+                'data' => [],
+                'message' => 'Student not found.',
+                'code' => 404,
+            ];
+        }
+
+        $request = $this->requestRepository
+            ->findRequestDetails($requestId, $student->id);
+
+        if (!$request) {
+            return [
+                'data' => [],
+                'message' => 'Request not found.',
+                'code' => 404,
+            ];
+        }
+
+        $data = [
+            'request_id' => $request->id,
+            'reason' => $request->reason,
+            'submission_date' => $request->submission_date,
+            'decision_date' => $request->decision_date,
+            'decision_reason' => $request->decision_reason,
+
+            'course' => $request->course
+                ? [
+                    'name' => $request->course->universalCourse->name ?? '',
+                    'code' => $request->course->code ?? '',
+                ]
+                : null,
+
+            'status' => $request->status,
+
+            'staff' => $request->processedBy
+                ? [
+                    'name' => $request->processedBy->person->full_name ?? '',
+                ]
+                : null,
+
+            'requestType' => [
+                'request_type_id' => $request->requestType->id,
+                'name' => $request->requestType->name,
+                'description' => $request->requestType->description,
+
+                'requestTypeMedia' => $request->requestType->requestTypeMedia
+                    ->map(function ($media) {
+                        return [
+                            'id' => $media->id,
+                            'name' => $media->name,
+                            'type' => $media->type,
+                        ];
+                    })
+                    ->values(),
+            ],
+
+            'media' => $request->media
+                ->map(function ($media) {
+                    return [
+                        'id' => $media->id,
+                        'name' => $media->name,
+                        'type' => $media->type,
+                    ];
+                })
+                ->values(),
+        ];
+
+        return [
+            'data' => $data,
+            'message' => 'Request details retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+
+
+
+
 }

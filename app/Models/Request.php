@@ -55,7 +55,7 @@ class Request extends Model
 
     public function processedBy()
     {
-        return $this->belongsTo(Staff::class, 'processed_by_staff_id', 'staff_id');
+        return $this->belongsTo(Staff::class, 'processed_by_staff_id', 'id');
     }
 
     public function course()
