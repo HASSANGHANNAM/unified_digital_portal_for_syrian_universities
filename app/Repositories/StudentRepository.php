@@ -38,4 +38,11 @@ class StudentRepository implements StudentRepositoryInterface
     {
         return $this->model->find($id);
     }
+
+    public function findByStudentNumber(string $studentNumber)
+    {
+        return $this->model
+            ->where('student_id_number', $studentNumber)
+            ->first();
+    }
 }

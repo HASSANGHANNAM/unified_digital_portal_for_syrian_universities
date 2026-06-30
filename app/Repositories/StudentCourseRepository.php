@@ -51,21 +51,53 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
     public function getStudentCoursesWithGrades(int $studentId, int $perPage = 10)
     {
         return $this->model->with([
-                'course',
-                'Parts.coursePart'
-            ])
-            ->where('student_id', $studentId)
-            ->paginate($perPage); // Replaced ->get() with ->paginate()
+            'course.universalCourse',
+            'course.department',
+            'parts.coursePart',
+        ])
+        ->where('student_id', $studentId)
+        ->paginate($perPage);
     }
 
         public function getPassedCourses(int $studentId): Collection
     {
         return $this->model
-            ->with(['course.universalCourse'])
-            ->where([
-                'student_id' => $studentId,
-                'status' => 'passed'
-            ])->get();
+            ->with([
+                'course.universalCourse',
+                'course.department',
+            ])
+            ->where('student_id', $studentId)
+            ->where('course_id', $courseId)
+            ->first();
     }
+
+    public function getCourseGrades(int $courseId,string $academicYear,int $semester,int $perPage = 10)
+    {
+        return $this->model
+            ->with([
+                'student.person',
+                'course.universalCourse',
+                'parts.coursePart',
+            ])
+            ->where('course_id', $courseId)
+            ->where('academic_year', $academicYear)
+            ->where('semester', $semester)
+            ->paginate($perPage);
+    }
+
+    public function findStudentCourseByStudentNumber(string $studentNumber,int $courseId,string $academicYear,int $semester)
+    {
+        return $this->model
+            ->whereHas('student', function ($q) use ($studentNumber) {
+                $q->where('student_id_number', $studentNumber);
+            })
+            ->where('course_id', $courseId)
+            ->where('academic_year', $academicYear)
+            ->where('semester', $semester)
+            ->first();
+    }
+
+
+
 
 }

@@ -5,12 +5,18 @@ namespace App\Services;
 use App\DTOs\AllGradesDTO;
 use App\Imports\StudentMarksImport;
 use App\Models\Course;
+use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\StudentCoursePartRepositoryInterface;
 use App\Repositories\Contracts\StudentCourseRepositoryInterface;
+use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
+use App\Repositories\Contracts\StudentRepositoryInterface;
+use App\Repositories\Contracts\CoursePartRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
+
 
 class GradeService
 {
@@ -18,6 +24,9 @@ class GradeService
         private UserRepositoryInterface $userRepositoryInterface,
         private StudentCoursePartRepositoryInterface $studentCoursePartRepositoryInterface,
         private StudentCourseRepositoryInterface $studentCourseRepositoryInterface,
+        private StudyPlanCourseRepositoryInterface $studyPlanCourseRepositoryInterface,
+        private StudentRepositoryInterface $studentRepositoryInterface,
+        private CoursePartRepositoryInterface $coursePartRepositoryInterface
     ) {}
 
     public function getAllGrades(array $data): array
@@ -123,13 +132,16 @@ class GradeService
 
         return [
             'data' => [
-                'course_id' => $courseId,
-                'course_name' => $studentCourse->course->name,
-                'total_grade' => $total,
-                'status' => $status,
+                'course_id'       => $courseId,
+                'course_name'     => optional($studentCourse->course->universalCourse)->name,
+                'code'            => $studentCourse->course->code,
+                'credits'         => $studentCourse->course->credits, // أو $studentCourse->credits حسب المطلوب
+                'department_name' => optional($studentCourse->course->department)->name,
+                'total_grade'     => $total,
+                'status'          => $status,
                 'parts' => $grades->map(function ($grade) {
                     return [
-                        'id' => $grade->id,
+                        // 'id' => $grade->id,
                         'part_name' => $grade->coursePart->name,
                         'percentage' => $grade->coursePart->percentage,
                         'grade' => $grade->credits,
@@ -162,14 +174,19 @@ class GradeService
             $total = $publishedGrades->sum('credits');
 
             return [
-                'course_id' => $studentCourse->course_id,
-                'course_name' => $studentCourse->course->name,
-                'total' => $total,
-                'status' => $total >= 60 ? 'passed' : 'failed',
+                'course_id'       => $studentCourse->course_id,
+                'course_name'     => optional($studentCourse->course->universalCourse)->name,
+                'code'            => $studentCourse->course->code,
+                'credits'         => $studentCourse->course->credits,
+                'department_name' => $studentCourse->course->department?->name,
+                'total'           => $total,
+                'status'          => $total >= 60 ? 'passed' : 'failed',
                 'parts' => $publishedGrades->map(function ($part) {
                     return [
-                        'name' => $part->coursePart->name,
-                        'grade' => $part->credits,
+                        // 'id'         => $part->id,
+                        'part_name'  => optional($part->coursePart)->name,
+                        'percentage' => optional($part->coursePart)->percentage,
+                        'grade'      => $part->credits,
                     ];
                 })->values(),
             ];
@@ -189,6 +206,195 @@ class GradeService
             'code' => 200,
         ];
     }
+
+    // استعراض نتائج جميع الطلاب في مادة معينة مع حالة النجاح أو الرسوب لكل طالب(للامتحانات)
+        public function getCourseGrades(User $user, int $courseId, string $academicYear, int $semester): array
+    {
+        if (!$user->hasRole('Examination')) {
+        throw new \Exception('غير مصرح لك بالوصول');
+        }
+        $perPage = request()->input('per_page', 10);
+
+        $studentCourses = $this->studentCourseRepositoryInterface
+            ->getCourseGrades($courseId, $academicYear, $semester, $perPage);
+
+        if ($studentCourses->isEmpty()) {
+            return [
+                'data'    => [],
+                'message' => 'No grades found.',
+                'code'    => 404,
+            ];
+        }
+
+        $data = collect($studentCourses->items())->map(function ($studentCourse) {
+            $publishedGrades = collect($studentCourse->parts)->where('published', 1);
+            $total = $publishedGrades->sum('credits');
+
+            return [
+                'student_name'   => optional($studentCourse->student->person)->full_name,
+                'student_number' => $studentCourse->student->student_id_number,
+                'parts' => $publishedGrades->map(fn($part) => [
+                    'id'         => $part->id,
+                    'part_name'  => $part->coursePart->name,
+                    'percentage' => $part->coursePart->percentage,
+                    'grade'      => $part->credits,
+                ])->values(),
+                'total'  => $total,
+                'status' => $total >= 60 ? 'passed' : 'failed',
+            ];
+        });
+
+        return [
+            'data' => [
+                'course_id'     => $courseId,
+                'course_name' => optional($studentCourses->first()?->course?->universalCourse)->name,
+                'academic_year' => $academicYear,
+                'semester'      => $semester,
+                'students'      => $data,
+                'meta' => [
+                    'current_page' => $studentCourses->currentPage(),
+                    'last_page'    => $studentCourses->lastPage(),
+                    'per_page'     => $studentCourses->perPage(),
+                    'total'        => $studentCourses->total(),
+                ],
+            ],
+            'message' => 'Grades retrieved successfully.',
+            'code'    => 200,
+        ];
+    }
+    //تعديل علامة جزء معين من المادة لطالب معين (للامتحانات)
+    public function updateGrade(User $user, int $studentCoursePartId, float $grade): array
+    {
+        if (!$user->hasRole('Examination')) {
+        throw new \Exception('غير مصرح لك بالوصول');
+        }
+        $studentCoursePart = $this->studentCoursePartRepositoryInterface
+            ->getPartById($studentCoursePartId);
+
+        if (!$studentCoursePart) {
+            return [
+                'data' => [],
+                'message' => 'Grade record not found.',
+                'code' => 404,
+            ];
+        }
+
+        $maxGrade = $studentCoursePart->coursePart->percentage;
+
+        if ($grade > $maxGrade) {
+            return [
+                'data' => [],
+                'message' => "The maximum grade for this part is {$maxGrade}.",
+                'code' => 422,
+            ];
+        }
+
+        $this->studentCoursePartRepositoryInterface
+            ->updateGrade($studentCoursePartId, $grade);
+
+        return [
+            'data' => [],
+            'message' => 'Grade updated successfully.',
+            'code' => 200,
+        ];
+    }
+// إضافة علامات لطالب معين في مادة معينة (للامتحانات)
+    public function addGradesforonestudent(User $user,int $courseId,string $academicYear,int $semester,array $request): array
+    {
+        if (!$user->hasRole('Examination')) {
+        throw new \Exception('غير مصرح لك بالوصول');
+        }
+
+        $student = $this->studentRepositoryInterface
+            ->findByStudentNumber($request['student_number']);
+
+        if (!$student) {
+            return [
+                'data' => [],
+                'message' => 'Student not found.',
+                'code' => 404,
+            ];
+        }
+        $exists = $this->studyPlanCourseRepositoryInterface
+            ->existsInStudyPlan(
+                $student->department_id,
+                $courseId
+            );
+        if (!$exists) {
+            return [
+                'data' => [],
+                'message' => 'This course is not in the student study plan.',
+                'code' => 422,
+            ];
+        }
+        $studentCourse = $this->studentCourseRepositoryInterface
+            ->findStudentCourseByStudentNumber(
+                $request['student_number'],
+                $courseId,
+                $academicYear,
+                $semester
+            );
+        if (!$studentCourse) {
+            $studentCourse = $this->studentCourseRepositoryInterface
+                ->create([
+                    'student_id'     => $student->id,
+                    'course_id'      => $courseId,
+                    'academic_year'  => $academicYear,
+                    'semester'       => $semester,
+                    'credits'        => 0,
+                    'status'         => 'in_progress',
+                ]);
+        }
+        if ($studentCourse->parts()->exists()) {
+            return [
+                'data' => [],
+                'message' => 'Grades have already been entered.',
+                'code' => 422,
+            ];
+        }
+        DB::beginTransaction();
+        try {
+            foreach ($request['parts'] as $part) {
+                $coursePart = $this->coursePartRepositoryInterface
+                    ->findByCourseAndPart(
+                        $courseId,
+                        $part['course_part_id']
+                    );
+                if (!$coursePart) {
+                    throw new \Exception('Invalid course part.');
+                }
+                if ($part['grade'] > $coursePart->percentage) {
+                    throw new \Exception(
+                        "Maximum grade for {$coursePart->name} is {$coursePart->percentage}."
+                    );
+                }
+                $this->studentCoursePartRepositoryInterface
+                    ->create([
+                        'student_course_id' => $studentCourse->id,
+                        'course_part_id'    => $part['course_part_id'],
+                        'credits'           => $part['grade'],
+                        'published'         => 1,
+                    ]);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+        return [
+            'data' => [],
+            'message' => 'Grades added successfully.',
+            'code' => 201,
+        ];
+    }
+
+
+
+
+
+
+
+
 
 }
 

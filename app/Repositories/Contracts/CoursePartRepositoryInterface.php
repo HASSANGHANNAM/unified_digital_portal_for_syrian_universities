@@ -12,4 +12,5 @@ interface CoursePartRepositoryInterface
     public function update(CoursePart $coursePart, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?CoursePart;
+    public function findByCourseAndPart(int $courseId, int $coursePartId);
 }

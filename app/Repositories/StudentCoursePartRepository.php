@@ -43,4 +43,21 @@ class StudentCoursePartRepository implements StudentCoursePartRepositoryInterfac
     {
         return $this->model->with('coursePart')->where('student_course_id', $studentCourseId)->where('published', 1)->get();
     }
+
+        public function updateGrade(int $studentCoursePartId, float $grade): bool
+    {
+        return $this->model
+            ->where('id', $studentCoursePartId)
+            ->update([
+                'credits' => $grade,
+            ]);
+    }
+
+        public function getPartById(int $id)
+    {
+        return $this->model
+            ->with('coursePart')
+            ->find($id);
+    }
+
 }

@@ -9,6 +9,8 @@ use App\Http\Requests\V1\AddGradeRequest;
 use App\Http\Requests\V1\GetAllGradesRequest;
 use App\Http\Requests\V1\GetGradeAppealsRequest;
 use App\Http\Requests\V1\ProcessAppealRequest;
+use App\Http\Requests\V1\UpdateGradeRequest;
+use App\Http\Requests\V1\AddGradesforonestudentRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -78,5 +80,41 @@ class GradeController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+    public function getCourseGrades(int $courseId, string $academicYear, int $semester): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->getCourseGrades(auth()->user(),$courseId, $academicYear, $semester);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+
+    public function updateGrade(UpdateGradeRequest $request, int $studentCoursePartId): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->updateGrade(auth()->user(), $studentCoursePartId, $request->grade);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+
+    public function addGradesforonestudent(AddGradesforonestudentRequest $request,int $courseId,string $academicYear,int $semester): JsonResponse
+    {
+    try{
+        $data=$this->gradeService->addGradesforonestudent(auth()->user(),$courseId,$academicYear,$semester,$request->validated());
+        return Response::success($data['data'],$data['message'],$data['code']);
+    }catch(Throwable $th){
+        return Response::Error([],$th->getMessage(),400);
+    }
+}
+
+
+
+
+
+
+
 
 }

@@ -11,7 +11,7 @@ class StudentCourse extends Model
 
     protected $table = 'student_courses';
 
-    protected $fillable = ['course_id', 'credits', 'status', 'student_id'];
+    protected $fillable = ['course_id', 'credits', 'status', 'student_id', 'academic_year', 'semester'];
 
     public function student()
     {
@@ -27,5 +27,5 @@ class StudentCourse extends Model
     {
         return $this->hasMany(StudentCoursePart::class);
     }
-    
+
 }

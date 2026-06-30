@@ -12,4 +12,6 @@ interface StudentCoursePartRepositoryInterface
     public function update(StudentCoursePart $studentCoursePart, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?StudentCoursePart;
+    public function getPartById(int $id);
+    public function updateGrade(int $studentCoursePartId, float $grade): bool;
 }

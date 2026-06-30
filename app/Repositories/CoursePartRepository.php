@@ -38,4 +38,12 @@ class CoursePartRepository implements CoursePartRepositoryInterface
     {
         return $this->model->find($id);
     }
+    
+    public function findByCourseAndPart(int $courseId, int $coursePartId)
+    {
+        return $this->model
+            ->where('id', $coursePartId)
+            ->where('course_id', $courseId)
+            ->first();
+    }
 }

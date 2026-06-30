@@ -19,6 +19,8 @@ interface StudyPlanCourseRepositoryInterface
     public function getSemesterCourses(int $departmentId,int $year,int $semester): Collection;
 
     public function getPassedCourses(int $studentId): Collection;
+    
+    public function existsInStudyPlan(int $departmentId,int $courseId): bool;
 
 
 

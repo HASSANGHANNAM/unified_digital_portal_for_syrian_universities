@@ -76,6 +76,14 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
             ])->get();
     }
 
+    public function existsInStudyPlan(int $departmentId,int $courseId): bool
+    {
+        return $this->model
+            ->where('department_id', $departmentId)
+            ->where('course_id', $courseId)
+            ->exists();
+    }
+
 
 
 

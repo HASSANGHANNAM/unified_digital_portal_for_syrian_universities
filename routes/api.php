@@ -132,6 +132,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/requests-list', [RequestController::class, 'getRequestsList']);
     Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails']);
 
+    Route::get('/course-grades/{courseId}/{academicYear}/{semester}', [GradeController::class, 'getCourseGrades']);
+    Route::put('/grades/{studentCoursePartId}', [GradeController::class, 'updateGrade']);
+    Route::post('/grades-for-one-student/{courseId}/{academicYear}/{semester}', [GradeController::class, 'addGradesforonestudent']);
+
 });
 
 Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {

@@ -12,4 +12,5 @@ interface StudentRepositoryInterface
     public function update(Student $student, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?Student;
+    public function findByStudentNumber(string $studentNumber);
 }

@@ -12,4 +12,8 @@ interface StudentCourseRepositoryInterface
     public function update(StudentCourse $studentCourse, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?StudentCourse;
+    public function getCourseGrades(int $courseId,string $academicYear,int $semester,int $perPage = 10);
+    public function findStudentCourseByStudentNumber(string $studentNumber,int $courseId,string $academicYear,int $semester);
+
+
 }
