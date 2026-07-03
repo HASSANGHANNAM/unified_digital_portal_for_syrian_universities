@@ -24,7 +24,7 @@ class User extends Authenticatable
         'password',
         'new_password',
         'email',
-        'email_verified',
+        'email_verified_at',
         'status',
         'last_login',
         'person_id'

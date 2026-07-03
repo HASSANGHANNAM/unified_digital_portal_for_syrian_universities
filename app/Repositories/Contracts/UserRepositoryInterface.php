@@ -9,7 +9,7 @@ use Ramsey\Collection\Collection;
 interface UserRepositoryInterface
 {
     public function create(array $data): User;
-    public function update(User $user, array $data): bool;
+    public function update(User $user, array $data): User;
     public function all(): Collection;
     public function findByEmail(string $email): ?User;
     public function findByUserName(string $username): ?User;

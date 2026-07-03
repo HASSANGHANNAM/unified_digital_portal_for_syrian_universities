@@ -12,6 +12,9 @@ class EmailVerificationRepository implements EmailVerificationRepositoryInterfac
 {
     public function sendCode(User $user): void
     {
+        EmailVerification::where('user_id', $user->id)
+        ->where('is_verified', false)
+        ->delete();
         $code = rand(100000, 999999);
 
         EmailVerification::create([
@@ -86,5 +89,41 @@ class EmailVerificationRepository implements EmailVerificationRepositoryInterfac
         $user->refresh();
 
         return true;
+    }
+
+        public function verifyResetCode(User $user, string $code): bool
+    {
+        $record = EmailVerification::where('user_id', $user->id)
+            ->where('code', $code)
+            ->where('is_verified', false)
+            ->latest()
+            ->first();
+
+        if (!$record) {
+            return false;
+        }
+
+        if ($record->expires_at->lt(now())) {
+            return false;
+        }
+
+        $record->update([
+            'is_verified' => true,
+        ]);
+
+        return true;
+    }
+
+    public function canResetPassword(User $user): bool
+    {
+        return EmailVerification::where('user_id', $user->id)
+            ->where('is_verified', true)
+            ->exists();
+    }
+
+    public function clearResetCode(User $user): void
+    {
+        EmailVerification::where('user_id', $user->id)
+            ->delete();
     }
 }

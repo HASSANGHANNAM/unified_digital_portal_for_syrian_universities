@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Student;
+use App\Models\User;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -45,4 +46,55 @@ class StudentRepository implements StudentRepositoryInterface
             ->where('student_id_number', $studentNumber)
             ->first();
     }
+
+    public function getHomePage(int $userId)
+    {
+    $user = User::findOrFail($userId);
+
+    return Student::with([
+        'person:id,full_name',
+        'department:id,name',
+        'college:id,name,university_id',
+        'college.university:id,name',
+        'requests' => function ($query) {
+            $query->latest('submission_date')
+                ->take(4)
+                ->with([
+                    'course:id,universal_course_id,code',
+                    'course.universalCourse:id,name',
+                    'processedBy.person:id,full_name'
+                ]);
+        },
+    ])->where('person_id', $user->person_id)
+    ->first();
+    }
+
+    public function getAcademicProfile(int $personId)
+    {
+        return Student::with([
+            'person:id,full_name',
+            'department:id,name',
+            'college:id,name,university_id',
+            'college.university:id,name',
+
+            'sanctions' => function ($q) {
+                $q->with([
+                    'sanctionType:id,name,reason',
+                    'course:id,universal_course_id',
+                    'course.universalCourse:id,name'
+                ]);
+            },
+
+            'courses' => function ($q) {
+                $q->with([
+                    'course:id,universal_course_id',
+                    'course.universalCourse:id,name',
+                    'parts:id,student_course_id,credits,created_at'
+                ]);
+            }
+        ])
+            ->where('person_id', $personId)
+            ->first();
+    }
+
 }

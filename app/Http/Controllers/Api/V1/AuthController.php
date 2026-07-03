@@ -9,6 +9,9 @@ use App\Http\Requests\V1\SetupAccountRequest;
 use App\Http\Requests\V1\VerifyEmailRequest;
 use App\Http\Requests\V1\UploadDocumentRequest;
 use App\Http\Requests\V1\CompleteProfileRequest;
+use App\Http\Requests\V1\ChangePasswordRequest;
+use App\Http\Requests\V1\ResetPasswordRequest;
+use App\Http\Requests\V1\EditProfileRequest;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Responses\Response;
@@ -44,6 +47,17 @@ class AuthController extends Controller
             return Response::Error([], $message, 401);
         }
     }
+    public function editProfile(EditProfileRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->authServices->editProfile($request);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message, 401);
+        }
+    }
+
     public function logout(): JsonResponse
     {
         try {
@@ -83,6 +97,50 @@ class AuthController extends Controller
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error([], $message);
+        }
+    }
+
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->authServices->changePassword($request);
+            return Response::success($data['data'],$data['message'],$data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+        }
+    }
+    public function forgotPassword(): JsonResponse
+    {
+        try {
+            $data = $this->authServices->forgotPassword();
+            return Response::success($data['data'],$data['message'],$data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+        }
+    }
+    public function verifyResetCode(VerifyEmailRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->authServices->verifyResetCode($request);
+            return Response::success($data['data'],$data['message'],$data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+        }
+    }
+
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        try {
+
+            $data = $this->authServices->resetPassword($request);
+            return Response::success($data['data'],$data['message'],$data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+
         }
     }
 }

@@ -51,9 +51,10 @@ class UserRepository implements UserRepositoryInterface
         $user->assignRole($roleName);
     }
 
-    public function update(User $user, array $data): bool
+    public function update(User $user, array $data): User
     {
-        return $user->update($data);
+        $user->update(array_filter($data, fn ($value) => !is_null($value)));
+        return $user->refresh();
     }
 
     public function getUsersWithFilters(array $filters, int $perPage = 15): LengthAwarePaginator
@@ -98,5 +99,14 @@ class UserRepository implements UserRepositoryInterface
         return $this->user
             ->where('person_id', $personId)
             ->first();
+    }
+
+    public function changePassword(User $user, string $password): User
+    {
+        $user->update([
+            'password' => $password,
+        ]);
+
+        return $user->refresh();
     }
 }

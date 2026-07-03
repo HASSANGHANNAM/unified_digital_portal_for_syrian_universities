@@ -12,7 +12,7 @@ class Response
             'status' => 1,
             'data' => $data,
             'message' => $message
-        ], $code);
+        ], $code, [], JSON_UNESCAPED_UNICODE);
     }
 
     public static function Error($data, $message, $code = 500): JsonResponse
@@ -21,6 +21,6 @@ class Response
             'status' => 0,
             'data' => $data,
             'message' => $message
-        ], $code);
+        ], $code,[], JSON_UNESCAPED_UNICODE);
     }
 }

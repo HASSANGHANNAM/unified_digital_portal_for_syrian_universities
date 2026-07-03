@@ -61,4 +61,25 @@ class ProfileController extends Controller
             return Response::Error([], $th->getMessage());
         }
     }
+    public function getHomePage(): JsonResponse
+    {
+        try {
+           $data = $this->profileService->getHomePage(auth()->user());
+           return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
+    public function getAcademicProfile(): JsonResponse
+    {
+        try {
+            $data = $this->profileService->getAcademicProfile(auth()->user());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
+
 }
+

@@ -20,9 +20,10 @@ class PersonRepository implements PersonRepositoryInterface
         return $this->model->create($data);
     }
 
-    public function update(Person $person, array $data): bool
+    public function update(Person $person, array $data): Person
     {
-        return $person->update($data);
+        $person->update(array_filter($data, fn ($value) => !is_null($value)));
+        return $person->refresh();
     }
 
     public function delete(string $id): bool

@@ -111,6 +111,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/complete-profile', [ProfileController::class, 'completeProfile']);
     Route::post('/submit', [ProfileController::class, 'submit']);
     Route::get('/profile', [AuthController::class, 'getProfile']);
+    Route::put('/edit-profile', [AuthController::class, 'editProfile']);
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/verify-reset-code', [AuthController::class, 'verifyResetCode']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
     Route::get('/my-grades/{courseId}', [GradeController::class, 'getgrade']);
     Route::get('/all-my-grades', [GradeController::class, 'getAllMyGrades']);
     Route::get('/all-my-sanctions', [SanctionController::class, 'getAllSanctions']);
@@ -135,6 +140,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/course-grades/{courseId}/{academicYear}/{semester}', [GradeController::class, 'getCourseGrades']);
     Route::put('/grades/{studentCoursePartId}', [GradeController::class, 'updateGrade']);
     Route::post('/grades-for-one-student/{courseId}/{academicYear}/{semester}', [GradeController::class, 'addGradesforonestudent']);
+
+    Route::get('/student-home', [ProfileController::class, 'getHomePage']);
+    Route::get('/student-academic-profile', [ProfileController::class, 'getAcademicProfile']);
 
 });
 

@@ -10,6 +10,7 @@ use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 use App\Repositories\Contracts\PersonRepositoryInterface;
 use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
+use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -25,6 +26,7 @@ class ProfileService
         private PersonRepositoryInterface $personRepo,
         private PersonAttachmentRepositoryInterface $personAttachmentRepo,
         private EmailVerificationRepositoryInterface $emailRepo,
+        private StudentRepositoryInterface $studentRepository,
     ) {}
 
     public function setupAccount(User $user, array $data): array
@@ -149,5 +151,105 @@ class ProfileService
             'code' => 200
         ];
     }
+
+    public function getHomePage(User $user): array
+    {
+        $student = $this->studentRepository->getHomePage($user->id);
+
+        $data = [
+            'fullname' => $student->person->full_name,
+            'student_id_number' => $student->student_id_number,
+            'current_year' => $student->current_year,
+            'current_semester' => $student->current_semester,
+            'status' => $student->academic_status,
+            'department_name' => optional($student->department)->name,
+            'college_name' => $student->college->name,
+            'university_name' => $student->college->university->name,
+            'gpa' => $student->current_gpa,
+            'latest_request' => $student->requests->map(function ($request) {
+                return [
+                    'request_id' => $request->id,
+                    'request_type_id' => $request->request_type_id,
+                    'reason' => $request->reason,
+                    'submission_date' => $request->submission_date,
+                    'decision_date' => $request->decision_date,
+                    'decision_reason' => $request->decision_reason,
+                    'status' => $request->status,
+                    'course' => $request->course ? [
+                        'name' => $request->course->universalCourse->name,
+                        'code' => $request->course->code,
+                    ] : null,
+                    'processed_by' => $request->processedBy ? [
+                        'name' => $request->processedBy->person->full_name,
+                    ] : null,
+                ];
+            })->values(),
+        ];
+
+        $message = 'تم جلب بيانات الصفحة الرئيسية بنجاح';
+        $code = 200;
+        return [
+            'data' => $data,
+            'message' => $message,
+            'code' => $code,
+        ];
+    }
+
+    public function getAcademicProfile(User $user): array
+    {
+        $student = $this->studentRepository->getAcademicProfile($user->person_id);
+
+        $data = [
+            'fullname' => $student->person->full_name,
+            'student_id_number' => $student->student_id_number,
+            'current_year' => $student->current_year,
+            'current_semester' => $student->current_semester,
+            'status' => $student->academic_status,
+            'department_name' => optional($student->department)->name,
+            'college_name' => $student->college->name,
+            'university_name' => $student->college->university->name,
+            'gpa' => $student->current_gpa,
+
+            'sanctions' => $student->sanctions->map(function ($sanction) {
+                return [
+                    'sanction_type_name' => $sanction->sanctionType->name,
+                    'sanction_type_reason' => $sanction->sanctionType->reason,
+                    'sanction_id' => $sanction->id,
+                    'status' => $sanction->status,
+                    'issued_date' => $sanction->issued_date,
+                    'expiry_date' => $sanction->expiry_date,
+                    'notes' => $sanction->notes,
+                    'student_response' => $sanction->student_response,
+                    'staff_response' => $sanction->staff_response,
+                    'course_id' => $sanction->course_id,
+                    'course_name' => optional($sanction->course?->universalCourse)->name,
+                ];
+            })->values(),
+
+            'grades' => $student->courses->groupBy('course_id')->map(function ($courses) {
+                    $course = $courses->first();
+                    return [
+                        'course_name' => $course->course->universalCourse->name,
+                        'grade' => $courses->sum(function ($item) {
+                            return $item->parts->sum('credits');
+                        }),
+                        'status' => $course->status,
+                        'year' => $course->academic_year,
+                        'semester' => $course->semester,
+                        'date' => optional(
+                            $courses->sortByDesc('created_at')->first()
+                        )->created_at,
+                    ];
+                })->values(),
+                ];
+
+        return [
+            'data' => $data,
+            'message' => 'تم جلب الملف الأكاديمي بنجاح',
+            'code' => 200,
+        ];
+    }
+
+
 
 }
