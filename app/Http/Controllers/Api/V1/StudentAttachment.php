@@ -30,6 +30,16 @@ public function __construct(private StudentAttachmentService $studentAttachmentS
             return Response::Error([],$th->getMessage());
         }
     }
+    public function getPendingStudents()
+    {
+        try {
+            $data = $this->studentAttachmentService->getPendingStudents(auth()->user());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message, 500);
+        }
+    }
 
 
 }

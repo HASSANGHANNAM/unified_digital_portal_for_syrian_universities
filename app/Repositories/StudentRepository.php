@@ -96,5 +96,13 @@ class StudentRepository implements StudentRepositoryInterface
             ->where('person_id', $personId)
             ->first();
     }
+    public function getPendingStudents()
+    {
+        return Student::with(['person.user'])
+            ->whereHas('person.user', function ($query) {
+                $query->where('status', 'pending');
+            })
+            ->get();
+    }
 
 }

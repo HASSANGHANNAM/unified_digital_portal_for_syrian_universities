@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\V1\SanctionController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StudyPlanController;
 use App\Http\Controllers\Api\V1\StudentAttachment;
+use App\Http\Controllers\Api\V1\AffairController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -132,6 +133,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress']);
     Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments']);
     Route::post('/student-affairs/{personId}',[StudentAttachment::class, 'reviewStudent']);
+    Route::get('/student-affairs/pending-students', [StudentAttachment::class, 'getPendingStudents']);
 
     Route::get('/request-types', [RequestController::class, 'getRequestTypes']);
     Route::get('/requests-list', [RequestController::class, 'getRequestsList']);
@@ -143,6 +145,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/student-home', [ProfileController::class, 'getHomePage']);
     Route::get('/student-academic-profile', [ProfileController::class, 'getAcademicProfile']);
+
+    Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses']);
 
 });
 

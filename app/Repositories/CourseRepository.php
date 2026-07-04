@@ -38,4 +38,13 @@ class CourseRepository implements CourseRepositoryInterface
     {
         return $this->model->find($id);
     }
+
+    public function getCollegeCourses(int $collegeId)
+    {
+        return Course::with('universalCourse')
+            ->where('college_id', $collegeId)
+            ->orderBy('code')
+            ->get();
+    }
+
 }
