@@ -13,4 +13,5 @@ interface StudentRepositoryInterface
     public function delete(string $id): bool;
     public function findById(string $id): ?Student;
     public function findByStudentNumber(string $studentNumber);
+    public function getPendingStudents();
 }

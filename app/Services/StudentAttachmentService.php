@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\DB;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\StudentVerificationRepositoryInterface;
 use App\Repositories\Contracts\PersonRepositoryInterface;
+use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\PersonAttachmentRepositoryInterface;
 
 class StudentAttachmentService
 {
     public function __construct(
         private PersonAttachmentRepositoryInterface $personAttachmentRepo,
+        private StudentRepositoryInterface $studentRepo,
         private PersonRepositoryInterface $personRepo,
         private UserRepositoryInterface $userRepo,
         private StudentVerificationRepositoryInterface $studentVerificationRepo
@@ -86,7 +88,45 @@ class StudentAttachmentService
                 'code'    => 200,
             ];
         });
-}
+
+    }
+
+        public function getPendingStudents(User $user): array
+    {
+        if (!$user->hasRole('StudentAffairs')) {
+        throw new \Exception('غير مصرح لك بالوصول');
+        }
+        $students = $this->studentRepo->getPendingStudents();
+
+        if ($students->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No pending students found.',
+                'code' => 404,
+            ];
+        }
+
+        $data = $students->map(function ($student) {
+            return [
+            'student_id'      => $student->id,
+            'student_number'  => $student->student_id_number,
+            'full_name'       => $student->person->full_name,
+            'national_number' => $student->person->national_number,
+            'phone'           => $student->person->phone,
+            'email'           => $student->person->user?->email,
+            'username'        => $student->person->user?->username,
+            'status'          => $student->person->user?->status,
+            ];
+        });
+
+        return [
+            'data' => $data,
+            'message' => 'Pending students retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+
 
 
 
