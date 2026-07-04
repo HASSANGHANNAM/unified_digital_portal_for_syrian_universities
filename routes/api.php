@@ -27,6 +27,11 @@ use App\Http\Controllers\Api\V1\AffairController; // من فرع student_profile
 |--------------------------------------------------------------------------
 */
 
+// Routes المشتركة خارج مجموعة auth (من HEAD)
+Route::post('/addGrade', [GradeController::class, 'addGrade']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
+
 // ========== Routes داخل الـ prefix V1 (من كلا الفرعين) ==========
 Route::prefix('V1')->group(function () {
 
@@ -89,11 +94,6 @@ Route::prefix('V1')->group(function () {
         Route::post('/signatures', [UserController::class, 'uploadSignature']);
         Route::post('/colleges/{collegeId}/logo', [CollegeController::class, 'uploadLogo']);
     });
-
-    // Routes المشتركة خارج مجموعة auth (من HEAD)
-    Route::post('/addGrade', [GradeController::class, 'addGrade']);
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
 
     // ملاحظة: لم نضع هنا مجموعة auth:sanctum من student_profile لأنها خارج V1 في الأصل
 });
