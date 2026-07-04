@@ -9,6 +9,7 @@ use App\Http\Requests\V1\GetUserPermissionsRequest;
 use App\Http\Requests\V1\GetUsersRequest;
 use App\Http\Requests\V1\ToggleUserActivationRequest;
 use App\Http\Requests\V1\UpdateUserRoleRequest;
+use App\Http\Requests\V1\UploadSignatureRequest;
 use App\Http\Responses\Response;
 use App\Services\UserService;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -77,6 +78,15 @@ class UserController extends Controller
     {
         try {
             $data = $this->userService->toggleActivation($toggleUserActivationRequest->validated(), $id);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function uploadSignature(UploadSignatureRequest $uploadSignatureRequest): JsonResponse
+    {
+        try {
+            $data = $this->userService->uploadSignature($uploadSignatureRequest->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

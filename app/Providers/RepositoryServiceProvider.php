@@ -68,10 +68,14 @@ use App\Repositories\SuggestionRepository;
 use App\Repositories\PersonAttachmentRepository;
 use App\Repositories\DepartmentHeadRepository;
 use App\Repositories\CollegeDeanRepository;
+use App\Repositories\Contracts\RequestUserRepositoryInterface;
+use App\Repositories\Contracts\UserSignatureRepositoryInterface;
 use App\Repositories\RequestTypeAvailabilityRepository;
 use App\Repositories\EmailVerificationRepository;
+use App\Repositories\RequestUserRepository;
 use App\Repositories\StudyPlanCourseRepository;
 use App\Repositories\StudentVerificationRepository;
+use App\Repositories\UserSignatureRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -111,8 +115,9 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(StudyPlanCourseRepositoryInterface::class, StudyPlanCourseRepository::class);
         $this->app->bind(StudentVerificationRepositoryInterface::class, StudentVerificationRepository::class);
         // $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
+        $this->app->bind(UserSignatureRepositoryInterface::class, UserSignatureRepository::class);
+        $this->app->bind(RequestUserRepositoryInterface::class, RequestUserRepository::class);
     }
-
     public function boot(): void
     {
         //

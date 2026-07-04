@@ -31,7 +31,8 @@ class Request extends Model
         'decision_reason',
         'student_id',
         'processed_by_staff_id',
-        'course_id'
+        'course_id',
+        'pdf_path'
     ];
 
     protected $attributes = [
@@ -66,5 +67,60 @@ class Request extends Model
     public function media()
     {
         return $this->hasMany(RequestMedia::class, 'request_id', 'id');
+    }
+    /**
+     * Get all request-user records for this request.
+     */
+    public function requestUsers()
+    {
+        return $this->hasMany(RequestUser::class);
+    }
+
+    /**
+     * Get all users who signed this request.
+     */
+    public function signers()
+    {
+        return $this->belongsToMany(User::class, 'request_user')
+            ->withPivot('role', 'status', 'signed_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all approved signatures for this request.
+     */
+    public function approvers()
+    {
+        return $this->requestUsers()->where('status', 'approved');
+    }
+
+    /**
+     * Get all rejected signatures for this request.
+     */
+    public function rejecters()
+    {
+        return $this->requestUsers()->where('status', 'rejected');
+    }
+
+    /**
+     * Get all pending signatures for this request.
+     */
+    public function pendingSignatures()
+    {
+        return $this->requestUsers()->where('status', 'pending');
+    }
+
+    /**
+     * Check if the request has been fully approved (all required roles approved).
+     */
+    public function isFullyApproved(): bool
+    {
+        $requiredRoles = ['affairs', 'exams', 'dean']; // حسب نظامك
+        $approvedRoles = $this->requestUsers()
+            ->where('status', 'approved')
+            ->pluck('role')
+            ->toArray();
+
+        return empty(array_diff($requiredRoles, $approvedRoles));
     }
 }
