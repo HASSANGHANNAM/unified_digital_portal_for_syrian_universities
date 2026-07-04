@@ -53,4 +53,43 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Person::class);
     }
+    /**
+     * Get all request-user records for this user.
+     */
+    public function requestUsers()
+    {
+        return $this->hasMany(RequestUser::class);
+    }
+
+    /**
+     * Get all requests signed by this user through the pivot table.
+     */
+    public function signedRequests()
+    {
+        return $this->belongsToMany(Request::class, 'request_user')
+            ->withPivot('role', 'status', 'signed_at')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all approved requests signed by this user.
+     */
+    public function approvedRequests()
+    {
+        return $this->belongsToMany(Request::class, 'request_user')
+            ->withPivot('role', 'status', 'signed_at')
+            ->wherePivot('status', 'approved')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get all pending requests waiting for this user's signature.
+     */
+    public function pendingRequests()
+    {
+        return $this->belongsToMany(Request::class, 'request_user')
+            ->withPivot('role', 'status', 'signed_at')
+            ->wherePivot('status', 'pending')
+            ->withTimestamps();
+    }
 }

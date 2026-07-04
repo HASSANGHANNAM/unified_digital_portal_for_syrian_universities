@@ -5,8 +5,10 @@ namespace App\Services;
 use App\DTOs\MediaFileDTO;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
+use Exception;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Illuminate\Support\Str;
 
 class MediaService
 {
@@ -56,5 +58,96 @@ class MediaService
             $headers['Content-Disposition'] = 'attachment; filename="' . $dto->name . '"';
         }
         return Storage::disk($disk)->response($filePath, $dto->name, $headers);
+    }
+    public function extractImageFromBase64(string $base64Image): array
+    {
+        if (!str_contains($base64Image, ';base64,')) {
+            throw new Exception('تنسيق Base64 غير صحيح: يجب أن يحتوي على "data:image/...;base64,"');
+        }
+
+        $parts = explode(';base64,', $base64Image);
+
+        if (count($parts) !== 2) {
+            throw new Exception('تنسيق Base64 غير صحيح: تأكد من وجود "data:image/png;base64," في بداية النص');
+        }
+
+        $header = $parts[0];
+        $encodedContent = $parts[1];
+
+        $mimeType = str_replace('data:', '', $header);
+        $extension = $this->getExtensionFromMime($mimeType);
+
+        if (!$extension) {
+            throw new Exception('نوع الصورة غير مدعوم: ' . $mimeType);
+        }
+
+        $binaryContent = base64_decode($encodedContent, true);
+
+        if ($binaryContent === false) {
+            throw new Exception('فشل فك ترميز Base64: تأكد من أن النص مشفر بصيغة Base64 صحيحة');
+        }
+
+        $sizeInBytes = strlen($binaryContent);
+        $sizeInKB = round($sizeInBytes / 1024, 2);
+
+        return [
+            'binary' => $binaryContent,              // البيانات الثنائية للصورة
+            'extension' => $extension,               // png, jpg, jpeg, gif, svg, webp
+            'mime' => $mimeType,                     // image/png, image/jpeg, ...
+            'size' => $sizeInKB,                     // الحجم بالكيلوبايت
+            'size_bytes' => $sizeInBytes,            // الحجم بالبايت
+        ];
+    }
+    private function getExtensionFromMime(string $mime): ?string
+    {
+        $map = [
+            'image/png' => 'png',
+            'image/jpeg' => 'jpg',
+            'image/jpg' => 'jpg',
+            'image/gif' => 'gif',
+            'image/svg+xml' => 'svg',
+            'image/webp' => 'webp',
+            'image/bmp' => 'bmp',
+            'image/tiff' => 'tiff',
+        ];
+
+        return $map[$mime] ?? null;
+    }
+    public function validateBase64Image(string $base64Image): bool
+    {
+        try {
+            $this->extractImageFromBase64($base64Image);
+            return true;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+    public function generateUniqueFilename(string $extension, string $prefix = 'img'): string
+    {
+        return $prefix . '_' . now()->format('Ymd_His') . '_' . Str::random(16) . '.' . $extension;
+    }
+    public function extractUploadedFile(\Illuminate\Http\UploadedFile $file): array
+    {
+        $extension = $file->getClientOriginalExtension();
+        $mime = $file->getMimeType();
+        $size = round($file->getSize() / 1024, 2); // بالكيلوبايت
+
+        $binaryContent = file_get_contents($file->getRealPath());
+        if ($binaryContent === false) {
+            throw new Exception('فشل قراءة محتوى الملف');
+        }
+
+        $supported = ['png', 'jpeg', 'jpg', 'gif', 'webp', 'bmp', 'tiff'];
+        if (!in_array(strtolower($extension), $supported)) {
+            throw new Exception('نوع الملف غير مدعوم: ' . $extension);
+        }
+
+        return [
+            'binary' => $binaryContent,
+            'extension' => $extension,
+            'mime' => $mime,
+            'size' => $size,
+            'size_bytes' => $file->getSize(),
+        ];
     }
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\AcademicController;
 use App\Http\Controllers\Api\V1\AdminController;
 use App\Http\Controllers\Api\V1\AdmissionController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\CollegeController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\GradeController;
 use App\Http\Controllers\Api\V1\MaterialController;
@@ -91,6 +92,8 @@ Route::prefix('V1')->group(function () {
         Route::post('/sanction-type', [SanctionController::class, 'store']);
         Route::post('/student/{studentId}/documents', [DocumentController::class, 'addDocument']);
         Route::get('/students/{studentId}/documents', [DocumentController::class, 'getDocuments']);
+        Route::post('/signatures', [UserController::class, 'uploadSignature']);
+        Route::post('/colleges/{collegeId}/logo', [CollegeController::class, 'uploadLogo']);
     });
 });
 
@@ -126,7 +129,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/remaining-courses', [StudyPlanController::class, 'getRemainingCourses']);
     Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress']);
     Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments']);
-    Route::post('/student-affairs/{personId}',[StudentAttachment::class, 'reviewStudent']);
+    Route::post('/student-affairs/{personId}', [StudentAttachment::class, 'reviewStudent']);
 
     Route::get('/request-types', [RequestController::class, 'getRequestTypes']);
     Route::get('/requests-list', [RequestController::class, 'getRequestsList']);
@@ -135,7 +138,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/course-grades/{courseId}/{academicYear}/{semester}', [GradeController::class, 'getCourseGrades']);
     Route::put('/grades/{studentCoursePartId}', [GradeController::class, 'updateGrade']);
     Route::post('/grades-for-one-student/{courseId}/{academicYear}/{semester}', [GradeController::class, 'addGradesforonestudent']);
-
 });
 
 Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {

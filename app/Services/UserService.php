@@ -5,15 +5,25 @@ namespace App\Services;
 use App\DTOs\PermissionsListDTO;
 use App\DTOs\UserDTO;
 use App\DTOs\UserListDTO;
+use App\DTOs\SignatureDTO;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use App\Repositories\Contracts\UserSignatureRepositoryInterface;
+use App\Notifications\SignatureUploadedNotification;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
+use App\Services\MediaService;
 
 class UserService
 {
     public function __construct(
-        private UserRepositoryInterface $userRepositoryInterface
+        private UserRepositoryInterface $userRepositoryInterface,
+        private MediaService $mediaService,
+        private UserSignatureRepositoryInterface $userSignatureRepository,
     ) {}
 
     public function listUsers(array $filters = []): array
@@ -130,5 +140,78 @@ class UserService
             'message' => 'تم تحديث حالة التفعيل بنجاح.',
             'code' => 200,
         ];
+    }
+
+    public function uploadSignature(array $data): array
+    {
+        try {
+            $userId = auth()->id();
+            if (!$userId) {
+                return [
+                    'data' => null,
+                    'message' => 'يجب تسجيل الدخول أولاً',
+                    'code' => 401,
+                ];
+            }
+
+            // 1. استخراج البيانات من Base64
+            $extracted = $this->mediaService->extractImageFromBase64($data['signature']);
+
+            // 2. توليد اسم ملف فريد (مع البادئة والتاريخ كما كان)
+            $filename = $this->mediaService->generateUniqueFilename(
+                $extracted['extension'],
+                'sig'
+            );
+
+            // 3. المسار الكامل (نفس المسار القديم)
+            $userFolder = 'private/signatures/' . $userId;
+            $path = $userFolder . '/' . $filename;
+
+            // 4. حفظ الملف في التخزين
+            Storage::disk('local')->put($path, $extracted['binary']);
+
+            // 5. التحقق من الحفظ
+            if (!Storage::disk('local')->exists($path)) {
+                return [
+                    'data' => null,
+                    'message' => 'فشل حفظ ملف التوقيع على الخادم',
+                    'code' => 500,
+                ];
+            }
+
+            // 6. إنشاء سجل في قاعدة البيانات (مع UUID)
+            $uuid = (string) Str::uuid();
+            $signature = $this->userSignatureRepository->create($userId, $uuid);
+
+            // 🔥 7. تحديث السجل بإضافة المسار الكامل
+            $signature->path = $path;
+            $signature->save();
+
+            // 8. (اختياري) إرسال إشعار للمستخدم
+            $user = $signature->user;
+            if ($user) {
+                // إشعار
+            }
+
+            // 9. تجهيز الـ DTO للإرجاع
+            $dto = new SignatureDTO(
+                id: $signature->id,
+                userId: $signature->user_id,
+                uuid: $signature->signature_uuid,
+                createdAt: $signature->created_at->toISOString(),
+            );
+
+            return [
+                'data' => $dto->toArray(),
+                'message' => 'تم رفع التوقيع بنجاح',
+                'code' => 201,
+            ];
+        } catch (Throwable $th) {
+            return [
+                'data' => null,
+                'message' => 'حدث خطأ أثناء رفع التوقيع: ' . $th->getMessage(),
+                'code' => 400,
+            ];
+        }
     }
 }

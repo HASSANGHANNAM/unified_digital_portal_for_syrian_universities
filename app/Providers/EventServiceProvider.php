@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\SendCustomNotification;
 use App\Events\SendLoginSuccessNotification;
 use App\Events\SendUserNotification;
 use App\Events\StudentRegistered;
+use App\Listeners\SendCustomNotificationListener;
 use App\Listeners\SendLoginSuccessNotificationListener;
 use App\Listeners\SendStudentRegisteredNotificationListener;
 use App\Listeners\SendUserNotificationListener;
@@ -27,7 +29,9 @@ class EventServiceProvider extends ServiceProvider
         SendUserNotification::class => [
             SendUserNotificationListener::class,
         ],
-
+        SendCustomNotification::class => [
+            SendCustomNotificationListener::class,
+        ],
     ];
 
     /**

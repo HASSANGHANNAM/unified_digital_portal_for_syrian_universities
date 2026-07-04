@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use App\Models\Student;
 use App\DTOs\LoginDTO;
 use App\DTOs\UserDTO;
+use App\Events\SendCustomNotification;
 
 class AuthServices
 {
@@ -41,7 +42,6 @@ class AuthServices
         }
         $user->refresh();
         $loginDto = LoginDTO::fromServiceData($this->tokenService->createAuthTokens($user), $user);
-        event(new SendLoginSuccessNotification($user, 'Login successful'));
         return [
             'data' => $loginDto->toArray(),
             'message' => 'Login successful',
@@ -72,6 +72,12 @@ class AuthServices
 
     public function logout($user): array
     {
+        event(new SendCustomNotification(
+            $user,
+            'تسجيل خروج',
+            'لقد سجلت الخروج بنجاح',
+            'WARNING'
+        ));
         $this->tokenService->revokeAllTokens($user);
         $data = [];
         $message = 'Logged out successfully';
