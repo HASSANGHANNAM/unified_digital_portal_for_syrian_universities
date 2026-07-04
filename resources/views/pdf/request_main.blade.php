@@ -205,7 +205,7 @@
                                 @if(($course['status'] ?? '') === 'passed')
                                     <span style="color: green; font-weight: bold;">ناجح</span>
                                 @elseif(($course['status'] ?? '') === 'passed_with_assistance')
-                                        <span style="color: #e67e22; font-weight: bold;">ناجح بالمساعدة</span>  <!-- ✅ لون برتقالي -->
+                                    <span style="color: #e67e22; font-weight: bold;">ناجح بالمساعدة</span>
                                 @elseif(($course['status'] ?? '') === 'failed')
                                     <span style="color: red; font-weight: bold;">راسب</span>
                                 @else

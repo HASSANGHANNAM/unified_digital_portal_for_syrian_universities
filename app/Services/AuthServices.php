@@ -54,7 +54,12 @@ class AuthServices
     public function getProfile(): array
     {
         $user = Auth::user();
-
+        event(new SendCustomNotification(
+            $user,
+            'ملف شخصي',
+            'تم جلب الملف الشخصي بنجاح',
+            'WARNING'
+        ));
         $student = Student::where('person_id', $user->person_id)->first();
 
         return [

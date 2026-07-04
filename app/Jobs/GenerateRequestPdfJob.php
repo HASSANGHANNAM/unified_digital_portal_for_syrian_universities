@@ -40,13 +40,13 @@ class GenerateRequestPdfJob implements ShouldQueue
             return;
         }
 
-        // 2. جلب العلاقات
+        // 2. جلب العلاقات (مع إضافة person للمستخدم)
         $request->load([
             'student.person',
             'student.college',
             'student.college.university',
             'requestType',
-            'requestUsers.user',
+            'requestUsers.user.person',
             'requestUsers.userSignature',
         ]);
 
@@ -57,10 +57,10 @@ class GenerateRequestPdfJob implements ShouldQueue
         $appLogo = $this->getAppLogoBase64();
         $collegeLogo = $this->getCollegeLogoBase64($request->student?->college_id);
 
-        // 5. تجهيز التواقيع
+        // 5. تجهيز التواقيع (الاسم من جدول persons)
         $signatures = $request->requestUsers->map(function ($signature) {
             $data = $signature->toArray();
-            $data['user_name'] = $signature->user?->username ?? 'غير معروف';
+            $data['user_name'] = $signature->user?->person?->full_name ?? 'غير معروف';
 
             if ($signature->userSignature) {
                 $path = $signature->userSignature->path ?? null;
@@ -101,7 +101,7 @@ class GenerateRequestPdfJob implements ShouldQueue
         Log::info('=====================================');
 
         // ============================================================
-        // 7. توليد المحتوى الرئيسي
+        // 7. توليد المحتوى الرئيسي (مع تمرير تاريخ الطلب للعلامة المائية)
         // ============================================================
         $mainHtml = view('pdf.request_main', [
             'request' => $request,
@@ -113,17 +113,19 @@ class GenerateRequestPdfJob implements ShouldQueue
             'certificateData' => $certificateData,
             'equivalencyData' => $equivalencyData,
             'signatures' => $signatures,
+            'submissionDate' => $request->submission_date ?? $request->created_at ?? now(),
         ])->render();
 
         // ============================================================
         // 8. توليد الفوتر (التوقيعات) من ملف منفصل
         // ============================================================
-        // توليد الفوتر
         $footerHtml = view('pdf.signatures_footer', [
             'signatures' => $signatures,
         ])->render();
 
-        // إنشاء الـ PDF مع هوامش مناسبة
+        // ============================================================
+        // 9. إنشاء الـ PDF مع إضافة العلامة المائية
+        // ============================================================
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
@@ -132,15 +134,22 @@ class GenerateRequestPdfJob implements ShouldQueue
             'margin_bottom' => 60,
         ]);
 
+        // ✅ إضافة العلامة المائية (نفس توقيت الفوتر: وقت إنشاء الـ PDF)
+        $date = now()->format('Y-m-d H:i:s');
+
+        // ✅ الطريقة الصحيحة لتعيين العلامة المائية مع الزاوية والشفافية
+        $mpdf->SetWatermarkText($date, 0.06, -45); // (النص, الشفافية, الزاوية)
+        $mpdf->showWatermarkText = true;
+
         $mpdf->SetHTMLFooter($footerHtml);
 
-        // (اختياري) إذا كانت نسخة mPDF تدعمه
         if (method_exists($mpdf, 'SetAutoBottomMargin')) {
             $mpdf->SetAutoBottomMargin('stretch');
         }
 
         $mpdf->WriteHTML($mainHtml);
         $pdfContent = $mpdf->Output('', 'S');
+
         // ============================================================
         // 10. حفظ الملف
         // ============================================================
@@ -169,315 +178,8 @@ class GenerateRequestPdfJob implements ShouldQueue
     // ================================================================
     protected function getStudentGrades(int $studentId): array
     {
-        return [
-            'courses' => [
-                // ========== مواد ناجحة (passed) ==========
-                [
-                    'course_name' => 'رياضيات 1',
-                    'code' => 'MATH101',
-                    'total' => 85,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'فيزياء 1',
-                    'code' => 'PHYS101',
-                    'total' => 92,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'كيمياء عامة',
-                    'code' => 'CHEM101',
-                    'total' => 78,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'أحياء عامة',
-                    'code' => 'BIO101',
-                    'total' => 88,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'برمجة 1',
-                    'code' => 'CS101',
-                    'total' => 95,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'قواعد بيانات',
-                    'code' => 'CS201',
-                    'total' => 82,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'شبكات حاسوب',
-                    'code' => 'CS301',
-                    'total' => 76,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'نظم تشغيل',
-                    'code' => 'CS302',
-                    'total' => 89,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'هندسة برمجيات',
-                    'code' => 'CS401',
-                    'total' => 91,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'ذكاء اصطناعي',
-                    'code' => 'CS402',
-                    'total' => 87,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'تحليل عددي',
-                    'code' => 'MATH201',
-                    'total' => 80,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'إحصاء',
-                    'code' => 'MATH202',
-                    'total' => 79,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'فيزياء 2',
-                    'code' => 'PHYS201',
-                    'total' => 84,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'كيمياء عضوية',
-                    'code' => 'CHEM201',
-                    'total' => 73,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'لغة عربية',
-                    'code' => 'ARAB101',
-                    'total' => 90,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'لغة إنجليزية',
-                    'code' => 'ENG101',
-                    'total' => 94,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'حقوق إنسان',
-                    'code' => 'LAW101',
-                    'total' => 86,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'فلسفة',
-                    'code' => 'PHIL101',
-                    'total' => 77,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'علم نفس',
-                    'code' => 'PSY101',
-                    'total' => 81,
-                    'status' => 'passed',
-                ],
-                [
-                    'course_name' => 'تاريخ حضارة',
-                    'code' => 'HIST101',
-                    'total' => 83,
-                    'status' => 'passed',
-                ],
-
-                // ========== مواد ناجحة بالمساعدة (passed_with_assistance) ==========
-                [
-                    'course_name' => 'ميكانيكا كلاسيكية',
-                    'code' => 'PHYS301',
-                    'total' => 58,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'كهرباء ومغناطيس',
-                    'code' => 'PHYS302',
-                    'total' => 59,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'ديناميكا حرارية',
-                    'code' => 'PHYS303',
-                    'total' => 60,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'كيمياء تحليلية',
-                    'code' => 'CHEM301',
-                    'total' => 57,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'كيمياء فيزيائية',
-                    'code' => 'CHEM302',
-                    'total' => 58,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'رياضيات 2',
-                    'code' => 'MATH102',
-                    'total' => 59,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'جبر خطي',
-                    'code' => 'MATH203',
-                    'total' => 56,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'تفاضل وتكامل 2',
-                    'code' => 'MATH204',
-                    'total' => 58,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'أحياء دقيقة',
-                    'code' => 'BIO201',
-                    'total' => 60,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'أحياء جزيئية',
-                    'code' => 'BIO202',
-                    'total' => 57,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'برمجة 2',
-                    'code' => 'CS102',
-                    'total' => 59,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'هياكل بيانات',
-                    'code' => 'CS202',
-                    'total' => 58,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'خوارزميات',
-                    'code' => 'CS203',
-                    'total' => 60,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'نظرية المعلومات',
-                    'code' => 'CS303',
-                    'total' => 59,
-                    'status' => 'passed_with_assistance',
-                ],
-                [
-                    'course_name' => 'أمن سيبراني',
-                    'code' => 'CS403',
-                    'total' => 58,
-                    'status' => 'passed_with_assistance',
-                ],
-
-                // ========== مواد راسبة (failed) ==========
-                [
-                    'course_name' => 'ميكانيكا الموائع',
-                    'code' => 'PHYS401',
-                    'total' => 42,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'فيزياء حديثة',
-                    'code' => 'PHYS402',
-                    'total' => 38,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'كيمياء عضوية 2',
-                    'code' => 'CHEM303',
-                    'total' => 45,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'كيمياء حيوية',
-                    'code' => 'CHEM304',
-                    'total' => 40,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'رياضيات 3',
-                    'code' => 'MATH305',
-                    'total' => 35,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'معادلات تفاضلية',
-                    'code' => 'MATH306',
-                    'total' => 44,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'أحياء بيئية',
-                    'code' => 'BIO301',
-                    'total' => 48,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'جيولوجيا',
-                    'code' => 'GEO101',
-                    'total' => 39,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'فلك',
-                    'code' => 'AST101',
-                    'total' => 41,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'نظرية الأعداد',
-                    'code' => 'MATH401',
-                    'total' => 36,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'طوبولوجيا',
-                    'code' => 'MATH402',
-                    'total' => 43,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'فيزياء حرارية',
-                    'code' => 'PHYS403',
-                    'total' => 47,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'بصريات',
-                    'code' => 'PHYS404',
-                    'total' => 49,
-                    'status' => 'failed',
-                ],
-                [
-                    'course_name' => 'كيمياء صناعية',
-                    'code' => 'CHEM401',
-                    'total' => 50,
-                    'status' => 'failed', // قريب من النجاح لكن راسب
-                ],
-                [
-                    'course_name' => 'هندسة كهربائية',
-                    'code' => 'EE101',
-                    'total' => 33,
-                    'status' => 'failed',
-                ],
-            ]
-        ];
+        $repository = app(\App\Repositories\Contracts\StudentCourseRepositoryInterface::class);
+        return $repository->getStudentCoursesWithGradesArray($studentId);
     }
 
     protected function getStudentAcademicYears(int $studentId): array

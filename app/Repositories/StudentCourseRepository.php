@@ -55,11 +55,35 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             'course.department',
             'parts.coursePart',
         ])
-        ->where('student_id', $studentId)
-        ->paginate($perPage);
+            ->where('student_id', $studentId)
+            ->paginate($perPage);
     }
-
-        public function getPassedCourses(int $studentId): Collection
+    public function getStudentCoursesWithGradesArray(int $studentId): array
+    {
+        $courses = $this->model->with([
+            'course.universalCourse',
+            'course.department',
+            'parts.coursePart',
+        ])
+            ->where('student_id', $studentId)
+            ->get();
+        $result = [];
+        foreach ($courses as $studentCourse) {
+            $publishedParts = $studentCourse->parts->filter(function ($part) {
+                return $part->published == 1;
+            });
+            $total = $publishedParts->sum('credits');
+            $status = $total >= 60 ? 'passed' : 'failed';
+            $result[] = [
+                'course_name' => $studentCourse->course->universalCourse->name ?? $studentCourse->course->name ?? '',
+                'code' => $studentCourse->course->code ?? '',
+                'total' => $total,
+                'status' => $status,
+            ];
+        }
+        return ['courses' => $result];
+    }
+    public function getPassedCourses(int $studentId): Collection
     {
         return $this->model
             ->with([
@@ -71,7 +95,7 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->first();
     }
 
-    public function getCourseGrades(int $courseId,string $academicYear,int $semester,int $perPage = 10)
+    public function getCourseGrades(int $courseId, string $academicYear, int $semester, int $perPage = 10)
     {
         return $this->model
             ->with([
@@ -85,7 +109,7 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function findStudentCourseByStudentNumber(string $studentNumber,int $courseId,string $academicYear,int $semester)
+    public function findStudentCourseByStudentNumber(string $studentNumber, int $courseId, string $academicYear, int $semester)
     {
         return $this->model
             ->whereHas('student', function ($q) use ($studentNumber) {
@@ -96,8 +120,4 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->where('semester', $semester)
             ->first();
     }
-
-
-
-
 }

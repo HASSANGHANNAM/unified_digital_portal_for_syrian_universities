@@ -15,9 +15,9 @@
                         $userName = $sig['user_name'] ?? '';
                         $signedAt = isset($sig['signed_at']) ? \Carbon\Carbon::parse($sig['signed_at'])->format('Y-m-d') : '';
                     @endphp
-                    <td style="width: 16.66%; text-align: center; padding: 5px 4px; vertical-align: top; border: none; {{ $hasSignature && $i > 0 ? 'border-left: 1px solid #ccc; border-left-style: solid;' : '' }}">
+                    <td style="width: 16.66%; text-align: center; padding: 2px 1px; vertical-align: top; border: none; {{ $hasSignature && $i > 0 ? 'border-left: 1px  #ccc; border-left-style: solid;' : '' }}">
                         @if($hasSignature && $imageBase64)
-                            <div style="font-size: 10px; font-weight: bold; color: #1a1a1a; border-bottom: 1px solid #ccc; padding-bottom: 3px; margin-bottom: 4px;">
+                            <div style="font-size: 5px; font-weight: bold; color: #1a1a1a; border-bottom: 1px  #ccc; padding-bottom: 3px; margin-bottom: 2px;">
                                 {{ $userName ?: '............' }}
                             </div>
                             <img src="{{ $imageBase64 }}" alt="توقيع" style="width: 60px; height: 30px; object-fit: contain; margin: 3px 0;" />

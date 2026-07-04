@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\DB;
 
 class GradeService
 {
-     public function __construct(
+    public function __construct(
         private UserRepositoryInterface $userRepositoryInterface,
         private StudentCoursePartRepositoryInterface $studentCoursePartRepositoryInterface,
         private StudentCourseRepositoryInterface $studentCourseRepositoryInterface,
@@ -157,10 +157,9 @@ class GradeService
     public function getAllMyGrades(): array
     {
         $user = Auth::user();
-
         $perPage = request()->input('per_page', 10);
+        $this->studentCourseRepositoryInterface->getStudentCoursesWithGradesArray(7);
         $courses = $this->studentCourseRepositoryInterface->getStudentCoursesWithGrades($user->id, $perPage);
-
         if ($courses->isEmpty()) {
             return [
                 'data' => [],
@@ -208,10 +207,10 @@ class GradeService
     }
 
     // استعراض نتائج جميع الطلاب في مادة معينة مع حالة النجاح أو الرسوب لكل طالب(للامتحانات)
-        public function getCourseGrades(User $user, int $courseId, string $academicYear, int $semester): array
+    public function getCourseGrades(User $user, int $courseId, string $academicYear, int $semester): array
     {
         if (!$user->hasRole('Examination')) {
-        throw new \Exception('غير مصرح لك بالوصول');
+            throw new \Exception('غير مصرح لك بالوصول');
         }
         $perPage = request()->input('per_page', 10);
 
@@ -266,7 +265,7 @@ class GradeService
     public function updateGrade(User $user, int $studentCoursePartId, float $grade): array
     {
         if (!$user->hasRole('Examination')) {
-        throw new \Exception('غير مصرح لك بالوصول');
+            throw new \Exception('غير مصرح لك بالوصول');
         }
         $studentCoursePart = $this->studentCoursePartRepositoryInterface
             ->getPartById($studentCoursePartId);
@@ -298,11 +297,11 @@ class GradeService
             'code' => 200,
         ];
     }
-// إضافة علامات لطالب معين في مادة معينة (للامتحانات)
-    public function addGradesforonestudent(User $user,int $courseId,string $academicYear,int $semester,array $request): array
+    // إضافة علامات لطالب معين في مادة معينة (للامتحانات)
+    public function addGradesforonestudent(User $user, int $courseId, string $academicYear, int $semester, array $request): array
     {
         if (!$user->hasRole('Examination')) {
-        throw new \Exception('غير مصرح لك بالوصول');
+            throw new \Exception('غير مصرح لك بالوصول');
         }
 
         $student = $this->studentRepositoryInterface
@@ -387,14 +386,4 @@ class GradeService
             'code' => 201,
         ];
     }
-
-
-
-
-
-
-
-
-
 }
-
