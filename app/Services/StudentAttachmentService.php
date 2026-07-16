@@ -76,9 +76,20 @@ class StudentAttachmentService
                 'notes'       => $data['notes'] ?? null,
             ]);
 
-            $this->userRepo->update($student, [
-                'status' => $data['status'] === 'approved' ? 'active' : 'inactive'
-            ]);
+            $updateData = [];
+
+            if ($data['status'] === 'approved') {
+                $updateData['status'] = 'active';
+
+                    if (!empty($student->new_password)) {
+                    $updateData['password'] = $student->new_password;
+                    $updateData['new_password'] = null; // تصفير الحقل القديم لكي لا يُعاد استخدامه
+                }
+            } else {
+                $updateData['status'] = 'inactive';
+            }
+
+            $this->userRepo->update($student, $updateData);
 
             return [
                 'data'    => [],
