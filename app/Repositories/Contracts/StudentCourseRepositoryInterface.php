@@ -15,6 +15,6 @@ interface StudentCourseRepositoryInterface
     public function getCourseGrades(int $courseId, string $academicYear, int $semester, int $perPage = 10);
     public function findStudentCourseByStudentNumber(string $studentNumber, int $courseId, string $academicYear, int $semester);
     public function findStudentCourse(int $studentId, int $courseId);
-    public function getStudentCoursesWithGrades(int $studentId, int $perPage = 10, array $filters = []);
+    public function getStudentCoursesWithGrades(int $userId, int $perPage , array $filters = []);
     public function getStudentCoursesWithGradesArray(int $studentId): array;
 }
