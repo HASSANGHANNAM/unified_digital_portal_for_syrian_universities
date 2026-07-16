@@ -33,6 +33,7 @@ class EditProfileRequest extends FormRequest
             'full_name' => 'sometimes|string|max:255',
             'phone' => 'sometimes|nullable|string|max:20',
             'address' => 'sometimes|nullable|string|max:255',
+            'profile_image' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ];
 
     }

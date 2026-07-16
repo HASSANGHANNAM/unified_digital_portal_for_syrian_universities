@@ -13,14 +13,33 @@ class StudyPlanCourseRepository implements StudyPlanCourseRepositoryInterface
         private StudyPlanCourse $model
     ) {}
 
-    public function getAllPlanCourses(int $departmentId, int $perPage = 10): LengthAwarePaginator
+    public function getAllPlanCourses(int $departmentId,int $perPage = 10,array $filters = []): LengthAwarePaginator
     {
-        return $this->model
+        $query = $this->model
             ->with([
                 'course.universalCourse',
-                'department'
+                'department',
             ])
-            ->where('department_id', $departmentId)
+            ->where('department_id', $departmentId);
+
+        // Filter by course name
+        if (!empty($filters['course_name'])) {
+            $query->whereHas('course.universalCourse', function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['course_name'] . '%');
+            });
+        }
+
+        // Filter by year
+        if (!empty($filters['year'])) {
+            $query->where('year', $filters['year']);
+        }
+
+        // Filter by semester
+        if (!empty($filters['semester'])) {
+            $query->where('semester', $filters['semester']);
+        }
+
+        return $query
             ->orderBy('year')
             ->orderBy('semester')
             ->paginate($perPage);

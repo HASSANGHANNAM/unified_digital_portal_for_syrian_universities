@@ -157,9 +157,18 @@ class GradeService
     public function getAllMyGrades(): array
     {
         $user = Auth::user();
-        $perPage = request()->input('per_page', 10);
-        $this->studentCourseRepositoryInterface->getStudentCoursesWithGradesArray(7);
-        $courses = $this->studentCourseRepositoryInterface->getStudentCoursesWithGrades($user->id, $perPage);
+        $perPage = request('per_page', 10);
+
+        $filters = [
+            'status' => request('status'),
+            'course_name' => request('course_name'),
+            'semester' => request('semester'),
+            'academic_year' => request('academic_year'),
+        ];
+
+        $courses = $this->studentCourseRepositoryInterface
+            ->getStudentCoursesWithGrades($user->id, $perPage, $filters);
+
         if ($courses->isEmpty()) {
             return [
                 'data' => [],
@@ -169,7 +178,10 @@ class GradeService
         }
 
         $data = collect($courses->items())->map(function ($studentCourse) {
-            $publishedGrades = collect($studentCourse->parts)->where('published', 1);
+
+            $publishedGrades = collect($studentCourse->parts)
+                ->where('published', true);
+
             $total = $publishedGrades->sum('credits');
 
             return [
@@ -178,11 +190,12 @@ class GradeService
                 'code'            => $studentCourse->course->code,
                 'credits'         => $studentCourse->course->credits,
                 'department_name' => $studentCourse->course->department?->name,
+                'academic_year'   => $studentCourse->academic_year,
+                'semester'        => $studentCourse->semester,
                 'total'           => $total,
                 'status'          => $total >= 60 ? 'passed' : 'failed',
                 'parts' => $publishedGrades->map(function ($part) {
                     return [
-                        // 'id'         => $part->id,
                         'part_name'  => optional($part->coursePart)->name,
                         'percentage' => optional($part->coursePart)->percentage,
                         'grade'      => $part->credits,

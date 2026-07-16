@@ -57,6 +57,17 @@ class AuthController extends Controller
             return Response::Error([], $message, 401);
         }
     }
+    public function getProfileImage(): JsonResponse
+    {
+        try {
+            $data = $this->authServices->getProfileImage();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message, 401);
+        }
+    }
+
 
     public function logout(): JsonResponse
     {

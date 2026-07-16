@@ -14,7 +14,7 @@ class Person extends Model
     protected $fillable = [
         'id',
          'national_id', 'full_name', 'phone',
-        'birth_date', 'national_number', 'address'
+        'birth_date', 'national_number', 'address', 'profile_image'
     ];
 
     protected $casts = ['birth_date' => 'date'];

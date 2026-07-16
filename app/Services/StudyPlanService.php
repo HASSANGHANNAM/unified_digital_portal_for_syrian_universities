@@ -18,7 +18,9 @@ class StudyPlanService
     public function getStudyPlan(): array
     {
         $user = Auth::user();
+
         $student = Student::where('person_id', $user->person_id)->first();
+
         if (!$student) {
             return [
                 'data' => [],
@@ -26,8 +28,21 @@ class StudyPlanService
                 'code' => 404,
             ];
         }
-        $perPage = request()->input('per_page', 10);
-        $courses = $this->studyPlanCourseRepositoryInterface->getAllPlanCourses($student->department_id, $perPage);
+
+        $perPage = request('per_page', 10);
+
+        $filters = [
+            'course_name'   => request('course_name'),
+            'year'          => request('year'),
+            'semester'      => request('semester'),
+        ];
+
+        $courses = $this->studyPlanCourseRepositoryInterface
+            ->getAllPlanCourses(
+                $student->department_id,
+                $perPage,
+                $filters
+            );
 
         $data = collect($courses->items())->map(function ($course) {
             return [

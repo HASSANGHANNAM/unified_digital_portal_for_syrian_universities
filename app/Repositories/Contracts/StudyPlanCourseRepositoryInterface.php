@@ -8,7 +8,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface StudyPlanCourseRepositoryInterface
 {
-    public function getAllPlanCourses(int $departmentId, int $perPage = 10): LengthAwarePaginator;
+    public function getAllPlanCourses(int $departmentId, int $perPage = 10, array $filters = []): LengthAwarePaginator;
 
     public function getYearCourses(int $departmentId,int $year): Collection;
 
@@ -19,7 +19,7 @@ interface StudyPlanCourseRepositoryInterface
     public function getSemesterCourses(int $departmentId,int $year,int $semester): Collection;
 
     public function getPassedCourses(int $studentId): Collection;
-    
+
     public function existsInStudyPlan(int $departmentId,int $courseId): bool;
 
 
