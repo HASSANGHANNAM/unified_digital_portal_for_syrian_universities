@@ -77,10 +77,10 @@ class AuthServices
         ];
     }
 
+
     public function editProfile($request): array
     {
         $user = Auth::user();
-
         $oldEmail = $user->email;
 
         $user = $this->userRepo->update(
@@ -90,23 +90,44 @@ class AuthServices
                 'email',
             ])
         );
+
+        $personData = $request->only([
+            'full_name',
+            'phone',
+            'address',
+        ]);
+
+        if ($request->hasFile('profile_image')) {
+
+            if ($user->person->profile_image &&
+                Storage::disk('public')->exists($user->person->profile_image)) {
+
+                Storage::disk('public')->delete($user->person->profile_image);
+            }
+
+            $personData['profile_image'] = $request
+                ->file('profile_image')
+                ->store('profile-images', 'public');
+        }
+
         $person = $this->personRepository->update(
             $user->person,
-            $request->only([
-                'full_name',
-                'phone',
-                'address',
-            ])
+            $personData
         );
+
         $message = 'Profile updated successfully';
 
         if ($request->filled('email') && $request->email !== $oldEmail) {
+
             $user->update([
                 'email_verified_at' => null,
             ]);
+
             $this->emailRepo->sendCode($user);
+
             $message = 'Profile updated successfully. Please verify your new email address.';
         }
+
         $student = Student::where('person_id', $user->person_id)->first();
 
         return [
@@ -117,12 +138,46 @@ class AuthServices
                 'email' => $user->email,
                 'phone' => $person->phone,
                 'address' => $person->address,
+                'profile_image' => $person->profile_image
+                    ? Storage::disk('public')->url($person->profile_image)
+                    : null,
                 'study_info' => 'السنة ' . $student?->current_year . ' - ' . $student?->major,
             ],
             'message' => $message,
             'code' => 200,
         ];
     }
+
+    public function getProfileImage(): array
+    {
+        $user = Auth::user();
+
+        // التأكد من وجود علاقة الشخص وصورته الشخصية في قاعدة البيانات
+        if ($user && $user->person && $user->person->profile_image) {
+
+            // التحقق من وجود ملف الصورة في التخزين الفعلي لمنع حدوث رابط مكسور (Broken link)
+            if (Storage::disk('public')->exists($user->person->profile_image)) {
+                return [
+                    'data' => [
+                        'profile_image' => Storage::disk('public')->url($user->person->profile_image),
+                    ],
+                    'message' => 'Profile image retrieved successfully',
+                    'code' => 200,
+                ];
+            }
+        }
+
+        // في حال لم يكن لدى المستخدم صورة شخصية
+        return [
+            'data' => [
+                'profile_image' => null,
+            ],
+            'message' => 'No profile image found',
+            'code' => 200, // استخدمنا 200 لأن هذه حالة منطقية وليست خطأ بالنظام لكي لا تسبب مشاكل للـ Frontend
+        ];
+    }
+
+
     //تغيير كلمة اذا كان الطالب متذكرها
     public function changePassword($request): array
     {

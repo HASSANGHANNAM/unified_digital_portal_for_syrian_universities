@@ -48,15 +48,64 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->first();
     }
 
-    public function getStudentCoursesWithGrades(int $studentId, int $perPage = 10)
-    {
-        return $this->model->with([
+    public function getStudentCoursesWithGrades(int $userId,int $perPage,array $filters = []) {
+        $query = StudentCourse::with([
             'course.universalCourse',
             'course.department',
             'parts.coursePart',
+            'student.person.user',
         ])
-            ->where('student_id', $studentId)
-            ->paginate($perPage);
+        ->whereHas('student.person.user', function ($q) use ($userId) {
+            $q->where('id', $userId);
+        });
+
+        // اسم المادة
+        if (!empty($filters['course_name'])) {
+            $query->whereHas('course.universalCourse', function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['course_name'] . '%');
+            });
+        }
+
+        // السنة
+        if (!empty($filters['academic_year'])) {
+            $query->where('academic_year', $filters['academic_year']);
+        }
+
+        // الفصل
+        if (!empty($filters['semester'])) {
+            $query->where('semester', $filters['semester']);
+        }
+
+        // النجاح والرسوب
+        if (!empty($filters['status'])) {
+
+            if ($filters['status'] == 'passed') {
+
+                $query->whereHas('parts', function ($q) {
+                    $q->where('published', 1);
+                })
+                ->withSum([
+                    'parts as total_grade' => function ($q) {
+                        $q->where('published', 1);
+                    }
+                ], 'credits')
+                ->having('total_grade', '>=', 60);
+
+            } elseif ($filters['status'] == 'failed') {
+
+                $query->whereHas('parts', function ($q) {
+                    $q->where('published', 1);
+                })
+                ->withSum([
+                    'parts as total_grade' => function ($q) {
+                        $q->where('published', 1);
+                    }
+                ], 'credits')
+                ->having('total_grade', '<', 60);
+            }
+        }
+
+        return $query->paginate($perPage);
     }
     public function getStudentCoursesWithGradesArray(int $studentId): array
     {
