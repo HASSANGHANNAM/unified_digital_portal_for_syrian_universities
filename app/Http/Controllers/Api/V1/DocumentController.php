@@ -7,6 +7,7 @@ use App\Services\DocumentService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Requests\V1\AddDocumentRequest;
 use App\Http\Requests\V1\GetDocumentsRequest;
+use App\Http\Requests\V1\StoreLectureRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -38,5 +39,22 @@ class DocumentController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-
+    public function uploadLecture(StoreLectureRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->documentService->uploadLecture($request->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function lecturesByCoursePart(int $coursePartsId): JsonResponse
+    {
+        try {
+            $data = $this->documentService->getLecturesByCoursePart($coursePartsId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
 }

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StudyPlanController;
 use App\Http\Controllers\Api\V1\StudentAttachment;
 use App\Http\Controllers\Api\V1\AffairController; // من فرع student_profile
+use App\Http\Controllers\Api\V1\FileStorageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,9 @@ Route::prefix('V1')->group(function () {
         Route::get('/students/{studentId}/documents', [DocumentController::class, 'getDocuments']);
         Route::post('/signatures', [UserController::class, 'uploadSignature']);
         Route::post('/colleges/{collegeId}/logo', [CollegeController::class, 'uploadLogo']);
+        Route::post('/uploadLecture', [DocumentController::class, 'uploadLecture']);
+        Route::get('/lectures/{coursePartsId}/{filename}', [FileStorageController::class, 'showLecture']);
+        Route::get('/course-parts/{coursePartsId}/lectures', [DocumentController::class, 'lecturesByCoursePart']);
     });
 
     // ملاحظة: لم نضع هنا مجموعة auth:sanctum من student_profile لأنها خارج V1 في الأصل

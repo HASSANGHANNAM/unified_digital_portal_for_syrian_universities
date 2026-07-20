@@ -12,4 +12,5 @@ interface LectureRepositoryInterface
     public function update(Lecture $lecture, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?Lecture;
+    public function findByCoursePartId(int $coursePartsId): Collection;
 }

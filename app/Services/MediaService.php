@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\MediaFileDTO;
+use App\Models\Lecture;
 use App\Models\Request;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
@@ -167,5 +168,53 @@ class MediaService
         }
 
         return Storage::disk('private')->response($request->pdf_path);
+    }
+    public function uploadLectureFile($file, int $coursePartsId): array
+    {
+        $extension = $file->getClientOriginalExtension();
+        $type = $extension;
+        $filename = time() . '_' . Str::random(10) . '.' . $extension;
+        $stored = Storage::disk('private')->putFileAs(
+            'lectures/' . $coursePartsId,
+            $file,
+            $filename
+        );
+        if (!$stored) {
+            throw new \Exception('فشل في حفظ ملف المحاضرة على الخادم');
+        }
+        $relativePath = 'lectures/' . $coursePartsId . '/' . $filename;
+        return [
+            'file_url'  => $relativePath,
+            'type'      => $type,
+        ];
+    }
+    public function showLecture(string $coursePartsId, string $filename): StreamedResponse
+    {
+        $relativePath = "lectures/{$coursePartsId}/{$filename}";
+        $lecture = Lecture::where('file_url', $relativePath)->first();
+        if (!$lecture) {
+            abort(404, 'المحاضرة غير موجودة');
+        }
+        $fullPath = $relativePath; // <-- التعديل هنا
+        if (!Storage::disk('private')->exists($fullPath)) {
+            abort(404, 'ملف المحاضرة غير موجود على الخادم');
+        }
+        $mime = Storage::disk('private')->mimeType($fullPath) ?: 'application/octet-stream';
+        $headers = [
+            'Content-Type' => $mime,
+            'Content-Disposition' => $this->getLectureDisposition($lecture->type, $filename),
+        ];
+        return Storage::disk('private')->response($fullPath, $filename, $headers);
+    }
+
+    private function getLectureDisposition(string $type, string $filename): string
+    {
+        $inlineTypes = ['pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'webm'];
+
+        if (in_array(strtolower($type), $inlineTypes)) {
+            return 'inline; filename="' . $filename . '"';
+        }
+
+        return 'attachment; filename="' . $filename . '"';
     }
 }

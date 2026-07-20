@@ -38,4 +38,10 @@ class LectureRepository implements LectureRepositoryInterface
     {
         return $this->model->find($id);
     }
+    public function findByCoursePartId(int $coursePartsId): Collection
+    {
+        return $this->model->where('course_parts_id', $coursePartsId)
+            ->orderBy('order_index', 'asc')
+            ->get();
+    }
 }
