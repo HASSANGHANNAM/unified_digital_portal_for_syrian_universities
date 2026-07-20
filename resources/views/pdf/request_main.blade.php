@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>طلب {{ $requestTypeName }}</title>
+    <title>طلب {{ $requestTypeName ?? 'غير محدد' }}</title>
     <style>
         /* ====================================================== */
         /*                     الإعدادات العامة                    */
@@ -128,9 +128,9 @@
     <!-- ========================================================= -->
     @include('pdf.header', [
         'request' => $request,
-        'requestTypeName' => $requestTypeName,
-        'appLogo' => $appLogo,
-        'collegeLogo' => $collegeLogo,
+        'requestTypeName' => $requestTypeName ?? 'غير محدد',
+        'appLogo' => $appLogo ?? null,
+        'universityLogo' => $universityLogo ?? null, // 🔥 تم التعديل: universityLogo بدلاً من collegeLogo
     ])
 
     <!-- ========================================================= -->
@@ -180,7 +180,7 @@
     <!-- ========================================================= -->
     <div class="content">
 
-        @if(str_contains($requestTypeName, 'كشف علامات'))
+        @if(str_contains($requestTypeName ?? '', 'كشف علامات'))
             <!-- ====== عنوان العلامات (في المنتصف) ====== -->
             <h3 style="text-align: center;"> كشف العلامات الدراسية</h3>
             <!-- ====== جدول العلامات ====== -->
@@ -219,7 +219,7 @@
                 </tbody>
             </table>
 
-        @elseif($requestTypeName === 'حياة جامعية')
+        @elseif(($requestTypeName ?? '') === 'حياة جامعية')
             <h3>📚 الحياة الجامعية</h3>
             <table>
                 <thead><tr><th>السنة</th><th>المعدل التراكمي</th><th>عدد الساعات</th><th>الحالة</th></tr></thead>
@@ -232,7 +232,7 @@
                 </tbody>
             </table>
 
-        @elseif($requestTypeName === 'شهادة تخرج')
+        @elseif(($requestTypeName ?? '') === 'شهادة تخرج')
             <h3>🎓 شهادة التخرج</h3>
             <div class="certificate-box">
                 <p style="font-size:15px;">تشهد عمادة الكلية بأن الطالب/الطالبة</p>
@@ -245,7 +245,7 @@
                 <p style="margin-top:15px;font-size:12px;color:#555;">وتمنح هذه الشهادة بناءً على طلبه/ها، وتطبق عليها أحكام النظام الداخلي للكلية.</p>
             </div>
 
-        @elseif($requestTypeName === 'طلب معادلة')
+        @elseif(($requestTypeName ?? '') === 'طلب معادلة')
             <h3>🔄 طلب معادلة مواد</h3>
             <table>
                 <thead><tr><th>#</th><th>المادة</th><th>الجامعة المصدر</th><th>العلامة</th><th>الساعات</th></tr></thead>
@@ -260,7 +260,7 @@
 
         @else
             <h3>📄 تفاصيل الطلب</h3>
-            <p><strong>نوع الطلب:</strong> {{ $requestTypeName }}</p>
+            <p><strong>نوع الطلب:</strong> {{ $requestTypeName ?? 'غير محدد' }}</p>
             <div class="free-text">{{ $request->reason ?? 'لا يوجد محتوى إضافي لهذا الطلب.' }}</div>
         @endif
 

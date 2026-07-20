@@ -8,14 +8,14 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('colleges', function (Blueprint $table) {
+        Schema::table('universities', function (Blueprint $table) {
             $table->string('logo_path')->nullable()->after('name');
         });
     }
 
     public function down(): void
     {
-        Schema::table('colleges', function (Blueprint $table) {
+        Schema::table('universities', function (Blueprint $table) {
             $table->dropColumn('logo_path');
         });
     }

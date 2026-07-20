@@ -5,8 +5,8 @@
     <tr>
         <!-- ====== العمود الأيسر: شعار الجامعة ====== -->
         <td style="text-align: left; width: 16.66%; vertical-align: middle; padding: 0; margin: 0;">
-            @if($collegeLogo)
-                <img src="{{ $collegeLogo }}" alt="شعار الكلية" style="width:auto; height:80px; object-fit:contain; display:inline-block; margin:0; padding:0;" />
+            @if(isset($universityLogo) && $universityLogo)
+                <img src="{{ $universityLogo }}" alt="شعار الجامعة" style="width:auto; height:80px; object-fit:contain; display:inline-block; margin:0; padding:0;" />
             @endif
         </td>
 
@@ -26,7 +26,7 @@
             @endif
 
             <div style="font-size: 16px; font-weight: bold; color: #010102; line-height: 1.2; margin:0; padding:0;">
-                {{ $requestTypeName }}
+                {{ $requestTypeName ?? 'طلب' }}
             </div>
             <div style="font-size: 11px; color: #010102; margin:0; padding:0;">
                 <span>رقم الطلب: {{ $request->id }}</span>
@@ -37,7 +37,7 @@
 
         <!-- ====== العمود الأيمن: شعار التطبيق ====== -->
         <td style="text-align: right; width: 16.66%; vertical-align: middle; padding: 0; margin: 0;">
-            @if($appLogo)
+            @if(isset($appLogo) && $appLogo)
                 <img src="{{ $appLogo }}" alt="شعار التطبيق" style="width:80px; height:80px; object-fit:contain; display:inline-block; margin:0; padding:0;" />
             @endif
         </td>

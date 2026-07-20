@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\ApproveRequestRequest;
+use App\Http\Requests\V1\AssignRequestRequest;
 use App\Services\RequestService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 use App\Http\Requests\V1\CreateRequestRequest;
 use App\Http\Requests\V1\GetAllRequestsRequest;
 use App\Http\Requests\V1\GetRequestDetailsRequest;
+use App\Http\Requests\V1\GetStaffRequestsRequest;
 use App\Http\Requests\V1\GetStudentRequestsRequest;
 use App\Http\Requests\V1\ReviewRequestRequest;
 use App\Http\Requests\V1\RequestsInStudentCollegeRequest;
@@ -36,7 +39,15 @@ class RequestController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-
+    public function staffRequests(GetStaffRequestsRequest $getStaffRequestsRequest): JsonResponse
+    {
+        try {
+            $data = $this->requestService->getStaffRequests($getStaffRequestsRequest->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
     public function createRequest(CreateRequestRequest $createRequestRequest): JsonResponse
     {
         try {
@@ -52,6 +63,16 @@ class RequestController extends Controller
         try {
             $validated = $getRequestDetailsRequest->validated();
             $data = $this->requestService->getRequestDetails((int) $validated['requestId']);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getStaffRequestDetails(GetRequestDetailsRequest $getRequestDetailsRequest): JsonResponse
+    {
+        try {
+            $validated = $getRequestDetailsRequest->validated();
+            $data = $this->requestService->getStaffRequestDetails((int) $validated['requestId']);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -124,7 +145,7 @@ class RequestController extends Controller
         }
     }
 
-        public function getRequestTypes(): JsonResponse
+    public function getRequestTypes(): JsonResponse
     {
         try {
             $data = $this->requestService->getAvailableRequestTypes();
@@ -152,6 +173,23 @@ class RequestController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+    public function assignRequest(AssignRequestRequest $assignRequest): JsonResponse
+    {
 
-
+        try {
+            $data = $this->requestService->assignRequest($assignRequest->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function approveRequest(ApproveRequestRequest $approveRequest): JsonResponse
+    {
+        try {
+            $result = $this->requestService->approveRequest($approveRequest->validated());
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
 }

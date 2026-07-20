@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\DTOs\ApproveRequestDTO;
+use App\DTOs\AssignRequestDTO;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\RequestTypeRepositoryInterface;
 use App\DTOs\RequestTypeDTO;
@@ -38,6 +40,7 @@ class RequestService
 
     public function getStudentRequests($request): array
     {
+
         $studentId = $this->getStudentId();
         abort_if(!$studentId, 403);
         $status = null;
@@ -69,11 +72,61 @@ class RequestService
         ];
     }
 
+    public function getStaffRequests($request): array
+    {
+
+        $userId = auth()->id();
+        abort_if(!$userId, 403, 'يجب تسجيل الدخول أولاً.');
+
+        $name = null;
+        $collegeId = $request['college_id'];
+        $perPage = 15;
+        if (empty($collegeId)) {
+            abort(422, 'معرف الكلية مطلوب.');
+        }
+        if ($request instanceof Request) {
+            $name = $request->input('name');
+            $collegeId = $request->input('college_id');
+            $perPage = $request->input('per_page', 15);
+        } elseif (is_array($request)) {
+            $name = $request['name'] ?? null;
+            $perPage = $request['per_page'] ?? 15;
+        }
+
+        $perPage = (int) $perPage;
+        $perPage = $perPage > 0 ? $perPage : 15;
+
+        $requests = $this->requestRepository->getStaffRequestsWithFilters(
+            $userId,
+            [
+                'name' => $name,
+                'college_id' => $collegeId,
+            ],
+            $perPage
+        );
+
+        return [
+            'data' => RequestListDTO::fromPaginator($requests),
+            'message' => 'قائمة الطلبات المكلف بتوقيعها.',
+            'code' => 200,
+        ];
+    }
+
     public function getRequestDetails(int $requestId): array
     {
         $studentId = $this->getStudentId();
         abort_if(!$studentId, 403);
         $request = $this->requestRepository->findWithDetailsAndMedia($requestId, $studentId);
+        abort_if(!$request, 403);
+        return [
+            'data' => RequestDetailsDTO::fromModel($request)->toArray(),
+            'message' => 'تفاصيل الطلب المحدد.',
+            'code' => 200,
+        ];
+    }
+    public function getStaffRequestDetails(int $requestId): array
+    {
+        $request = $this->requestRepository->staffFindWithDetailsAndMedia($requestId);
         abort_if(!$request, 403);
         return [
             'data' => RequestDetailsDTO::fromModel($request)->toArray(),
@@ -204,7 +257,7 @@ class RequestService
         ];
     }
 
-        public function getAvailableRequestTypes(): array
+    public function getAvailableRequestTypes(): array
     {
         $user = Auth::user();
 
@@ -246,7 +299,7 @@ class RequestService
         ];
     }
 
-        public function getRequestsList(): array
+    public function getRequestsList(): array
     {
         $user = Auth::user();
 
@@ -307,7 +360,7 @@ class RequestService
         ];
     }
 
-        public function RequestDetails(int $requestId): array
+    public function RequestDetails(int $requestId): array
     {
         $user = Auth::user();
         $student = Student::where('person_id', $user->person_id)->first();
@@ -386,9 +439,55 @@ class RequestService
             'code' => 200,
         ];
     }
-
-
-
-
-
+    public function assignRequest(array $data): array
+    {
+        $userId = auth()->id();
+        abort_if(!$userId, 403, 'يجب تسجيل الدخول أولاً.');
+        $requestId = $data['request_id'] ?? null;
+        $collegeId = $data['college_id'] ?? null;
+        if (!$requestId || !$collegeId) {
+            abort(422, 'بيانات غير مكتملة.');
+        }
+        $result = $this->requestRepository->assignRequestToUser(
+            (int) $requestId,
+            $userId,
+            (int) $collegeId
+        );
+        $dto = new AssignRequestDTO(
+            $result['request_id'],
+            $result['status'],
+            'تم استلام الطلب بنجاح.'
+        );
+        return [
+            'data' => $dto->toArray(),
+            'message' => 'تم استلام الطلب بنجاح.',
+            'code' => 200,
+        ];
+    }
+    public function approveRequest(array $data): array
+    {
+        $userId = auth()->id();
+        abort_if(!$userId, 403, 'يجب تسجيل الدخول أولاً.');
+        $requestUserId = $data['request_user_id'] ?? null;
+        $decision = $data['decision'] ?? null;
+        if (!$requestUserId || !$decision) {
+            abort(422, 'بيانات غير مكتملة.');
+        }
+        $result = $this->requestRepository->approveRequest(
+            (int) $requestUserId,
+            $userId,
+            $decision
+        );
+        $dto = new ApproveRequestDTO(
+            $result['request_id'],
+            $result['status'],
+            $result['decision'],
+            $decision === 'approved' ? 'تمت الموافقة على الطلب.' : 'تم رفض الطلب.'
+        );
+        return [
+            'data' => $dto->toArray(),
+            'message' => $dto->message,
+            'code' => 200,
+        ];
+    }
 }

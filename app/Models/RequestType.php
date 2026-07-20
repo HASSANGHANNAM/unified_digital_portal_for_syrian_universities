@@ -14,6 +14,7 @@ class RequestType extends Model
     protected $fillable = [
         'name',
         'description',
+        'requires_course',
         'university_director_acceptance',
         'college_dean_acceptance',
         'department_head_acceptance',
@@ -23,6 +24,7 @@ class RequestType extends Model
     ];
 
     protected $casts = [
+        'requires_course' => 'boolean',
         'university_director_acceptance' => 'boolean',
         'college_dean_acceptance' => 'boolean',
         'department_head_acceptance' => 'boolean',
@@ -31,6 +33,7 @@ class RequestType extends Model
         'doctor_acceptance' => 'boolean',
     ];
 
+    // ===== العلاقات (تم الإبقاء على جميعها) =====
     public function requests()
     {
         return $this->hasMany(StudentRequest::class);
@@ -50,4 +53,38 @@ class RequestType extends Model
     {
         return $this->hasMany(RequestTypeAvailability::class);
     }
+
+    // ===== الدوال الجديدة =====
+    /**
+     * تجلب الأدوار المطلوبة لهذا النوع من الطلبات، مرتبة حسب التسلسل الهرمي.
+     *
+     * @return array
+     */
+    public function getRequiredRoles(): array
+    {
+        $hierarchy = config('university.hierarchy');
+        $roles = [];
+
+        foreach ($hierarchy as $role) {
+            $field = $role . '_acceptance';
+            if ($this->$field) {
+                $roles[] = $role;
+            }
+        }
+
+        return $roles;
+    }
+
+    /**
+     * Accessor لتسهيل الوصول إلى required_roles كـ property.
+     *
+     * @return array
+     */
+    public function getRequiredRolesAttribute()
+    {
+        return $this->getRequiredRoles();
+    }
+
+    // ===== Appends لتضمينها في JSON =====
+    protected $appends = ['required_roles'];
 }

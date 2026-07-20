@@ -17,7 +17,7 @@ class UserSignature extends Model
     protected $fillable = [
         'user_id',
         'signature_uuid',
-        'path', // ✅ إضافة عمود path
+        'path',
     ];
 
     /**

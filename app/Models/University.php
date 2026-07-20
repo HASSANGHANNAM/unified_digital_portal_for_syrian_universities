@@ -9,7 +9,7 @@ class University extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address', 'accreditation', 'university_director_id'];
+    protected $fillable = ['name', 'address', 'accreditation', 'university_director_id', 'logo_path'];
 
     // مدير الجامعة
     public function director()

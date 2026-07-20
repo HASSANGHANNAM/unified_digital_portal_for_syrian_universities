@@ -61,13 +61,18 @@ Route::prefix('V1')->group(function () {
         Route::get('/materials/{materialId}/download', [MaterialController::class, 'downloadMaterial']);
         Route::get('/requestsInStudentCollege', [RequestController::class, 'requestsInStudentCollege']);
         Route::get('/requests', [RequestController::class, 'getStudentRequests']);
+        Route::get('/staff_requests', [RequestController::class, 'staffRequests']);
         Route::post('/requests', [RequestController::class, 'store']);
         Route::get('/requests/{requestId}', [RequestController::class, 'getRequestDetails']);
+        Route::post('/requests/{requestId}/assign', [RequestController::class, 'assignRequest']);
+        Route::get('/staff_requests/{requestId}', [RequestController::class, 'getStaffRequestDetails']);
         Route::post('/requests/{requestId}/cancel', [RequestController::class, 'cancelRequest']);
         Route::get('/allRequests', [RequestController::class, 'getAllRequests']);
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest']);
         Route::get('/request-type-media/{request_type_id}', [RequestController::class, 'getMediaByRequestTypeId']);
+        Route::post('/request-user/{requestUserId}/approve', [RequestController::class, 'approveRequest']);
         Route::get('/media/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewMedia']);
+        Route::get('/pdf/{request}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewPdf']);
         Route::get('/allGrades', [GradeController::class, 'getAllGrades']);
         Route::post('/addGrade', [GradeController::class, 'addGrade']);
         Route::get('/my-grades/{courseId}', [GradeController::class, 'getgrade']); // موجودة هنا في HEAD

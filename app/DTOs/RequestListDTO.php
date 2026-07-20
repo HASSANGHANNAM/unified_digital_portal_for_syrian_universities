@@ -10,7 +10,8 @@ class RequestListDTO
     public function __construct(
         public readonly string $id,
         public readonly string $student_id,
-        public readonly string $status,
+        public readonly string $status,          // الحالة الأصلية (داخلية)
+        public readonly string $display_status,  // الحالة المبسطة للواجهة (جديدة)
         public readonly string $request_type_id,
         public readonly ?string $submission_date,
         public readonly ?string $request_type_name
@@ -18,6 +19,7 @@ class RequestListDTO
 
     public static function fromModel(Request $request): self
     {
+        // معالجة تاريخ التقديم
         $submission = null;
         if ($request->submission_date instanceof \DateTime) {
             $submission = $request->submission_date->format('Y-m-d H:i:s');
@@ -25,10 +27,14 @@ class RequestListDTO
             $submission = (string) $request->submission_date;
         }
 
+        // 🔥 الحصول على الحالة المبسطة (waiting_doctor بدلاً من generating_doctor_pdf)
+        $displayStatus = $request->getDisplayStatus();
+
         return new self(
             (string) $request->id,
             (string) $request->student_id,
-            (string) $request->status,
+            (string) $request->status,          // الحالة الداخلية (generating_...)
+            $displayStatus,                     // الحالة المعروضة للمستخدم (waiting_...)
             (string) $request->request_type_id,
             $submission,
             $request->requestType?->name ? (string) $request->requestType->name : null
@@ -40,7 +46,7 @@ class RequestListDTO
         return [
             'id' => $this->id,
             'student_id' => $this->student_id,
-            'status' => $this->status,
+            'status' => $this->display_status,   // 🔥 نعيد للمستخدم الحالة المبسطة
             'request_type_id' => $this->request_type_id,
             'submission_date' => $this->submission_date,
             'request_type_name' => $this->request_type_name,

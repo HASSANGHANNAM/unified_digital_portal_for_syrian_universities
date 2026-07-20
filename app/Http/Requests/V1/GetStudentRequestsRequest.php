@@ -20,16 +20,29 @@ class GetStudentRequestsRequest extends FormRequest
                 'nullable',
                 'string',
                 Rule::in([
+                    // الحالات الأساسية
                     Request::STATUS_PENDING,
+
+                    // حالات التجهيز (Generating)
+                    Request::STATUS_GENERATING_DOCTOR,
+                    Request::STATUS_GENERATING_EXAMS_STUFF,
+                    Request::STATUS_GENERATING_STUDENT_STUFF,
+                    Request::STATUS_GENERATING_DEPARTMENT_HEAD,
+                    Request::STATUS_GENERATING_COLLEGE_DEAN,
+                    Request::STATUS_GENERATING_UNIVERSITY_DIRECTOR,
+
+                    // حالات الانتظار (Waiting)
+                    Request::STATUS_WAITING_DOCTOR,
+                    Request::STATUS_WAITING_EXAMS_STUFF,
+                    Request::STATUS_WAITING_STUDENT_STUFF,
+                    Request::STATUS_WAITING_DEPARTMENT_HEAD,
+                    Request::STATUS_WAITING_COLLEGE_DEAN,
+                    Request::STATUS_WAITING_UNIVERSITY_DIRECTOR,
+
+                    // الحالات النهائية
                     Request::STATUS_COMPLETED,
                     Request::STATUS_REJECTED,
                     Request::STATUS_CANCELLED,
-                    Request::STATUS_UNIVERSITY_DIRECTOR_PROCESSING,
-                    Request::STATUS_COLLEGE_DEAN,
-                    Request::STATUS_DEPARTMENT_HEAD,
-                    Request::STATUS_STUDENT_STUFF_PROCESSING,
-                    Request::STATUS_EXAMS_STUFF,
-                    Request::STATUS_DOCTOR_PROCESSING,
                 ]),
             ],
             'name' => ['nullable', 'string'],

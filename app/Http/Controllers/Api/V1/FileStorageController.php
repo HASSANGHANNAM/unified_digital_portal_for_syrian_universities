@@ -17,4 +17,8 @@ class FileStorageController extends Controller
     {
         return $this->mediaService->viewMedia($id);
     }
+    public function viewPdf(string $id): StreamedResponse
+    {
+        return $this->mediaService->viewPdf($id);
+    }
 }

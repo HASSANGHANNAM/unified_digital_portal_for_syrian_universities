@@ -31,33 +31,51 @@ class GenerateRequestPdfJob implements ShouldQueue
         ini_set('memory_limit', '512M');
         $request = $this->request;
 
-        // 1. التحقق من اكتمال الطلب
-        if (!$this->isRequestFullyApproved($request->id)) {
-            Log::warning('الطلب غير مكتمل أو غير موافق عليه، لن يتم توليد PDF', [
+        // ============================================================
+        // 1. التحقق من أن الطلب في حالة تسمح بتوليد PDF
+        //    - pending: أول توليد (بدون توقيعات)
+        //    - generating_...: توليد بعد كل توقيع (مع التواقيع المسجلة)
+        // ============================================================
+        $allowedStatuses = ['pending'];
+        $isGenerating = str_starts_with($request->status, 'generating_');
+
+        if (!in_array($request->status, $allowedStatuses) && !$isGenerating) {
+            Log::warning('الطلب ليس في حالة تسمح بتوليد PDF', [
                 'request_id' => $request->id,
                 'status' => $request->status,
             ]);
             return;
         }
 
-        // 2. جلب العلاقات (مع إضافة person للمستخدم)
+        // ============================================================
+        // 2. جلب العلاقات المطلوبة
+        // ============================================================
         $request->load([
             'student.person',
             'student.college',
             'student.college.university',
             'requestType',
-            'requestUsers.user.person',
-            'requestUsers.userSignature',
+            // جلب التواقيع المسجلة فقط (approved)
+            'requestUsers' => function ($query) {
+                $query->where('status', 'approved')
+                    ->with(['user.person', 'userSignature']);
+            },
         ]);
 
+        // ============================================================
         // 3. اسم نوع الطلب
+        // ============================================================
         $requestTypeName = $request->requestType?->name ?? 'غير محدد';
 
+        // ============================================================
         // 4. الشعارات
+        // ============================================================
         $appLogo = $this->getAppLogoBase64();
-        $collegeLogo = $this->getCollegeLogoBase64($request->student?->college_id);
+        $universityLogo = $this->getUniversityLogoBase64($request->student?->college?->university_id);
 
-        // 5. تجهيز التواقيع (الاسم من جدول persons)
+        // ============================================================
+        // 5. تجهيز التواقيع المسجلة (approved)
+        // ============================================================
         $signatures = $request->requestUsers->map(function ($signature) {
             $data = $signature->toArray();
             $data['user_name'] = $signature->user?->person?->full_name ?? 'غير معروف';
@@ -76,7 +94,9 @@ class GenerateRequestPdfJob implements ShouldQueue
             return $data;
         })->toArray();
 
-        // 6. البيانات حسب نوع الطلب (باستخدام str_contains)
+        // ============================================================
+        // 6. البيانات حسب نوع الطلب
+        // ============================================================
         $grades = null;
         $academicYears = null;
         $certificateData = null;
@@ -93,38 +113,30 @@ class GenerateRequestPdfJob implements ShouldQueue
         }
 
         // ============================================================
-        // ✅ سجلات للتحقق
-        // ============================================================
-        Log::info('========== بداية توليد PDF ==========');
-        Log::info('requestTypeName: ' . $requestTypeName);
-        Log::info('grades: ' . json_encode($grades));
-        Log::info('=====================================');
-
-        // ============================================================
-        // 7. توليد المحتوى الرئيسي (مع تمرير تاريخ الطلب للعلامة المائية)
+        // 7. توليد المحتوى الرئيسي
         // ============================================================
         $mainHtml = view('pdf.request_main', [
             'request' => $request,
             'requestTypeName' => $requestTypeName,
             'appLogo' => $appLogo,
-            'collegeLogo' => $collegeLogo,
+            'universityLogo' => $universityLogo,
             'grades' => $grades,
             'academicYears' => $academicYears,
             'certificateData' => $certificateData,
             'equivalencyData' => $equivalencyData,
-            'signatures' => $signatures,
+            'signatures' => $signatures, // تمرير التواقيع المسجلة فقط
             'submissionDate' => $request->submission_date ?? $request->created_at ?? now(),
         ])->render();
 
         // ============================================================
-        // 8. توليد الفوتر (التوقيعات) من ملف منفصل
+        // 8. توليد الفوتر (التوقيعات)
         // ============================================================
         $footerHtml = view('pdf.signatures_footer', [
             'signatures' => $signatures,
         ])->render();
 
         // ============================================================
-        // 9. إنشاء الـ PDF مع إضافة العلامة المائية
+        // 9. إنشاء الـ PDF مع العلامة المائية
         // ============================================================
         $mpdf = new Mpdf([
             'mode' => 'utf-8',
@@ -134,11 +146,8 @@ class GenerateRequestPdfJob implements ShouldQueue
             'margin_bottom' => 60,
         ]);
 
-        // ✅ إضافة العلامة المائية (نفس توقيت الفوتر: وقت إنشاء الـ PDF)
         $date = now()->format('Y-m-d H:i:s');
-
-        // ✅ الطريقة الصحيحة لتعيين العلامة المائية مع الزاوية والشفافية
-        $mpdf->SetWatermarkText($date, 0.06, -45); // (النص, الشفافية, الزاوية)
+        $mpdf->SetWatermarkText($date, 0.06, -45);
         $mpdf->showWatermarkText = true;
 
         $mpdf->SetHTMLFooter($footerHtml);
@@ -163,18 +172,39 @@ class GenerateRequestPdfJob implements ShouldQueue
 
         Storage::disk('local')->put($path, $pdfContent);
 
+        // تحديث مسار PDF في قاعدة البيانات
         $request->pdf_path = $path;
         $request->save();
 
+        // ============================================================
+        // 11. 🔥 تغيير الحالة إلى waiting_{first_role} إذا كانت pending
+        // ============================================================
+        if ($request->status === 'pending') {
+            $firstRole = $request->requestType?->getRequiredRoles()[0] ?? null;
+            if ($firstRole) {
+                $request->status = 'waiting_' . $firstRole;
+                $request->save();
+
+                Log::info('تم تغيير حالة الطلب إلى waiting_' . $firstRole, [
+                    'request_id' => $request->id,
+                ]);
+            }
+        }
+
+        // ============================================================
+        // 12. تسجيل النجاح
+        // ============================================================
         Log::info('تم توليد PDF للطلب', [
             'request_id' => $request->id,
             'pdf_path' => $path,
             'type' => $requestTypeName,
+            'signatures_count' => count($signatures),
+            'status' => $request->status,
         ]);
     }
 
     // ================================================================
-    // دوال مساعدة
+    // دوال مساعدة (لم تتغير)
     // ================================================================
     protected function getStudentGrades(int $studentId): array
     {
@@ -223,6 +253,26 @@ class GenerateRequestPdfJob implements ShouldQueue
         }
 
         $path = $college->logo_path;
+        if (!Storage::disk('local')->exists($path)) {
+            return null;
+        }
+
+        $binary = Storage::disk('local')->get($path);
+        return 'data:image/png;base64,' . base64_encode($binary);
+    }
+
+    protected function getUniversityLogoBase64(?int $universityId): ?string
+    {
+        if (!$universityId) {
+            return null;
+        }
+
+        $university = \App\Models\University::find($universityId);
+        if (!$university || !$university->logo_path) {
+            return null;
+        }
+
+        $path = $university->logo_path;
         if (!Storage::disk('local')->exists($path)) {
             return null;
         }

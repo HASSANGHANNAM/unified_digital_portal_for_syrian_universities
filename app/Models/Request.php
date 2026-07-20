@@ -12,14 +12,26 @@ class Request extends Model
     protected $table = 'requests';
 
     public const STATUS_PENDING = 'pending';
+
+    // ===== حالات التجهيز (Generating) =====
+    public const STATUS_GENERATING_DOCTOR = 'generating_doctor_pdf';
+    public const STATUS_GENERATING_EXAMS_STUFF = 'generating_exams_stuff_pdf';
+    public const STATUS_GENERATING_STUDENT_STUFF = 'generating_student_stuff_pdf';
+    public const STATUS_GENERATING_DEPARTMENT_HEAD = 'generating_department_head_pdf';
+    public const STATUS_GENERATING_COLLEGE_DEAN = 'generating_college_dean_pdf';
+    public const STATUS_GENERATING_UNIVERSITY_DIRECTOR = 'generating_university_director_pdf';
+
+    // ===== حالات الانتظار (Waiting) =====
+    public const STATUS_WAITING_DOCTOR = 'waiting_doctor';
+    public const STATUS_WAITING_EXAMS_STUFF = 'waiting_exams_stuff';
+    public const STATUS_WAITING_STUDENT_STUFF = 'waiting_student_stuff';
+    public const STATUS_WAITING_DEPARTMENT_HEAD = 'waiting_department_head';
+    public const STATUS_WAITING_COLLEGE_DEAN = 'waiting_college_dean';
+    public const STATUS_WAITING_UNIVERSITY_DIRECTOR = 'waiting_university_director';
+
+    // ===== الحالات النهائية =====
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_REJECTED = 'rejected';
-    public const STATUS_UNIVERSITY_DIRECTOR_PROCESSING = 'university_director_processing';
-    public const STATUS_COLLEGE_DEAN = 'college_dean';
-    public const STATUS_DEPARTMENT_HEAD = 'department_head';
-    public const STATUS_STUDENT_STUFF_PROCESSING = 'student_stuff_processing';
-    public const STATUS_EXAMS_STUFF = 'exams_stuff';
-    public const STATUS_DOCTOR_PROCESSING = 'doctor_processing';
     public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
@@ -122,5 +134,29 @@ class Request extends Model
             ->toArray();
 
         return empty(array_diff($requiredRoles, $approvedRoles));
+    }
+    public function getDisplayStatus(): string
+    {
+        $finalStatuses = [
+            self::STATUS_PENDING,
+            self::STATUS_COMPLETED,
+            self::STATUS_REJECTED,
+            self::STATUS_CANCELLED,
+        ];
+
+        if (in_array($this->status, $finalStatuses)) {
+            return $this->status;
+        }
+
+        if (str_starts_with($this->status, 'generating_')) {
+            return str_replace(['generating_', '_pdf'], ['waiting_', ''], $this->status);
+        }
+
+        return $this->status;
+    }
+    public function assignedUsers()
+    {
+        return $this->belongsToMany(User::class, 'request_user')
+            ->withPivot('role', 'status', 'signed_at');
     }
 }

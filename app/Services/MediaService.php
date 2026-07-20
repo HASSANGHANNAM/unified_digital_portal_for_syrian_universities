@@ -3,12 +3,14 @@
 namespace App\Services;
 
 use App\DTOs\MediaFileDTO;
+use App\Models\Request;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Gate;
 
 class MediaService
 {
@@ -149,5 +151,21 @@ class MediaService
             'size' => $size,
             'size_bytes' => $file->getSize(),
         ];
+    }
+    public function viewPdf($requestId)
+    {
+        $request = Request::findOrFail($requestId);
+
+        Gate::authorize('viewPdf', $request);
+
+        if (empty($request->pdf_path)) {
+            abort(404, 'لم يتم إنشاء ملف PDF لهذا الطلب بعد.');
+        }
+
+        if (!Storage::disk('private')->exists($request->pdf_path)) {
+            abort(404, 'ملف PDF غير موجود على الخادم.');
+        }
+
+        return Storage::disk('private')->response($request->pdf_path);
     }
 }
