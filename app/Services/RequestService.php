@@ -198,7 +198,6 @@ class RequestService
         $data = [];
         $collegeId = $this->getStudentCollegeId();
         $types = $this->requestTypeRepository->getByCollegeId($collegeId, $request);
-
         $data = RequestTypeDTO::fromServiceData($types);
         return [
             'data' => $data,

@@ -12,7 +12,8 @@ class RequestTypeDTO
         public readonly int $id,
         public readonly string $name,
         public readonly ?string $description,
-        public readonly bool $is_available
+        public readonly bool $is_available,
+        public readonly bool $requires_course,
     ) {}
 
     public static function fromModel(RequestType $model): self
@@ -22,7 +23,8 @@ class RequestTypeDTO
             id: $model->id,
             name: $model->name,
             description: $model->description,
-            is_available: (bool) ($availability->is_available ?? false)
+            is_available: (bool) ($availability->is_available ?? false),
+            requires_course: (bool) ($model->requires_course ?? false)
         );
     }
 
@@ -32,6 +34,7 @@ class RequestTypeDTO
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'requires_course' => $this->requires_course,
             'is_available' => $this->is_available,
         ];
     }
