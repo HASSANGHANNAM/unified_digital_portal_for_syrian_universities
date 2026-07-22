@@ -98,7 +98,10 @@ class RequestRepository
         if (!$authorized) {
             abort(403, 'ليس لديك صلاحية للوصول إلى طلبات هذه الكلية.');
         }
-        $query = $this->model->newQuery()
+        $query = $this->model->with([
+            'course.universalCourse',
+            'processedBy.person'
+        ])->newQuery()
             ->whereIn('requests.status', $waitingStatuses)
             ->where(function ($query) use ($userId, $requestRoles) {
                 $query->orWhereDoesntHave('assignedUsers', function ($q) use ($requestRoles) {
@@ -143,14 +146,14 @@ class RequestRepository
     {
         return $this->model->newQuery()
             ->with([
-                'requestType:id,name,description',
+                'course.universalCourse',
+                'processedBy.person',
                 'media',
-                'student.person'
+                'requestType.requestTypeMedia'
             ])
             ->where('id', $requestId)
             ->first();
     }
-
     public function updateStatus(int $requestId, string $status): ?Request
     {
         $r = $this->model->find($requestId);

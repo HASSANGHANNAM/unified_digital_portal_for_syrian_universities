@@ -104,9 +104,8 @@ class RequestService
             ],
             $perPage
         );
-
         return [
-            'data' => RequestListDTO::fromPaginator($requests),
+            'data' => RequestListDTO::fromPaginatorForStaff($requests),
             'message' => 'قائمة الطلبات المكلف بتوقيعها.',
             'code' => 200,
         ];
@@ -128,13 +127,74 @@ class RequestService
     {
         $request = $this->requestRepository->staffFindWithDetailsAndMedia($requestId);
         abort_if(!$request, 403);
+        if (!$request) {
+            return [
+                'data' => [],
+                'message' => 'Request not found.',
+                'code' => 404,
+            ];
+        }
+        if ($request->pdf_path != null) {
+            $request->pdf_url = $request->id ? 'pdf/' . $request->id : '';
+        } else {
+            $request->pdf_url = null;
+        }
+        $data = [
+            'request_id' => $request->id,
+            'reason' => $request->reason,
+            'submission_date' => $request->submission_date,
+            'decision_date' => $request->decision_date,
+            'decision_reason' => $request->decision_reason,
+            'pdf_url' => $request->pdf_url,
+
+            'course' => $request->course
+                ? [
+                    'name' => $request->course->universalCourse->name ?? '',
+                    'code' => $request->course->code ?? '',
+                ]
+                : null,
+
+            'status' => $request->status,
+
+            'staff' => $request->processedBy
+                ? [
+                    'name' => $request->processedBy->person->full_name ?? '',
+                ]
+                : null,
+
+            'requestType' => [
+                'request_type_id' => $request->requestType->id,
+                'name' => $request->requestType->name,
+                'description' => $request->requestType->description,
+
+                'requestTypeMedia' => $request->requestType->requestTypeMedia
+                    ->map(function ($media) {
+                        return [
+                            'id' => $media->id,
+                            'name' => $media->name,
+                            'type' => $media->type,
+                        ];
+                    })
+                    ->values(),
+            ],
+
+            'media' => $request->media
+                ->map(function ($media) {
+                    return [
+                        'id' => $media->id,
+                        'name' => $media->name,
+                        'type' => $media->type,
+                    ];
+                })
+                ->values(),
+        ];
+
         return [
-            'data' => RequestDetailsDTO::fromModel($request)->toArray(),
-            'message' => 'تفاصيل الطلب المحدد.',
+            'data' => $data,
+            'message' => 'Request details retrieved successfully.',
             'code' => 200,
         ];
     }
-
     public function createRequest(array $data): array
     {
         $message = 'تقديم طلب طلابي جديد.';
@@ -382,13 +442,18 @@ class RequestService
                 'code' => 404,
             ];
         }
-
+        if ($request->pdf_path != null && $request->status !== 'completed') {
+            $request->pdf_url = $request->id ? 'pdf/' . $request->id : '';
+        } else {
+            $request->pdf_url = null;
+        }
         $data = [
             'request_id' => $request->id,
             'reason' => $request->reason,
             'submission_date' => $request->submission_date,
             'decision_date' => $request->decision_date,
             'decision_reason' => $request->decision_reason,
+            'pdf_url' => $request->pdf_url,
 
             'course' => $request->course
                 ? [

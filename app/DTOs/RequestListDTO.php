@@ -70,4 +70,50 @@ class RequestListDTO
             ],
         ];
     }
+
+    /**
+     * 🔥 تابع جديد خاص بـ Staff Requests
+     * يستخدم العلاقات المتداخلة: course.universalCourse و processedBy.person
+     */
+    public static function fromPaginatorForStaff(LengthAwarePaginator $paginator): array
+    {
+        return [
+            'requests' => $paginator->getCollection()->map(function ($request) {
+                // استخراج اسم المقرر من universalCourse
+                $course = null;
+                if ($request->course && $request->course->universalCourse) {
+                    $course = [
+                        'name' => $request->course->universalCourse->name,
+                        'code' => $request->course->code,
+                    ];
+                }
+
+                // استخراج اسم الموظف من person
+                $staff = null;
+                if ($request->processedBy && $request->processedBy->person) {
+                    $staff = [
+                        'name' => $request->processedBy->person->full_name,
+                    ];
+                }
+
+                return [
+                    'request_id'      => $request->id,
+                    'request_type_id' => $request->request_type_id,
+                    'reason'          => $request->reason,
+                    'submission_date' => $request->submission_date?->toISOString() ?? (string) $request->submission_date,
+                    'decision_date'   => $request->decision_date?->toISOString(),
+                    'decision_reason' => $request->decision_reason,
+                    'course'          => $course,
+                    'status'          => $request->status,
+                    'staff'           => $staff,
+                ];
+            })->toArray(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page'    => $paginator->lastPage(),
+                'per_page'     => $paginator->perPage(),
+                'total'        => $paginator->total(),
+            ],
+        ];
+    }
 }
