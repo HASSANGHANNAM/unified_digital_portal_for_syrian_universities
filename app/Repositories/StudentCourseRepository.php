@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\StudentCourse;
+use App\Models\StudentCoursePart;
 use App\Repositories\Contracts\StudentCourseRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -169,4 +170,65 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->where('semester', $semester)
             ->first();
     }
+
+        public function getUnpublishedMarks(int $courseId,int $perPage, array $filters = [])
+    {
+        $query = StudentCourse::with([
+            'course.universalCourse',
+            'student.person',
+            'parts.coursePart'
+        ])
+        ->where('course_id', $courseId)
+        ->whereHas('parts', function ($q) {
+            $q->where('published', 0);
+        });
+
+        if (!empty($filters['course_name'])) {
+            $query->whereHas('course.universalCourse', function ($q) use ($filters) {
+                $q->where('name', 'like', '%' . $filters['course_name'] . '%');
+            });
+        }
+
+        if (!empty($filters['academic_year'])) {
+            $query->where('academic_year', $filters['academic_year']);
+        }
+
+        if (!empty($filters['semester'])) {
+            $query->where('semester', $filters['semester']);
+        }
+
+        $query->with([
+            'parts' => function ($q) {
+                $q->where('published', 0)
+                ->with('coursePart');
+            }
+        ]);
+
+        return $query->paginate($perPage);
+    }
+
+        public function publishMarks(int $courseId,array $filters = [])
+    {
+        $query = StudentCoursePart::query()
+            ->where('published', 0)
+            ->whereHas('studentCourse', function ($q) use ($filters, $courseId) {
+                $q->where('course_id', $courseId);
+                if (!empty($filters['academic_year'])) {
+                    $q->where('academic_year', $filters['academic_year']);
+                }
+                if (!empty($filters['semester'])) {
+                    $q->where('semester', $filters['semester']);
+                }
+                if (!empty($filters['course_name'])) {
+                    $q->whereHas('course.universalCourse', function ($qq) use ($filters) {
+                        $qq->where('name', 'like', '%' . $filters['course_name'] . '%');
+                    });
+                }
+            });
+        return $query->update([
+            'published' => 1
+        ]);
+    }
+
+
 }

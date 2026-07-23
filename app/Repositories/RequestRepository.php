@@ -6,6 +6,8 @@ use App\Models\Request;
 use App\Models\RequestUser;
 use App\Models\User;
 use App\Models\UserSignature;
+use App\Models\RequestType;
+use App\Models\StudentCoursePart;
 use App\Services\Traits\RequestRoleMapper;
 use Illuminate\Support\Facades\Gate;
 use App\Policies\RequestPolicy;
@@ -342,4 +344,64 @@ class RequestRepository
             'decision' => 'approved',
         ];
     }
+        public function canUpdateGrade(User $user, StudentCoursePart $studentCoursePart): array
+    {
+        if ($user->hasRole('Examination'))
+        {
+        return [
+            'status'  => true,
+            'message' => 'Allowed by Examination department.',
+            'code'    => 200,
+        ];
+        }
+        $requestTypeName = null;
+
+        if ($user->hasRole('Instructor')) {
+            $requestTypeName = 'طلب إعادة تصحيح';
+        }
+
+        elseif ($user->hasRole('TeachingAssistant')) {
+            $requestTypeName = 'اعتراض على علامة';
+        }
+
+        else {
+            return [
+                'status' => false,
+                'message' => 'Unauthorized.',
+                'code' => 403,
+            ];
+        }
+
+        $requestType = RequestType::where('name', $requestTypeName)->first();
+
+        if (!$requestType) {
+            return [
+                'status' => false,
+                'message' => 'Request type not found.',
+                'code' => 404,
+            ];
+        }
+
+        $exists = $this->model
+            ->where('request_type_id', $requestType->id)
+            ->where('student_id', $studentCoursePart->studentCourse->student_id)
+            ->where('course_id', $studentCoursePart->studentCourse->course_id)
+            ->where('status', 'pending')
+            ->exists();
+
+        if (!$exists) {
+            return [
+                'status' => false,
+                'message' => 'No valid objection request found.',
+                'code' => 403,
+            ];
+        }
+
+        return [
+            'status' => true,
+            'message' => '',
+            'code' => 200,
+        ];
+    }
+
 }

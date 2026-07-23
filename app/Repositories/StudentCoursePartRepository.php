@@ -53,10 +53,13 @@ class StudentCoursePartRepository implements StudentCoursePartRepositoryInterfac
             ]);
     }
 
-        public function getPartById(int $id)
+    public function getPartById(int $id)
     {
         return $this->model
-            ->with('coursePart')
+            ->with([
+                'coursePart',
+                'studentCourse'
+            ])
             ->find($id);
     }
 

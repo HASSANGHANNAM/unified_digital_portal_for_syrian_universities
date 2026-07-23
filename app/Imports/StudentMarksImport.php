@@ -17,21 +17,24 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class StudentMarksImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
     private int $courseId;
+    private string $academicYear;
+    private int $semester;
 
 
     private int $importedCount = 0;
     private array $skippedRows = [];
     private array $errors = [];
 
-    public function __construct(int $courseId)
+    public function __construct(int $courseId, string $academicYear, int $semester)
     {
         $this->courseId = $courseId;
+        $this->academicYear = $academicYear;
+        $this->semester = $semester;
     }
 
 
     public function collection(Collection $rows): void
     {
-
         $course = Course::with('parts')->find($this->courseId);
         if (!$course) {
             $this->errors[] = ['error' => 'Course not found', 'course_id' => $this->courseId];
@@ -46,6 +49,7 @@ class StudentMarksImport implements ToCollection, WithHeadingRow, WithChunkReadi
             $studentLookup = [];
             $studentNumbers = [];
 
+            // 1. تجميع الأرقام الجامعية للتحضير للـ Eager Loading
             foreach ($rows as $row) {
                 $rowMap = $this->normalizeRowKeys($row);
                 $studentNumber = $this->findStudentNumber($rowMap);
@@ -62,8 +66,9 @@ class StudentMarksImport implements ToCollection, WithHeadingRow, WithChunkReadi
                     ->toArray();
             }
 
+            // 2. معالجة الصفوف
             foreach ($rows as $index => $row) {
-                $rowNumber = $index + 2;
+                $rowNumber = $index + 2; // مراعاة السطر الأول كـ Header
                 $rowMap = $this->normalizeRowKeys($row);
 
                 try {
@@ -73,61 +78,84 @@ class StudentMarksImport implements ToCollection, WithHeadingRow, WithChunkReadi
                         continue;
                     }
 
-                    $student = isset($studentLookup[$studentNumber]) ? (object)$studentLookup[$studentNumber] : Student::where('student_id_number', $studentNumber)->first();
+                    $student = isset($studentLookup[$studentNumber])
+                        ? (object)$studentLookup[$studentNumber]
+                        : Student::where('student_id_number', $studentNumber)->first();
+
                     if (!$student) {
                         $this->skippedRows[] = ['row' => $rowNumber, 'student_number' => $studentNumber, 'reason' => 'student_not_found'];
                         continue;
                     }
 
-                    $total = 0.0;
                     $partsData = [];
                     $matchedPartCount = 0;
 
+                    // مطابقة واستخراج الأجزاء الموجودة في الشيت فقط
                     foreach ($parts as $normalizedHeader => $part) {
                         $value = $this->findPartValue($rowMap, $part);
 
-                        if ($value === null || $value === '') {
+                        // إذا كان العمود غير موجود مطلقاً في الشيت المرفوع، يتم تخطيه وعدم تصفير علامته
+                        if ($value === null) {
+                            continue;
+                        }
+                        $value = trim((string)$value);
+
+                        // إذا كان العمود موجوداً لكن الخلية فارغة
+                        if ($value === '') {
                             $mark = 0.0;
                         } else {
-                            $value = trim($value);
                             if (!is_numeric($value)) {
                                 throw new \RuntimeException("Non-numeric mark for part '{$part->name}' in row {$rowNumber}");
                             }
                             $mark = (float)$value;
                         }
 
+                        // التحقق من أن العلامة ضمن المجال المسموح للقسم
                         if (isset($part->percentage) && $part->percentage !== null) {
                             if ($mark < 0 || $mark > (float)$part->percentage) {
                                 throw new \RuntimeException("Mark for '{$part->name}' out of allowed range (0-{$part->percentage}) in row {$rowNumber}");
                             }
                         }
-                        if ($value !== null && $value !== '') {
-                            $matchedPartCount++;
-                        }
 
-                        $total += $mark;
+                        $matchedPartCount++;
                         $partsData[] = ['part' => $part, 'mark' => $mark];
                     }
 
-                    if ($matchedPartCount === 0 && $total == 0.0) {
+                    // إذا لم يحتوي الشيت على أي عمود يطابق أجزاء الكورس
+                    if ($matchedPartCount === 0) {
                         $this->skippedRows[] = ['row' => $rowNumber, 'reason' => 'columns_not_matched_or_empty'];
                         continue;
                     }
 
-                    $studentCourse = StudentCourse::updateOrCreate(
-                        ['student_id' => $student->id, 'course_id' => $course->id],
+                    // جلب أو إنشاء سجل كورس الطالب
+                    $studentCourse = StudentCourse::firstOrCreate(
+                        [
+                            'student_id' => $student->id,
+                            'course_id' => $course->id,
+                            'academic_year' => $this->academicYear,
+                            'semester'      => $this->semester,
+
+                        ],
                         ['credits' => 0, 'status' => 'fail']
                     );
 
+                    // حفظ/تحديث العلامات للأجزاء الموجودة في الملف الحالي فقط
                     foreach ($partsData as $p) {
                         StudentCoursePart::updateOrCreate(
                             ['student_course_id' => $studentCourse->id, 'course_part_id' => $p['part']->id],
-                            ['credits' => $p['mark'], 'published' => true]
+                            ['credits' => $p['mark'], 'published' => false]
                         );
                     }
 
-                    $status = $total >= 60.0 ? 'pass' : 'fail';
-                    $studentCourse->update(['credits' => $total, 'status' => $status]);
+                    // إعادة حساب الإجمالي الكلي لجميع أجزاء المادة المسجلة للطالب من قاعدة البيانات
+                    $totalScore = StudentCoursePart::where('student_course_id', $studentCourse->id)->sum('credits');
+                    $status = $totalScore >= 60.0 ? 'pass' : 'fail';
+
+                    // تحديث النتيجة النهائية للمادة
+                    $studentCourse->update([
+                        'credits' => $totalScore,
+                        'status' => $status
+                    ]);
 
                     $this->importedCount++;
                 } catch (\Throwable $e) {

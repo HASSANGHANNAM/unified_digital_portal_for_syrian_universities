@@ -33,10 +33,10 @@ class GradeController extends Controller
         }
     }
 
-    public function addGrade(AddGradeRequest $addGradeRequest): JsonResponse
+    public function addGrade(AddGradeRequest $addGradeRequest,int $courseId,string $academicYear,int $semester): JsonResponse
     {
         try {
-            $data = $this->gradeService->addGrade($addGradeRequest->validated());
+            $data = $this->gradeService->addGrade($courseId, $academicYear, $semester, $addGradeRequest->file('file'));
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -107,6 +107,27 @@ class GradeController extends Controller
         return Response::success($data['data'],$data['message'],$data['code']);
     }catch(Throwable $th){
         return Response::Error([],$th->getMessage(),400);
+    }
+
+}
+
+public function getUnpublishedMarks(int $courseId): JsonResponse
+{
+    try {
+        $data = $this->gradeService->getUnpublishedMarks(auth()->user(),$courseId);
+        return Response::success($data['data'],$data['message'],$data['code']);
+    } catch (Throwable $th) {
+        return Response::Error([], $th->getMessage(), 400);
+    }
+}
+
+public function publishMarks(int $courseId): JsonResponse
+{
+    try {
+        $data = $this->gradeService->publishMarks(auth()->user(),$courseId);
+        return Response::success($data['data'],$data['message'],$data['code']);
+    } catch (Throwable $th) {
+        return Response::Error([], $th->getMessage(), 400);
     }
 }
 

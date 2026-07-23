@@ -3,6 +3,7 @@
 namespace App\Repositories\Contracts;
 
 use App\Models\Course;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 interface CourseRepositoryInterface
@@ -12,4 +13,5 @@ interface CourseRepositoryInterface
     public function update(Course $course, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?Course;
+    public function hasCourseAccess(User $user, int $courseId): array;
 }
