@@ -124,8 +124,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/verify-reset-code', [AuthController::class, 'verifyResetCode']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('add-grade/{courseId}/{academicYear}/{semester}',[GradeController::class, 'addGrade']);
     Route::get('/my-grades/{courseId}', [GradeController::class, 'getgrade']); // مكررة مع التي داخل V1
     Route::get('/all-my-grades', [GradeController::class, 'getAllMyGrades']);
+    Route::get('/unpublished-marks/{courseId}', [GradeController::class, 'getUnpublishedMarks']);
+    Route::post('/publish-marks/{courseId}', [GradeController::class, 'publishMarks']);
     Route::get('/all-my-sanctions', [SanctionController::class, 'getAllSanctions']);
     Route::get('/sanctions-details/{sanctionId}', [SanctionController::class, 'getSanctionDetails']);
     Route::post('/sanctions-respond/{sanctionId}', [SanctionController::class, 'respondToSanction']);

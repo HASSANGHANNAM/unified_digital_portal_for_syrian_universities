@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\AllGradesDTO;
 use App\Imports\StudentMarksImport;
+use Illuminate\Http\UploadedFile;
 use App\Models\Course;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -12,6 +13,8 @@ use App\Repositories\Contracts\StudentCourseRepositoryInterface;
 use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\CoursePartRepositoryInterface;
+use App\Repositories\Contracts\CourseRepositoryInterface;
+use App\Repositories\RequestRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -26,7 +29,9 @@ class GradeService
         private StudentCourseRepositoryInterface $studentCourseRepositoryInterface,
         private StudyPlanCourseRepositoryInterface $studyPlanCourseRepositoryInterface,
         private StudentRepositoryInterface $studentRepositoryInterface,
-        private CoursePartRepositoryInterface $coursePartRepositoryInterface
+        private CourseRepositoryInterface $courseRepository,
+        private CoursePartRepositoryInterface $coursePartRepositoryInterface,
+        private RequestRepository $requestRepository
     ) {}
 
     public function getAllGrades(array $data): array
@@ -42,9 +47,22 @@ class GradeService
         ];
     }
 
-    public function addGrade(array $data): array
+    public function addGrade(int $courseId,string $academicYear,int $semester,UploadedFile $file): array
     {
-        $course = Course::find($data['course_id']);
+
+        $user = Auth::user();
+
+        $permission = $this->courseRepository->hasCourseAccess($user,$courseId);
+        if (!$permission['status']) {
+
+            return [
+                'data' => [],
+                'message' => $permission['message'],
+                'code' => $permission['code'],
+            ];
+        }
+        $course = Course::find($courseId);
+
         if (!$course) {
             return [
                 'data' => [],
@@ -52,10 +70,9 @@ class GradeService
                 'code' => 404,
             ];
         }
-        $import = new StudentMarksImport($course->id);
-
+        $import = new StudentMarksImport($courseId,$academicYear,$semester);
         try {
-            Excel::import($import, $data['file']);
+            Excel::import($import, $file);
         } catch (\Maatwebsite\Excel\Exceptions\ValidationException $exception) {
             return [
                 'data' => [
@@ -74,9 +91,8 @@ class GradeService
             ];
         }
 
-        $report = $import->getReport();
         return [
-            'data' => $report,
+            'data' => $import->getReport(),
             'message' => 'تم رفع العلامات بنجاح.',
             'code' => 200,
         ];
@@ -274,20 +290,45 @@ class GradeService
             'code'    => 200,
         ];
     }
-    //تعديل علامة جزء معين من المادة لطالب معين (للامتحانات)
+    //تعديل علامة جزء معين من المادة لطالب معين (للامتحانات)للدكتور والمعيد والامتحانات
     public function updateGrade(User $user, int $studentCoursePartId, float $grade): array
     {
-        if (!$user->hasRole('Examination')) {
-            throw new \Exception('غير مصرح لك بالوصول');
-        }
         $studentCoursePart = $this->studentCoursePartRepositoryInterface
             ->getPartById($studentCoursePartId);
 
         if (!$studentCoursePart) {
             return [
-                'data' => [],
+                'data'    => [],
                 'message' => 'Grade record not found.',
-                'code' => 404,
+                'code'    => 404,
+            ];
+        }
+
+        $coursePermission = $this->courseRepository
+            ->hasCourseAccess(
+                $user,
+                $studentCoursePart->studentCourse->course_id
+            );
+
+        if (!$coursePermission['status']) {
+            return [
+                'data'    => [],
+                'message' => $coursePermission['message'],
+                'code'    => $coursePermission['code'],
+            ];
+        }
+
+        $requestPermission = $this->requestRepository
+            ->canUpdateGrade(
+                $user,
+                $studentCoursePart
+            );
+
+        if (!$requestPermission['status']) {
+            return [
+                'data'    => [],
+                'message' => $requestPermission['message'],
+                'code'    => $requestPermission['code'],
             ];
         }
 
@@ -295,9 +336,9 @@ class GradeService
 
         if ($grade > $maxGrade) {
             return [
-                'data' => [],
+                'data'    => [],
                 'message' => "The maximum grade for this part is {$maxGrade}.",
-                'code' => 422,
+                'code'    => 422,
             ];
         }
 
@@ -305,16 +346,23 @@ class GradeService
             ->updateGrade($studentCoursePartId, $grade);
 
         return [
-            'data' => [],
+            'data'    => [],
             'message' => 'Grade updated successfully.',
-            'code' => 200,
+            'code'    => 200,
         ];
     }
     // إضافة علامات لطالب معين في مادة معينة (للامتحانات)
     public function addGradesforonestudent(User $user, int $courseId, string $academicYear, int $semester, array $request): array
     {
-        if (!$user->hasRole('Examination')) {
-            throw new \Exception('غير مصرح لك بالوصول');
+        $coursePermission = $this->courseRepository
+            ->hasCourseAccess($user, $courseId);
+
+        if (!$coursePermission['status']) {
+            return [
+                'data' => [],
+                'message' => $coursePermission['message'],
+                'code' => $coursePermission['code'],
+            ];
         }
 
         $student = $this->studentRepositoryInterface
@@ -399,4 +447,80 @@ class GradeService
             'code' => 201,
         ];
     }
+
+        public function getUnpublishedMarks(User $user,int $courseId): array
+    {
+        if (!$user->hasRole('Examination')) {
+            throw new \Exception('غير مصرح لك بالوصول');
+        }
+        $perPage = request('per_page', 10);
+        $filters = [
+            'course_name'    => request('course_name'),
+            'semester'       => request('semester'),
+            'academic_year'  => request('academic_year'),
+        ];
+        $courses = $this->studentCourseRepositoryInterface
+            ->getUnpublishedMarks($courseId, $perPage, $filters);
+
+        if ($courses->isEmpty()) {
+            return [
+                'data' => [],
+                'message' => 'No unpublished marks found.',
+                'code' => 404,
+            ];
+        }
+        $data = collect($courses->items())->map(function ($studentCourse) {
+            return [
+                'student_course_id' => $studentCourse->id,
+                'course_name' => optional($studentCourse->course->universalCourse)->name,
+                'student_name' => optional($studentCourse->student->person)->full_name,
+                'total' => $studentCourse->parts->sum('credits'),
+                'parts' => $studentCourse->parts->map(function ($part) {
+                    return [
+                        'part_name' => optional($part->coursePart)->name,
+                        'percentage' => optional($part->coursePart)->percentage,
+                        'grade' => $part->credits,
+                    ];
+                })->values()
+
+            ];
+        });
+        return [
+            'data' => [
+                'courses' => $data,
+                'meta' => [
+                    'current_page' => $courses->currentPage(),
+                    'last_page' => $courses->lastPage(),
+                    'per_page' => $courses->perPage(),
+                    'total' => $courses->total(),
+                ]
+            ],
+            'message' => 'Unpublished marks retrieved successfully.',
+            'code' => 200,
+        ];
+    }
+
+        public function publishMarks(User $user,int $courseId): array
+    {
+        if (!$user->hasRole('Examination')) {
+            throw new \Exception('غير مصرح لك بالوصول');
+        }
+        $filters = [
+            'course_name'   => request('course_name'),
+            'semester'      => request('semester'),
+            'academic_year' => request('academic_year'),
+        ];
+        $count = $this->studentCourseRepositoryInterface
+            ->publishMarks($courseId,$filters);
+        return [
+            'data' => [
+                'updated_rows' => $count
+            ],
+            'message' => 'Marks published successfully.',
+            'code' => 200,
+        ];
+    }
+
+
+
 }
