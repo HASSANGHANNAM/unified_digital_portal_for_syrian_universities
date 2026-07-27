@@ -18,10 +18,10 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // ربط dean_id بعد أن أصبح جدول staff موجوداً
-        Schema::table('colleges', function (Blueprint $table) {
-            $table->foreign('dean_id')->references('id')->on('staff')->nullOnDelete();
-        });
+        // // ربط dean_id بعد أن أصبح جدول staff موجوداً
+        // Schema::table('colleges', function (Blueprint $table) {
+        //     $table->foreign('dean_id')->references('id')->on('staff')->nullOnDelete();
+        // });
     }
 
     public function down()
@@ -29,6 +29,6 @@ return new class extends Migration
         Schema::table('colleges', function (Blueprint $table) {
             $table->dropForeign(['dean_id']);
         });
-        Schema::dropIfExists('staff');
+        // Schema::dropIfExists('staff');
     }
 };

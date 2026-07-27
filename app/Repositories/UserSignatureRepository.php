@@ -9,11 +9,12 @@ use Illuminate\Database\Eloquent\Collection;
 class UserSignatureRepository implements UserSignatureRepositoryInterface
 {
     public function __construct(private UserSignature $model) {}
-    public function create(int $userId, string $uuid): UserSignature
+    public function create(int $userId, string $uuid, string $path): UserSignature
     {
         return $this->model->create([
             'user_id' => $userId,
             'signature_uuid' => $uuid,
+            'path' => $path,
         ]);
     }
     public function getLatestByUserId(int $userId): ?UserSignature

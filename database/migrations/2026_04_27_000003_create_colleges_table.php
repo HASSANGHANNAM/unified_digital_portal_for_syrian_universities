@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('colleges', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('dean_id')->nullable();
+            $table->integer('dean_id')->nullable();
             $table->foreignId('university_id')->constrained('universities')->cascadeOnDelete();
             $table->timestamps();
         });
