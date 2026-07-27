@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 interface UserSignatureRepositoryInterface
 {
-    public function create(int $userId, string $uuid): UserSignature;
+    public function create(int $userId, string $uuid, string $path): UserSignature;
     public function getLatestByUserId(int $userId): ?UserSignature;
     public function findByUuid(string $uuid): ?UserSignature;
     public function getAllByUserId(int $userId): Collection;

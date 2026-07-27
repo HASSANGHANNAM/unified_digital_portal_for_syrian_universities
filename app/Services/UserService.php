@@ -181,11 +181,9 @@ class UserService
 
             // 6. إنشاء سجل في قاعدة البيانات (مع UUID)
             $uuid = (string) Str::uuid();
-            $signature = $this->userSignatureRepository->create($userId, $uuid);
+            $signature = $this->userSignatureRepository->create($userId, $uuid, $path);
 
             // 🔥 7. تحديث السجل بإضافة المسار الكامل
-            $signature->path = $path;
-            $signature->save();
 
             // 8. (اختياري) إرسال إشعار للمستخدم
             $user = $signature->user;

@@ -36,6 +36,15 @@ use Database\Seeders\Requests\RequestTypeMediaSeeder;
 use App\Models\University;
 use App\Models\Person;
 use Database\Seeders\Courses\StudyPlanCourseSeeder;
+use Database\Seeders\Requests\RequestTypeAvailabilitySeeder;
+use Database\Seeders\SeedersV2\CollegeSeederV2;
+use Database\Seeders\SeedersV2\DepartmentSeederV2;
+use Database\Seeders\SeedersV2\RolesAndPermissionsSeeders\RolesAndPermissionsSeederV2;
+use Database\Seeders\SeedersV2\StudentSeederV2;
+use Database\Seeders\SeedersV2\UniversitySeederV2;
+use Database\Seeders\SeedersV2\UsersSeeders\PersonAttachmentsSeederV2;
+use Database\Seeders\SeedersV2\UsersSeeders\PersonSeederV2;
+use Database\Seeders\SeedersV2\UsersSeeders\UsersSeederV2;
 
 class DatabaseSeeder extends Seeder
 {
@@ -43,18 +52,25 @@ class DatabaseSeeder extends Seeder
     {
         // تشغيل جميع السيدرات أولاً
         $this->call([
-            RolesAndPermissionsSeeder::class,
-            UniversitySeeder::class,
-            PersonSeeder::class,
-            CollegeSeeder::class,
-            DepartmentSeeder::class,
+            // RolesAndPermissionsSeeder::class,
+            RolesAndPermissionsSeederV2::class,
+            // UniversitySeeder::class,
+            UniversitySeederV2::class,
+            // PersonSeeder::class,
+            PersonSeederV2::class,
+            // CollegeSeeder::class,
+            CollegeSeederV2::class,
+            // DepartmentSeeder::class,
+            DepartmentSeederV2::class,
             StaffSeeder::class,
-            UsersSeeder::class,
+            // UsersSeeder::class,
+            UsersSeederV2::class,
             DoctorSeeder::class,
             TeachingAssistantSeeder::class,
             DepartmentHeadSeeder::class,
             CollegeDeanSeeder::class,
-            StudentSeeder::class,
+            // StudentSeeder::class,
+            StudentSeederV2::class,
             RequestTypeSeeder::class,
             SanctionTypeSeeder::class,
             UniversalCourseSeeder::class,
@@ -74,14 +90,9 @@ class DatabaseSeeder extends Seeder
             CourseStaffSeeder::class,
             RequestTypeMediaSeeder::class,
             RequestMediaSeeder::class,
-            PersonAttachmentSeeder::class,
+            // PersonAttachmentSeeder::class,
+            PersonAttachmentsSeederV2::class,
+            RequestTypeAvailabilitySeeder::class,
         ]);
-
-        // بعد الانتهاء من جميع السيدرات، نقوم بتعيين مدير جامعة دمشق
-        $damascus = University::where('name', 'جامعة دمشق')->first();
-        $director = Person::where('national_id', '01012345690')->first();
-        if ($damascus && $director) {
-            $damascus->update(['university_director_id' => $director->id]);
-        }
     }
 }

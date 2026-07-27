@@ -13,44 +13,64 @@ class TeachingAssistantSeeder extends Seeder
     public function run(): void
     {
         $tasData = [
+            // ============================================================
+            // المعيد 1: سارة حسن (person_id = 6) - قسم هندسة البرمجيات
+            // المشرف: الموظف رقم 1 (نورا علي حسين - affairs.khaled)
+            // ============================================================
             [
-                'person_name' => 'رنا باسم العقاد',
-                'department_name' => 'هندسة البرمجيات',
-                'supervisor_name' => 'محمد نور الدين',
-                'assignment_date' => '2018-03-01',
+                'ta_id_number'    => 'TA-6-1001',
+                'department_id'   => 1,   // هندسة البرمجيات ونظم المعلومات
+                'supervisor_id'   => 1,   // 👈 staff.id = 1 (نورا علي حسين)
+                'assignment_date' => '2022-09-01',
+                'person_id'       => 6,   // سارة حسن
             ],
+
+            // ============================================================
+            // المعيد 2: رنا باسم العقاد (person_id = 16) - قسم الذكاء الاصطناعي
+            // المشرف: الموظف رقم 2 (يوسف سامر الحموي - exam.omar)
+            // ============================================================
             [
-                'person_name' => 'عمار حسام الخطيب',
-                'department_name' => 'الذكاء الاصطناعي',
-                'supervisor_name' => 'سلمى عبد الرحمن',
-                'assignment_date' => '2017-01-10',
+                'ta_id_number'    => 'TA-16-1002',
+                'department_id'   => 2,   // الذكاء الاصطناعي
+                'supervisor_id'   => 2,   // 👈 staff.id = 2 (يوسف سامر الحموي)
+                'assignment_date' => '2021-03-15',
+                'person_id'       => 16,  // رنا باسم العقاد
             ],
+
+            // ============================================================
+            // المعيد 3: عمار حسام الخطيب (person_id = 17) - قسم النظم والشبكات
+            // المشرف: الموظف رقم 3 (هبة الله مصطفى - hiba.mustafa)
+            // ============================================================
             [
-                'person_name' => 'ريم جورج الخوري',
-                'department_name' => 'رياضيات',
-                'supervisor_name' => 'خالد وليد السيد',
-                'assignment_date' => '2016-09-01',
+                'ta_id_number'    => 'TA-17-1003',
+                'department_id'   => 3,   // النظم والشبكات الحاسوبية
+                'supervisor_id'   => 3,   // 👈 staff.id = 3 (هبة الله مصطفى)
+                'assignment_date' => '2023-01-20',
+                'person_id'       => 17,  // عمار حسام الخطيب
+            ],
+
+            // ============================================================
+            // المعيد 4: ريم جورج الخوري (person_id = 26) - قسم النظم والشبكات
+            // المشرف: الموظف رقم 3 (هبة الله مصطفى - hiba.mustafa)
+            // ============================================================
+            [
+                'ta_id_number'    => 'TA-26-1004',
+                'department_id'   => 3,   // النظم والشبكات الحاسوبية
+                'supervisor_id'   => 3,   // 👈 staff.id = 3 (هبة الله مصطفى)
+                'assignment_date' => '2022-06-01',
+                'person_id'       => 26,  // ريم جورج الخوري
             ],
         ];
 
         foreach ($tasData as $data) {
-            $person = Person::where('full_name', $data['person_name'])->first();
-            if (!$person) continue;
-
-            $department = Department::where('name', $data['department_name'])->first();
-            if (!$department) continue;
-
-            $supervisor = Doctor::whereHas('person', fn($q) => $q->where('full_name', $data['supervisor_name']))->first();
-            if (!$supervisor) continue;
-
-            $exists = TeachingAssistant::where('person_id', $person->id)->exists();
+            $exists = TeachingAssistant::where('person_id',  $data['person_id'])->exists();
             if (!$exists) {
                 TeachingAssistant::create([
-                    'ta_id_number' => 'TA-' . $person->id . '-' . rand(1000, 9999),
-                    'department_id' => $department->id,
-                    'supervisor_id' => $supervisor->id,
+                    'ta_id_number' =>  $data['ta_id_number'],
+                    'department_id' =>  $data['department_id'],
+                    'supervisor_id' => $data['supervisor_id'],
                     'assignment_date' => $data['assignment_date'],
-                    'person_id' => $person->id,
+                    'person_id' => $data['person_id'],
                 ]);
             }
         }
