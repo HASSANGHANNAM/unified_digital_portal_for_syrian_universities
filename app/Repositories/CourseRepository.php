@@ -51,7 +51,12 @@ class CourseRepository implements CourseRepositoryInterface
             ->get();
     }
 
-        public function hasCourseAccess(User $user, int $courseId): array
+    public function getCourseWithParts(int $courseId, int $perPage = 15)
+    {
+        return $this->model->with('courseParts')->find($courseId);
+    }
+
+    public function hasCourseAccess(User $user, int $courseId): array
     {
         if ($user->hasRole('Instructor')) {
 
@@ -84,9 +89,7 @@ class CourseRepository implements CourseRepositoryInterface
                     'code' => 403,
                 ];
             }
-        }
-
-        elseif ($user->hasRole('TeachingAssistant')) {
+        } elseif ($user->hasRole('TeachingAssistant')) {
 
             $assistant = TeachingAssistant::with('department.college')
                 ->where('person_id', $user->person_id)
@@ -117,9 +120,7 @@ class CourseRepository implements CourseRepositoryInterface
                     'code' => 403,
                 ];
             }
-        }
-
-        else {
+        } else {
 
             return [
                 'status' => false,
@@ -134,6 +135,4 @@ class CourseRepository implements CourseRepositoryInterface
             'code' => 200,
         ];
     }
-
-
 }

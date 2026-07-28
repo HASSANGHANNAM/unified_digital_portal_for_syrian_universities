@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\AdminController;
 use App\Http\Controllers\Api\V1\AdmissionController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CollegeController;
+use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\DocumentController;
 use App\Http\Controllers\Api\V1\GradeController;
 use App\Http\Controllers\Api\V1\MaterialController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\ProfileController;
 use App\Http\Controllers\Api\V1\RequestController;
 use App\Http\Controllers\Api\V1\SanctionController;
+use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StudyPlanController;
 use App\Http\Controllers\Api\V1\StudentAttachment;
@@ -167,6 +169,11 @@ Route::prefix('V1')->group(function () {
         Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments'])->middleware(['permission:get student attachments']);
         Route::post('/student-affairs/{personId}', [StudentAttachment::class, 'reviewStudent'])->middleware(['permission:review student']);
         Route::get('/student-affairs/pending-students', [StudentAttachment::class, 'getPendingStudents'])->middleware(['permission:get pending students']);
+
+
+        Route::get('/course-details', [CourseController::class, 'getCourseDetails']);
+        Route::get('/college-students', [StudentController::class, 'getCollegeStudents']);
+        Route::get('/student-sanctions', [SanctionController::class, 'getStudentSanctions']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});
@@ -178,7 +185,6 @@ Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
 Route::prefix('v1')->middleware('throttle:api')->group(function () {});
 
 Route::prefix('v1')->group(function () {

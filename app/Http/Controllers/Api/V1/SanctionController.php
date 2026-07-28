@@ -10,6 +10,7 @@ use App\Http\Requests\V1\CreateSanctionTypeRequest;
 use App\Http\Requests\V1\DeleteSanctionRequest;
 use App\Http\Requests\V1\GetSanctionTypesRequest;
 use App\Http\Requests\V1\GetSanctionsRequest;
+use App\Http\Requests\V1\GetStudentSanctionsRequest;
 use App\Http\Requests\V1\UpdateSanctionRequest;
 use App\Http\Requests\V1\RespondSanctionRequest;
 use App\Http\Responses\Response;
@@ -96,6 +97,16 @@ class SanctionController extends Controller
     {
         try {
             $data = $this->sanctionService->getAllSanctions();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+
+    public function getStudentSanctions(GetStudentSanctionsRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->sanctionService->getStudentSanctions($request->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

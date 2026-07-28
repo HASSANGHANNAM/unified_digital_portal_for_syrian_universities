@@ -49,24 +49,24 @@ class StudentRepository implements StudentRepositoryInterface
 
     public function getHomePage(int $userId)
     {
-    $user = User::findOrFail($userId);
+        $user = User::findOrFail($userId);
 
-    return Student::with([
-        'person:id,full_name',
-        'department:id,name',
-        'college:id,name,university_id',
-        'college.university:id,name',
-        'requests' => function ($query) {
-            $query->latest('submission_date')
-                ->take(4)
-                ->with([
-                    'course:id,universal_course_id,code',
-                    'course.universalCourse:id,name',
-                    'processedBy.person:id,full_name'
-                ]);
-        },
-    ])->where('person_id', $user->person_id)
-    ->first();
+        return Student::with([
+            'person:id,full_name',
+            'department:id,name',
+            'college:id,name,university_id',
+            'college.university:id,name',
+            'requests' => function ($query) {
+                $query->latest('submission_date')
+                    ->take(4)
+                    ->with([
+                        'course:id,universal_course_id,code',
+                        'course.universalCourse:id,name',
+                        'processedBy.person:id,full_name'
+                    ]);
+            },
+        ])->where('person_id', $user->person_id)
+            ->first();
     }
 
     public function getAcademicProfile(int $personId)
@@ -105,4 +105,10 @@ class StudentRepository implements StudentRepositoryInterface
             ->get();
     }
 
+    public function getStudentsByCollege(int $collegeId, int $perPage = 15, int $page = 1)
+    {
+        return Student::where('college_id', $collegeId)
+            ->with('person')
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
 }

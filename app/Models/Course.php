@@ -10,8 +10,11 @@ class Course extends Model
     use HasFactory;
 
     protected $fillable = [
-        'universal_course_id', 'code', 'credits',
-        'college_id', 'department_id'
+        'universal_course_id',
+        'code',
+        'credits',
+        'college_id',
+        'department_id'
     ];
 
     public function universalCourse()
@@ -30,6 +33,11 @@ class Course extends Model
     }
 
     public function parts()
+    {
+        return $this->hasMany(CoursePart::class);
+    }
+
+    public function courseParts()
     {
         return $this->hasMany(CoursePart::class);
     }
@@ -63,7 +71,7 @@ class Course extends Model
     {
         return $this->hasMany(StudentRequest::class);
     }
-    
+
     public function studyPlanCourses()
     {
         return $this->hasMany(StudyPlanCourse::class);

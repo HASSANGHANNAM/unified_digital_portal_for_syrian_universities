@@ -15,5 +15,7 @@ interface SanctionRepositoryInterface
     public function getStudentSanctions(int $studentId);
     public function getStudentSanctionById(int $studentId, int $sanctionId);
     public function updateResponse(int $sanctionId, array $data): bool;
-
+    public function getSanctionsByStudent(int $studentId, int $perPage = 15, int $page = 1);
+    public function getPaginatedWithFilters(array $filters, int $perPage = 15);
+    public function createSanctionType(array $data);
 }

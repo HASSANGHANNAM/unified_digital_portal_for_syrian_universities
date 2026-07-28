@@ -14,4 +14,5 @@ interface StudentRepositoryInterface
     public function findById(string $id): ?Student;
     public function findByStudentNumber(string $studentNumber);
     public function getPendingStudents();
+    public function getStudentsByCollege(int $collegeId, int $perPage = 15, int $page = 1);
 }

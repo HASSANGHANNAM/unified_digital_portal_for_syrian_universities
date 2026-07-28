@@ -149,6 +149,7 @@ class RequestService
 
             'course' => $request->course
                 ? [
+                    'id' => $request->course->id ?? '',
                     'name' => $request->course->universalCourse->name ?? '',
                     'code' => $request->course->code ?? '',
                 ]
@@ -158,6 +159,7 @@ class RequestService
 
             'staff' => $request->processedBy
                 ? [
+                    'id' => $request->processedBy->id ?? '',
                     'name' => $request->processedBy->person->full_name ?? '',
                 ]
                 : null,
@@ -166,6 +168,7 @@ class RequestService
                 'request_type_id' => $request->requestType->id,
                 'name' => $request->requestType->name,
                 'description' => $request->requestType->description,
+                'requires_course' => $request->requestType->requires_course,
 
                 'requestTypeMedia' => $request->requestType->requestTypeMedia
                     ->map(function ($media) {

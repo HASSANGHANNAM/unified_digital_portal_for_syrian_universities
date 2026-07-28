@@ -89,4 +89,11 @@ class SanctionRepository implements SanctionRepositoryInterface
         }
         return $sanction->update($data);
     }
+
+    public function getSanctionsByStudent(int $studentId, int $perPage = 15, int $page = 1)
+    {
+        return $this->model->where('student_id', $studentId)
+            ->with('sanctionType')
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
 }

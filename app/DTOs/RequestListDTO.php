@@ -99,6 +99,7 @@ class RequestListDTO
                 return [
                     'request_id'      => $request->id,
                     'request_type_id' => $request->request_type_id,
+                    'request_type_name' => $request->requestType->name,
                     'reason'          => $request->reason,
                     'submission_date' => $request->submission_date?->toISOString() ?? (string) $request->submission_date,
                     'decision_date'   => $request->decision_date?->toISOString(),

@@ -5,30 +5,28 @@ namespace App\Services;
 use App\DTOs\SanctionDTO;
 use App\DTOs\SanctionTypeDTO;
 use App\DTOs\SanctionTypeListDTO;
+use App\DTOs\StudentSanctionDTO;
 use App\Models\SanctionType;
-use App\Repositories\SanctionRepository;
+use App\Repositories\Contracts\SanctionRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
 use Carbon\Carbon;
-use Throwable;
-use App\Repositories\Contracts\SanctionRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class SanctionService
 {
     use TokenDataTrait;
 
     public function __construct(
-        private SanctionRepository $sanctionRepository,
-        private UserRepositoryInterface $userRepositoryInterface,
-        private SanctionRepositoryInterface $sanctionRepositoryInterface
+        private SanctionRepositoryInterface $sanctionRepositoryInterface,
+        private ?UserRepositoryInterface $userRepositoryInterface = null
     ) {}
 
     public function listSanctionTypes(array $filters = [], int $perPage = 15): array
     {
         try {
-            $paginator = $this->sanctionRepository->getPaginatedWithFilters($filters, $perPage);
+            $paginator = $this->sanctionRepositoryInterface->getPaginatedWithFilters($filters, $perPage);
             return [
                 'data' => SanctionTypeListDTO::fromPaginator($paginator),
                 'message' => 'قائمة أنواع العقوبات',
@@ -42,7 +40,7 @@ class SanctionService
     public function createSanctionType(array $data): array
     {
         try {
-            $created = $this->sanctionRepository->createSanctionType($data);
+            $created = $this->sanctionRepositoryInterface->createSanctionType($data);
             return ['data' => SanctionTypeDTO::fromModel($created)->toArray(), 'message' => 'تم إضافة نوع العقوبة', 'code' => 201];
         } catch (Throwable $th) {
             return ['data' => [], 'message' => $th->getMessage(), 'code' => 400];
@@ -96,7 +94,7 @@ class SanctionService
                 'course_id' => $data['course_id'] ?? null,
             ];
 
-            $sanction = $this->sanctionRepository->create($payload);
+            $sanction = $this->sanctionRepositoryInterface->create($payload);
             return ['data' => SanctionDTO::fromModel($sanction)->toArray(), 'message' => 'تم إضافة العقوبة بنجاح', 'code' => 201];
         } catch (Throwable $th) {
             return ['data' => [], 'message' => $th->getMessage(), 'code' => 400];
@@ -197,6 +195,49 @@ class SanctionService
             'code' => 200,
         ];
     }
+
+    public function getStudentSanctions(array $validated): array
+    {
+        $studentId = (int) ($validated['student_id'] ?? 0);
+        $perPage = (int) ($validated['per_page'] ?? 15);
+        $page = (int) ($validated['page'] ?? 1);
+        $sanctions = $this->sanctionRepositoryInterface->getSanctionsByStudent($studentId, $perPage, $page);
+
+        if (!$sanctions || $sanctions->isEmpty()) {
+            return [
+                'data' => [
+                    'data' => [],
+                    'meta' => [
+                        'current_page' => 1,
+                        'last_page' => 1,
+                        'per_page' => $perPage,
+                        'total' => 0,
+                    ],
+                ],
+                'message' => 'تم جلب العقوبات بنجاح',
+                'code' => 200,
+            ];
+        }
+
+        $items = $sanctions->getCollection()->map(function ($sanction) {
+            return StudentSanctionDTO::fromModel($sanction)->toArray();
+        })->values()->all();
+
+        return [
+            'data' => [
+                'data' => $items,
+                'meta' => [
+                    'current_page' => $sanctions->currentPage(),
+                    'last_page' => $sanctions->lastPage(),
+                    'per_page' => $sanctions->perPage(),
+                    'total' => $sanctions->total(),
+                ],
+            ],
+            'message' => 'تم جلب العقوبات بنجاح',
+            'code' => 200,
+        ];
+    }
+
     // للطالب
     public function respondToSanction(int $sanctionId, array $data): array
     {

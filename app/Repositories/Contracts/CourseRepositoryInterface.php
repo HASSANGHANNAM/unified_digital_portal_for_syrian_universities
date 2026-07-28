@@ -14,4 +14,5 @@ interface CourseRepositoryInterface
     public function delete(string $id): bool;
     public function findById(string $id): ?Course;
     public function hasCourseAccess(User $user, int $courseId): array;
+    public function getCourseWithParts(int $courseId, int $perPage = 15);
 }

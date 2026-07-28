@@ -102,7 +102,8 @@ class RequestRepository
         }
         $query = $this->model->with([
             'course.universalCourse',
-            'processedBy.person'
+            'processedBy.person',
+            'requestType'
         ])->newQuery()
             ->whereIn('requests.status', $waitingStatuses)
             ->where(function ($query) use ($userId, $requestRoles) {
@@ -344,27 +345,22 @@ class RequestRepository
             'decision' => 'approved',
         ];
     }
-        public function canUpdateGrade(User $user, StudentCoursePart $studentCoursePart): array
+    public function canUpdateGrade(User $user, StudentCoursePart $studentCoursePart): array
     {
-        if ($user->hasRole('Examination'))
-        {
-        return [
-            'status'  => true,
-            'message' => 'Allowed by Examination department.',
-            'code'    => 200,
-        ];
+        if ($user->hasRole('Examination')) {
+            return [
+                'status'  => true,
+                'message' => 'Allowed by Examination department.',
+                'code'    => 200,
+            ];
         }
         $requestTypeName = null;
 
         if ($user->hasRole('Instructor')) {
             $requestTypeName = 'طلب إعادة تصحيح';
-        }
-
-        elseif ($user->hasRole('TeachingAssistant')) {
+        } elseif ($user->hasRole('TeachingAssistant')) {
             $requestTypeName = 'اعتراض على علامة';
-        }
-
-        else {
+        } else {
             return [
                 'status' => false,
                 'message' => 'Unauthorized.',
@@ -403,5 +399,4 @@ class RequestRepository
             'code' => 200,
         ];
     }
-
 }

@@ -38,6 +38,4 @@ class StudentRequestRepository implements StudentRequestRepositoryInterface
     {
         return $this->model->find($id);
     }
-
-
 }
