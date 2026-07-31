@@ -76,4 +76,13 @@ class Course extends Model
     {
         return $this->hasMany(StudyPlanCourse::class);
     }
+    public function courseStaff()
+    {
+        return $this->hasMany(CourseStaff::class);
+    }
+
+    public function doctors()
+    {
+        return $this->hasManyThrough(Doctor::class, CourseStaff::class, 'course_id', 'id', 'id', 'doctor_id');
+    }
 }

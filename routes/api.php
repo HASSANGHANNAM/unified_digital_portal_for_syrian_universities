@@ -9,6 +9,8 @@ use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CollegeController;
 use App\Http\Controllers\Api\V1\CourseController;
 use App\Http\Controllers\Api\V1\DocumentController;
+use App\Http\Controllers\Api\V1\DoctorController;
+use App\Http\Controllers\Api\V1\TeachingAssistantController;
 use App\Http\Controllers\Api\V1\GradeController;
 use App\Http\Controllers\Api\V1\MaterialController;
 use App\Http\Controllers\Api\V1\NotificationController;
@@ -32,7 +34,6 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
 // student affairs courses
 Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses'])->middleware(['permission:get college courses']);
-
 //  V1 
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'/*, 'CheckPermission'*/])->group(function () {
@@ -174,6 +175,11 @@ Route::prefix('V1')->group(function () {
         Route::get('/course-details', [CourseController::class, 'getCourseDetails']);
         Route::get('/college-students', [StudentController::class, 'getCollegeStudents']);
         Route::get('/student-sanctions', [SanctionController::class, 'getStudentSanctions']);
+        Route::get('/doctor/universities', [DoctorController::class, 'getUniversities']);
+        Route::get('/doctor/courses', [DoctorController::class, 'getCourses']);
+        Route::get('/universities/{universityId}/logo', [FileStorageController::class, 'showUniversityLogo']);
+        Route::get('/teaching-assistant/universities', [TeachingAssistantController::class, 'getUniversities']);
+        Route::get('/teaching-assistant/courses', [TeachingAssistantController::class, 'getCourses']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});
