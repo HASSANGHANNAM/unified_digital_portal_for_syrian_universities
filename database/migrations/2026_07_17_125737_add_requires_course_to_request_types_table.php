@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('request_types', function (Blueprint $table) {
-            $table->boolean('requires_course')->default(false)->after('description');
+            $table->boolean('requires_course')->default(false);
         });
     }
 

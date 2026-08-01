@@ -22,7 +22,7 @@ class NotificationController extends Controller
                 ->paginate((int) $request->query('per_page', 15));
 
             $items = collect($notifications->items())
-                ->map(fn ($row) => (new NotificationResource($row))->toArray($request))
+                ->map(fn($row) => (new NotificationResource($row))->toArray($request))
                 ->values()
                 ->all();
 
@@ -79,6 +79,22 @@ class NotificationController extends Controller
             $request->user()->unreadNotifications()->update(['read_at' => now()]);
 
             return Response::Success([], 'تم تعليم جميع الإشعارات كمقروءة.', 200);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 500);
+        }
+    }
+
+    public function broadcast(\App\Http\Requests\V1\BroadcastNotificationRequest $request): JsonResponse
+    {
+        try {
+            $service = new \App\Services\NotificationBroadcastService();
+            $result = $service->broadcast($request->validated());
+
+            if (! empty($result['success']) && $result['success'] === true) {
+                return Response::Success($result['data'] ?? [], $result['message'] ?? 'تم بدء عملية البث', 200);
+            }
+
+            return Response::Error([], $result['message'] ?? 'فشل البث', $result['code'] ?? 422);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 500);
         }

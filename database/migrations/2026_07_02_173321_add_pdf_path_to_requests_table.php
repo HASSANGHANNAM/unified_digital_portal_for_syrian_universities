@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('requests', function (Blueprint $table) {
-            $table->string('pdf_path')->nullable()->default(null)->after('status');
+            $table->string('pdf_path')->nullable()->default(null);
         });
     }
 

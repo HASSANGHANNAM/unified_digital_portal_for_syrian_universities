@@ -10,10 +10,17 @@ class Student extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id_number', 'academic_status', 'major',
-        'enrollment_year','current_year',
-        'current_semester','current_gpa', 'advisor_id',
-        'person_id', 'college_id', 'department_id'
+        'student_id_number',
+        'academic_status',
+        'major',
+        'enrollment_year',
+        'current_year',
+        'current_semester',
+        'current_gpa',
+        'advisor_id',
+        'person_id',
+        'college_id',
+        'department_id'
     ];
 
     public function person()
@@ -49,5 +56,18 @@ class Student extends Model
     public function requests()
     {
         return $this->hasMany(StudentRequest::class);
+    }
+
+    public function user()
+    {
+        // Resolve User through Person -> User relationship
+        return $this->hasOneThrough(
+            \App\Models\User::class,
+            \App\Models\Person::class,
+            'id', // Foreign key on persons table...
+            'person_id', // Foreign key on users table...
+            'person_id', // Local key on students table...
+            'id' // Local key on persons table...
+        );
     }
 }

@@ -37,12 +37,12 @@ Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCour
 //  V1 
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'/*, 'CheckPermission'*/])->group(function () {
-
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->middleware(['permission:get my notifications']);
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->middleware(['permission:get my count notifications unread']);
         Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['permission:read notification']);
         Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->middleware(['permission:read all my notifications']);
+        Route::post('notifications/broadcast', [NotificationController::class, 'broadcast']); //->middleware(['permission:send broadcast notifications']);
 
         // Auth and verify code and profile
         Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
@@ -199,4 +199,7 @@ Route::prefix('v1')->group(function () {
 
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:premium-api'])->group(function () {
     Route::middleware('throttle:heavy')->group(function () {});
+});
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok']);
 });

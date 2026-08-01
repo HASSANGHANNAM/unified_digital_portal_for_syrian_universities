@@ -15,12 +15,10 @@ return new class extends Migration
 
             $table->unsignedTinyInteger('current_year')
                 ->default(1)
-                ->after('enrollment_year');
-
+            ;
             $table->unsignedTinyInteger('current_semester')
                 ->default(1)
-                ->after('current_year');
-
+            ;
         });
     }
 
@@ -32,7 +30,6 @@ return new class extends Migration
                 'current_year',
                 'current_semester',
             ]);
-
         });
     }
 };
