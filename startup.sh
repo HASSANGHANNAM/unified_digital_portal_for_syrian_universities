@@ -1,7 +1,17 @@
 #!/bin/bash
 
-# الانتظار لبضع ثوانٍ للتأكد من أن قاعدة البيانات جاهزة (اختياري)
-sleep 5
+# 🛠️ إصلاح صلاحيات مجلدات Laruhan الأساسية
+echo "Fixing storage and cache permissions..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# التأكد من وجود ملف laravel.log وإنشائه بصلاحيات صحيحة
+touch /var/www/html/storage/logs/laravel.log
+chown www-data:www-data /var/www/html/storage/logs/laravel.log
+chmod 644 /var/www/html/storage/logs/laravel.log
+
+# الانتظار لبضع ثوانٍ (اختياري)
+sleep 3
 
 # تشغيل أوامر Laravel الأساسية
 echo "Running package:discover..."
@@ -26,5 +36,5 @@ php artisan migrate --force
 echo "Optimizing..."
 php artisan optimize
 
-# بدء تشغيل Apache (الأمر الرسمي لصورة php:apache)
+# بدء تشغيل Apache
 exec apache2-foreground
