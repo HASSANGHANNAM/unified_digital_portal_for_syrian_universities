@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -18,7 +18,10 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --timeout=600 --ignore-platform-req=ext-* --no-scripts
+RUN git config --global --add safe.directory /var/www/html
+
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-* --no-scripts
+
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
