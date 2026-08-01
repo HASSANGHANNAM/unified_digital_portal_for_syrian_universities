@@ -25,8 +25,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # ثبّت تبعيات المشروع
-RUN composer install --no-dev --optimize-autoloader
-
+RUN composer install --no-dev --optimize-autoloader --timeout=600
 # غيّر صلاحيات الملفات
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
