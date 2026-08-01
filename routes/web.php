@@ -2,4 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-// No web routes needed - API only application
+Route::get('/health-check', function () {
+    return response()->json(['status' => 'healthy'], 200);
+});
