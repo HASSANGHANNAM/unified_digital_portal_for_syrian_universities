@@ -1,40 +1,28 @@
 #!/bin/bash
 
-# 🛠️ إصلاح صلاحيات مجلدات Laruhan الأساسية
-echo "Fixing storage and cache permissions..."
+# 1. إصلاح الصلاحيات (أساسي لمنع أخطاء Permission Denied)
+echo "Fixing permissions..."
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
-
-# التأكد من وجود ملف laravel.log وإنشائه بصلاحيات صحيحة
 touch /var/www/html/storage/logs/laravel.log
 chown www-data:www-data /var/www/html/storage/logs/laravel.log
 chmod 644 /var/www/html/storage/logs/laravel.log
 
-# الانتظار لبضع ثوانٍ (اختياري)
-sleep 3
-
-# تشغيل أوامر Laravel الأساسية
+# 2. الأوامر الأساسية لربط الحزم (خفيفة وسريعة)
 echo "Running package:discover..."
 php artisan package:discover --ansi
 
 echo "Running vendor:publish..."
 php artisan vendor:publish --tag=laravel-assets --ansi --force
 
-echo "Clearing and caching config..."
-php artisan config:clear
+# 3. تخزين الإعدادات مؤقتاً (لتسريع الأداء، وهذا لا يمس قاعدة البيانات)
+echo "Caching config, routes, views..."
 php artisan config:cache
-
-echo "Caching routes..."
 php artisan route:cache
-
-echo "Caching views..."
 php artisan view:cache
 
-echo "Running migrations..."
-php artisan migrate --force
+# ⛔ لا تضع migrate هنا (لأن الداتابيز جاهزة)
+# ⛔ لا تضع optimize هنا (لأنها تستهلك وقتاً طويلاً وليست ضرورية للبدء)
 
-echo "Optimizing..."
-php artisan optimize
-
-# بدء تشغيل Apache
+# 4. بدء تشغيل Apache
 exec apache2-foreground
