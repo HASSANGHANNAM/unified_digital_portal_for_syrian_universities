@@ -20,7 +20,10 @@ COPY . .
 
 RUN git config --global --add safe.directory /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-* --no-scripts
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-*
+
+RUN php artisan package:discover --ansi
+RUN php artisan vendor:publish --tag=laravel-assets --ansi --force
 
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
