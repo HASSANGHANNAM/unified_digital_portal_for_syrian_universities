@@ -11,40 +11,37 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# إضافة مهمة جداً: تفعيل إعادة كتابة الروابط (mod_rewrite) في Apache
+# تفعيل mod_rewrite في Apache
 RUN a2enmod rewrite
 
 # تثبيت Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# تعيين حد الذاكرة لـ Composer
+# تعيين حد الذاكرة
 ENV COMPOSER_MEMORY_LIMIT=-1
 
-# تعيين دليل العمل
 WORKDIR /var/www/html
 
-# نسخ جميع الملفات
+# نسخ الكود
 COPY . .
 
 # إعداد Git safe.directory
 RUN git config --global --add safe.directory /var/www/html
 
-# تثبيت الحزم (مع تجاهل الـ scripts مؤقتاً)
+# تثبيت الحزم (مع تجاهل scripts)
 RUN composer install --no-dev --optimize-autoloader --ignore-platform-req=ext-* --no-scripts
 
 # نسخ سكريبت بدء التشغيل
 COPY startup.sh /usr/local/bin/startup.sh
-
-# جعل سكريبت بدء التشغيل قابلاً للتنفيذ
 RUN chmod +x /usr/local/bin/startup.sh
 
-# تعيين الصلاحيات للمجلدات
+# صلاحيات المجلدات
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
-# نسخ إعدادات Apache (تأكد من وجود الملف)
+# نسخ إعدادات Apache
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
 
-# تعيين نقطة الدخول لتشغيل السكريبت أولاً، ثم Apache
+# نقطة الدخول
 ENTRYPOINT ["/usr/local/bin/startup.sh"]
