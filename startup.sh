@@ -17,9 +17,9 @@ php artisan vendor:publish --tag=laravel-assets --ansi --force
 
 # 3. تخزين الإعدادات مؤقتاً (لتسريع الأداء، وهذا لا يمس قاعدة البيانات)
 echo "Caching config, routes, views..."
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+# php artisan config:cache
+# php artisan route:cache
+# php artisan view:cache
 
 # ⛔ لا تضع migrate هنا (لأن الداتابيز جاهزة)
 # ⛔ لا تضع optimize هنا (لأنها تستهلك وقتاً طويلاً وليست ضرورية للبدء)
