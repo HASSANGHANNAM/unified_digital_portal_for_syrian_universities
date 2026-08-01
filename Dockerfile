@@ -18,8 +18,7 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader --timeout=600
-
+RUN composer install --no-dev --optimize-autoloader --timeout=600 --ignore-platform-req=ext-* --no-scripts
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/storage \
     && chmod -R 755 /var/www/html/bootstrap/cache
