@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
+# إضافة مهمة جداً: تفعيل إعادة كتابة الروابط (mod_rewrite) في Apache
+RUN a2enmod rewrite
+
 # تثبيت Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
