@@ -18,9 +18,13 @@ else
   echo "✅ APP_KEY is set."
 fi
 
-# 🟢 تشغيل Reverb في الخلفية (قبل تنظيف الكاش والأوامر الأخرى)
+# 🟢 تشغيل Reverb في الخلفية
 echo "🔄 Starting Reverb in background..."
 php artisan reverb:start --host=0.0.0.0 --port=8080 &
+
+# 🟢 تشغيل Queue Worker باستخدام Redis في الخلفية
+echo "🔄 Starting Queue Worker in background..."
+php artisan queue:work redis --queue=default --sleep=3 --tries=3 &
 
 # 3. تنظيف الكاش وتشغيل الأوامر الأساسية (مع تجاهل الأخطاء)
 echo "Clearing old cache..."
