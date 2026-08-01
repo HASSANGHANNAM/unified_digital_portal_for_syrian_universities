@@ -10,7 +10,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-RUN a2enmod rewrite
+# تفعيل وحدات Apache المطلوبة (بما فيها Proxy للـ WebSocket)
+RUN a2enmod rewrite proxy proxy_http proxy_wstunnel
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -32,5 +33,8 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html/bootstrap/cache
 
 COPY vhost.conf /etc/apache2/sites-available/000-default.conf
+
+# كشف المنفذ الذي يستخدمه Reverb
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/local/bin/startup.sh"]

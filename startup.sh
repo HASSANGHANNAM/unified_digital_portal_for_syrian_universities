@@ -18,6 +18,10 @@ else
   echo "✅ APP_KEY is set."
 fi
 
+# 🟢 تشغيل Reverb في الخلفية (قبل تنظيف الكاش والأوامر الأخرى)
+echo "🔄 Starting Reverb in background..."
+php artisan reverb:start --host=0.0.0.0 --port=8080 &
+
 # 3. تنظيف الكاش وتشغيل الأوامر الأساسية (مع تجاهل الأخطاء)
 echo "Clearing old cache..."
 php artisan optimize:clear 2>&1 || true
@@ -33,7 +37,7 @@ php artisan config:cache 2>&1 || true
 php artisan route:cache 2>&1 || true
 php artisan view:cache 2>&1 || true
 
-# 🟢 إضافة جديدة: طباعة سجل الأخطاء لمعرفة سبب الـ 500
+# 🟢 طباعة سجل الأخطاء لمعرفة سبب الـ 500
 echo "📄 Checking Laravel logs for errors..."
 if [ -f /var/www/html/storage/logs/laravel.log ]; then
     echo "========= ERROR LOG DUMP ========="
@@ -42,7 +46,6 @@ if [ -f /var/www/html/storage/logs/laravel.log ]; then
 else
     echo "No Laravel log file found yet."
 fi
-# ----------------------------------------
 
 echo "✅ Startup script finished. Starting Apache..."
 
