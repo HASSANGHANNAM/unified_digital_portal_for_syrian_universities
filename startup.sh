@@ -33,6 +33,17 @@ php artisan config:cache 2>&1 || true
 php artisan route:cache 2>&1 || true
 php artisan view:cache 2>&1 || true
 
+# 🟢 إضافة جديدة: طباعة سجل الأخطاء لمعرفة سبب الـ 500
+echo "📄 Checking Laravel logs for errors..."
+if [ -f /var/www/html/storage/logs/laravel.log ]; then
+    echo "========= ERROR LOG DUMP ========="
+    cat /var/www/html/storage/logs/laravel.log
+    echo "=================================="
+else
+    echo "No Laravel log file found yet."
+fi
+# ----------------------------------------
+
 echo "✅ Startup script finished. Starting Apache..."
 
 # 4. بدء تشغيل Apache
