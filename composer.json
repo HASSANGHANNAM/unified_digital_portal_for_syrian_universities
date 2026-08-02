@@ -17,6 +17,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.8",
         "league/flysystem-aws-s3-v3": "^3.35",
+        "league/flysystem-path-prefixing": "^3.31",
         "maatwebsite/excel": "3.1.48",
         "masbug/flysystem-google-drive-ext": "*",
         "mpdf/mpdf": "*",
