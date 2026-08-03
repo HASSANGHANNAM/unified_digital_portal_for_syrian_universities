@@ -47,12 +47,12 @@ class GradeService
         ];
     }
 
-    public function addGrade(int $courseId,string $academicYear,int $semester,UploadedFile $file): array
+    public function addGrade(int $courseId, string $academicYear, int $semester, UploadedFile $file): array
     {
 
         $user = Auth::user();
 
-        $permission = $this->courseRepository->hasCourseAccess($user,$courseId);
+        $permission = $this->courseRepository->hasCourseAccess($user, $courseId);
         if (!$permission['status']) {
 
             return [
@@ -70,7 +70,7 @@ class GradeService
                 'code' => 404,
             ];
         }
-        $import = new StudentMarksImport($courseId,$academicYear,$semester);
+        $import = new StudentMarksImport($courseId, $academicYear, $semester);
         try {
             Excel::import($import, $file);
         } catch (\Maatwebsite\Excel\Exceptions\ValidationException $exception) {
@@ -139,7 +139,7 @@ class GradeService
             return [
                 'data' => [],
                 'message' => 'No grades found for this course.',
-                'code' => 404,
+                'code' => 200,
             ];
         }
 
@@ -189,7 +189,7 @@ class GradeService
             return [
                 'data' => [],
                 'message' => 'No grades found.',
-                'code' => 404,
+                'code' => 200,
             ];
         }
 
@@ -250,7 +250,7 @@ class GradeService
             return [
                 'data'    => [],
                 'message' => 'No grades found.',
-                'code'    => 404,
+                'code'    => 200,
             ];
         }
 
@@ -448,7 +448,7 @@ class GradeService
         ];
     }
 
-        public function getUnpublishedMarks(User $user,int $courseId): array
+    public function getUnpublishedMarks(User $user, int $courseId): array
     {
         if (!$user->hasRole('Examination')) {
             throw new \Exception('غير مصرح لك بالوصول');
@@ -500,7 +500,7 @@ class GradeService
         ];
     }
 
-        public function publishMarks(User $user,int $courseId): array
+    public function publishMarks(User $user, int $courseId): array
     {
         if (!$user->hasRole('Examination')) {
             throw new \Exception('غير مصرح لك بالوصول');
@@ -511,7 +511,7 @@ class GradeService
             'academic_year' => request('academic_year'),
         ];
         $count = $this->studentCourseRepositoryInterface
-            ->publishMarks($courseId,$filters);
+            ->publishMarks($courseId, $filters);
         return [
             'data' => [
                 'updated_rows' => $count
@@ -520,7 +520,4 @@ class GradeService
             'code' => 200,
         ];
     }
-
-
-
 }
