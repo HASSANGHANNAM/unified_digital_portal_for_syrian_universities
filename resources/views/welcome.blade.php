@@ -17,7 +17,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #ffffff;
+            background: #3b82f6;
             direction: rtl;
             padding: 20px;
         }
@@ -27,7 +27,7 @@
             background: #ffffff;
             border-radius: 32px;
             padding: 60px 50px 50px;
-            max-width: 540px;
+            max-width: 720px;
             width: 100%;
             text-align: center;
             box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08),
@@ -53,7 +53,7 @@
         }
 
         .logo img {
-            max-width: 160px;
+            max-width: 300px;
             height: auto;
             border-radius: 16px;
             display: block;
@@ -157,7 +157,7 @@
                 font-size: 16px;
             }
             .logo img {
-                max-width: 120px;
+                max-width: 300px;
             }
         }
     </style>
@@ -165,48 +165,31 @@
 <body>
 
     <div class="container">
-
-        <!-- اللوغو باستخدام AppLogoTrait -->
         @php
             use App\Services\Traits\AppLogoTrait;
-
-            // إنشاء كائن مؤقت يستخدم الـ Trait
             $logoHelper = new class {
                 use AppLogoTrait;
             };
-
             $logoBase64 = $logoHelper->getAppLogoBase64();
             $appName = config('app.name', 'البوابة الرقمية الموحدة');
         @endphp
-
         <div class="logo">
             @if($logoBase64)
                 <img src="{{ $logoBase64 }}" alt="{{ $appName }}">
             @else
                 <span class="logo-placeholder">🏛️</span>
-                <div class="logo-sub">(اللوغو غير موجود)</div>
             @endif
         </div>
-
-        <!-- النصوص -->
         <h1>أهلاً بكم</h1>
         <div class="subtitle">
-            البوابة الرقمية الموحدة <span>للجامعات السورية</span>
+            البوابة الرقمية الموحدة للجامعات السورية
         </div>
         <div style="font-size: 14px; color: #64748b; margin-top: 4px;">
             back_end
         </div>
-
-        <div class="badge">✓ النظام جاهز</div>
-
         <hr class="divider">
 
         <div class="footer-info">
-            <span>
-                <span class="dot"></span>
-                {{ config('app.env') === 'production' ? '🚀 إنتاج' : '⚙️ تطوير' }}
-            </span>
-            <span>الإصدار {{ config('app.version', '1.0.0') }}</span>
         </div>
 
     </div>
