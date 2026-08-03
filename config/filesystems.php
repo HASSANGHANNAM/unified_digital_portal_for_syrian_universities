@@ -6,14 +6,21 @@ return [
 
     'disks' => [
 
-        // 🟤 التخزين المحلي (للملفات المؤقتة والنسخ الاحتياطي)
+        // 🔵 التخزين السحابي عبر Backblaze B2 (S3-compatible)
+        // الآن أي استخدام لـ 'local' سيذهب إلى السحابة
         'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app'),
-            'throw' => false,
+            'driver' => 's3',
+            'key' => env('BACKBLAZE_KEY_ID'),
+            'secret' => env('BACKBLAZE_APPLICATION_KEY'),
+            'region' => env('BACKBLAZE_REGION', 'eu-central-003'),
+            'bucket' => env('BACKBLAZE_BUCKET'),
+            'endpoint' => env('BACKBLAZE_ENDPOINT', 'https://s3.eu-central-003.backblazeb2.com'),
+            'use_path_style_endpoint' => true,
+            'visibility' => 'private',
+            'throw' => true,
         ],
 
-        // 🟤 نسخة محلية احتياطية للملفات العامة (يمكن استخدامها للاختبار)
+        // 🔴 نسخة محلية احتياطية للملفات العامة (تبقى محلية للاستثناءات)
         'local_public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -22,7 +29,7 @@ return [
             'throw' => false,
         ],
 
-        // 🟤 نسخة محلية احتياطية للملفات الخاصة
+        // 🔴 نسخة محلية احتياطية للملفات الخاصة
         'local_private' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
@@ -30,7 +37,7 @@ return [
             'throw' => false,
         ],
 
-        // 🟤 المستندات الآمنة (محلياً)
+        // 🔴 المستندات الآمنة (محلياً)
         'secure_documents' => [
             'driver' => 'local',
             'root' => storage_path('app/private/documents'),
@@ -48,7 +55,7 @@ return [
             ],
         ],
 
-        // 🔵 التخزين السحابي عبر Backblaze B2 (S3-compatible)
+        // 🔵 التخزين السحابي عبر Backblaze B2 (نفس الـ local ولكن اسم صريح)
         'b2' => [
             'driver' => 's3',
             'key' => env('BACKBLAZE_KEY_ID'),
@@ -70,7 +77,7 @@ return [
             'bucket' => env('BACKBLAZE_BUCKET'),
             'endpoint' => env('BACKBLAZE_ENDPOINT', 'https://s3.eu-central-003.backblazeb2.com'),
             'use_path_style_endpoint' => true,
-            'prefix' => 'public', // 👈 كل الملفات في هذا المجلد داخل الـ Bucket
+            'prefix' => 'public',
             'visibility' => 'private',
             'throw' => true,
         ],
@@ -84,7 +91,7 @@ return [
             'bucket' => env('BACKBLAZE_BUCKET'),
             'endpoint' => env('BACKBLAZE_ENDPOINT', 'https://s3.eu-central-003.backblazeb2.com'),
             'use_path_style_endpoint' => true,
-            'prefix' => 'private', // 👈 كل الملفات في هذا المجلد داخل الـ Bucket
+            'prefix' => 'private',
             'visibility' => 'private',
             'throw' => true,
         ],
