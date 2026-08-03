@@ -13,6 +13,12 @@ RUN apt-get update && apt-get install -y \
 # تفعيل وحدات Apache المطلوبة (بما فيها Proxy للـ WebSocket)
 RUN a2enmod rewrite proxy proxy_http proxy_wstunnel
 
+# 🟢 زيادة حدود رفع الملفات في PHP
+RUN echo "upload_max_filesize = 200M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size = 200M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "memory_limit = 512M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "max_execution_time = 300" >> /usr/local/etc/php/conf.d/uploads.ini
+
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 ENV COMPOSER_MEMORY_LIMIT=-1
