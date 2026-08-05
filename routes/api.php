@@ -34,6 +34,15 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
 //  V1 
 Route::prefix('V1')->group(function () {
+    Route::middleware(['auth:sanctum',])->group(function () {
+        Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
+        Route::post('/complete-profile', [ProfileController::class, 'completeProfile'])->middleware(['permission:complete profile']);
+        Route::post('/upload-document', [ProfileController::class, 'uploadDocument'])->middleware(['permission:upload document']);
+        Route::post('/submit', [ProfileController::class, 'submit'])->middleware(['permission:submit profile']);
+        Route::get('/profile', [AuthController::class, 'getProfile'])->middleware(['permission:get profile']);
+    });
+});
+Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->middleware(['permission:get my notifications']);
@@ -45,11 +54,6 @@ Route::prefix('V1')->group(function () {
         // Auth and verify code and profile
         Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
         Route::post('/verify-code', [AuthController::class, 'verifyCode'])->middleware(['permission:verify verification code']);
-        Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
-        Route::post('/upload-document', [ProfileController::class, 'uploadDocument'])->middleware(['permission:upload document']);
-        Route::post('/complete-profile', [ProfileController::class, 'completeProfile'])->middleware(['permission:complete profile']);
-        Route::post('/submit', [ProfileController::class, 'submit'])->middleware(['permission:submit profile']);
-        Route::get('/profile', [AuthController::class, 'getProfile'])->middleware(['permission:get profile']);
         Route::post('/edit-profile', [AuthController::class, 'editProfile'])->middleware(['permission:edit profile']);
         Route::get('/profile-image', [AuthController::class, 'getProfileImage'])->middleware(['permission:get profile image']);
         Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware(['permission:change password']);
@@ -185,7 +189,7 @@ Route::prefix('V1')->group(function () {
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});
-Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->middleware(['permission:logout']);
 });
 
