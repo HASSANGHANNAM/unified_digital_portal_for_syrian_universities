@@ -29,7 +29,9 @@ class CourseDetailsDTO
                 'percentage' => (int) $part->percentage,
             ];
         })->values()->all();
-
+        $partsCollection = $model->relationLoaded('universalCourse')
+            ? $model->name
+            : ($model->relationLoaded('universalCourse') ? $model->universalCourse->name : null);
         return new self(
             (int) $model->id,
             (string) $model->code,

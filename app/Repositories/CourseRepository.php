@@ -53,7 +53,7 @@ class CourseRepository implements CourseRepositoryInterface
 
     public function getCourseWithParts(int $courseId, int $perPage = 15)
     {
-        return $this->model->with('courseParts')->find($courseId);
+        return $this->model->with(['courseParts', 'universalCourse'])->find($courseId);
     }
 
     public function hasCourseAccess(User $user, int $courseId): array
