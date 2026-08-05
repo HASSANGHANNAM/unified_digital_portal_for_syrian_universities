@@ -32,11 +32,9 @@ Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
 // add grade 
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
-// student affairs courses
-Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses'])->middleware(['permission:get college courses']);
 //  V1 
 Route::prefix('V1')->group(function () {
-    Route::middleware(['auth:sanctum'/*, 'CheckPermission'*/])->group(function () {
+    Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->middleware(['permission:get my notifications']);
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->middleware(['permission:get my count notifications unread']);
@@ -87,6 +85,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/completed-courses', [StudyPlanController::class, 'getCompletedCourses'])->middleware(['permission:get completed courses']);
         Route::get('/remaining-courses', [StudyPlanController::class, 'getRemainingCourses'])->middleware(['permission:get remaining courses']);
         Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress'])->middleware(['permission:get academic progress']);
+        Route::get('/study-plan', [StudyPlanController::class, 'getStudyPlan']); //->middleware(['permission:get academic progress']);
 
         // Grades
         Route::get('/grades', [AcademicController::class, 'getGrades'])->middleware(['permission:get my grades']);
@@ -180,6 +179,9 @@ Route::prefix('V1')->group(function () {
         Route::get('/universities/{universityId}/logo', [FileStorageController::class, 'showUniversityLogo']);
         Route::get('/teaching-assistant/universities', [TeachingAssistantController::class, 'getUniversities']);
         Route::get('/teaching-assistant/courses', [TeachingAssistantController::class, 'getCourses']);
+
+        // student affairs courses
+        Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses'])->middleware(['permission:get college courses']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

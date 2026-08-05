@@ -18,41 +18,68 @@ class StudentCoursePartSeeder extends Seeder
 
     public function run(): void
     {
-        // ==================== 1. البيانات العشوائية (الموجودة أصلاً) ====================
-        $studentCourses = StudentCourse::all();
+        // ==================== 1. جلب جميع سجلات الطلاب في المواد ====================
+        $studentCourses = StudentCourse::with(['student.person', 'course'])->get();
+
+        $this->command->info("📊 تم العثور على " . $studentCourses->count() . " سجل طالب-مادة");
+
+        $totalCreated = 0;
 
         foreach ($studentCourses as $studentCourse) {
-            // جلب أجزاء المقرر التي تحمل اسم 'practical' أو 'theoretical' فقط
-            $courseParts = CoursePart::where('course_id', $studentCourse->course_id)
-                ->whereIn('name', ['practical', 'theoretical'])
-                ->get();
+            // جلب جميع أجزاء المقرر المرتبطة بهذه المادة
+            $courseParts = CoursePart::where('course_id', $studentCourse->course_id)->get();
+
+            if ($courseParts->isEmpty()) {
+                $this->command->warn("⚠️ لا توجد أجزاء للمادة: {$studentCourse->course->code}");
+                continue;
+            }
+
+            $studentName = $studentCourse->student->person->full_name ?? 'غير معروف';
+            $courseCode = $studentCourse->course->code ?? 'غير معروف';
 
             foreach ($courseParts as $part) {
-                // الدرجة حسب نوع الجزء
+                // تحديد الدرجة الافتراضية حسب اسم الجزء
                 $credits = match ($part->name) {
                     'practical' => rand(15, 20),   // العملي من 15 إلى 20
                     'theoretical' => rand(40, 60), // النظري من 40 إلى 60
-                    default => 0,
+                    default => rand(10, 50),       // أي جزء آخر
                 };
 
-                DB::transaction(function () use ($studentCourse, $part, $credits) {
-                    // تجنب التكرار (إضافة شرط)
-                    $exists = \App\Models\StudentCoursePart::where('student_course_id', $studentCourse->id)
-                        ->where('course_part_id', $part->id)
-                        ->exists();
-                    if (!$exists) {
+                // تجنب التكرار
+                $exists = \App\Models\StudentCoursePart::where('student_course_id', $studentCourse->id)
+                    ->where('course_part_id', $part->id)
+                    ->exists();
+
+                if (!$exists) {
+                    DB::transaction(function () use ($studentCourse, $part, $credits) {
                         $this->studentCoursePartRepo->create([
                             'student_course_id' => $studentCourse->id,
                             'course_part_id' => $part->id,
                             'credits' => $credits,
                             'published' => true,
                         ]);
-                    }
-                });
+                    });
+                    $totalCreated++;
+                }
             }
+
+            $this->command->info("✅ تم ربط {$courseParts->count()} جزء للطالب {$studentName} في المادة {$courseCode}");
         }
 
-        // ==================== 2. البيانات الثابتة من dummyData.ts ====================
+        $this->command->info("🎉 تم إنشاء {$totalCreated} سجل جديد في StudentCoursePart");
+
+        // ==================== 2. (اختياري) بيانات مخصصة من المصفوفة ====================
+        $this->command->info("📝 جاري معالجة البيانات المخصصة...");
+        $this->seedCustomData();
+
+        $this->command->info("✅ تم الانتهاء من تشغيل السيدر بالكامل!");
+    }
+
+    /**
+     * بيانات مخصصة من المصفوفة (لحالات خاصة)
+     */
+    private function seedCustomData(): void
+    {
         $specificStudentCourseParts = [
             [
                 'student_name' => 'أحمد محمد العلي',
@@ -92,28 +119,25 @@ class StudentCoursePartSeeder extends Seeder
         ];
 
         foreach ($specificStudentCourseParts as $data) {
-            // جلب الطالب عبر اسمه الكامل
+            // جلب الطالب
             $student = Student::whereHas('person', function ($q) use ($data) {
                 $q->where('full_name', $data['student_name']);
             })->first();
 
-            // جلب المقرر عبر الكود
+            // جلب المادة
             $course = Course::where('code', $data['course_code'])->first();
 
             if ($student && $course) {
-                // جلب سجل الطالب لهذا المقرر
                 $studentCourse = StudentCourse::where('student_id', $student->id)
                     ->where('course_id', $course->id)
                     ->first();
 
                 if ($studentCourse) {
-                    // جلب جزء المقرر عبر الاسم
                     $coursePart = CoursePart::where('course_id', $course->id)
                         ->where('name', $data['course_part_name'])
                         ->first();
 
                     if ($coursePart) {
-                        // تجنب التكرار
                         $exists = \App\Models\StudentCoursePart::where('student_course_id', $studentCourse->id)
                             ->where('course_part_id', $coursePart->id)
                             ->exists();
@@ -127,6 +151,7 @@ class StudentCoursePartSeeder extends Seeder
                                     'published' => $data['published'],
                                 ]);
                             });
+                            $this->command->info("✅ تم إضافة جزء مخصص: {$data['course_part_name']} للطالب {$data['student_name']}");
                         }
                     }
                 }

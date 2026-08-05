@@ -3,347 +3,197 @@
 namespace Database\Seeders\Courses;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use App\Repositories\Contracts\CourseRepositoryInterface;
 use App\Models\Department;
+use App\Models\Course;
 use App\Models\UniversalCourse;
+use Illuminate\Support\Facades\DB;
 
 class CourseSeeder extends Seeder
 {
-    public function __construct(
-        private CourseRepositoryInterface $courseRepo,
-    ) {}
-
     public function run(): void
     {
-        $departments = Department::all()->keyBy('name');
-        $coursesByDepartment = [
-            'العلوم الأساسية' => [
+        // ============================================================
+        // 1. جلب الأقسام مجمعة حسب الاسم، مع ترتيبها حسب college_id ثم id
+        // ============================================================
+        $departmentsGrouped = Department::orderBy('college_id')
+            ->orderBy('id')
+            ->get()
+            ->groupBy('name');
 
-                ['name' => 'اللغة الانكليزية 1', 'code' => 'CS101', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 2', 'code' => 'CS102', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 3', 'code' => 'CS103', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 4', 'code' => 'CS104', 'credits' => 3],
-                ['name' => 'البرمجة 1', 'code' => 'CS201', 'credits' => 4],
-                ['name' => 'البرمجة 2', 'code' => 'CS202', 'credits' => 4],
-                ['name' => 'البرمجة 3', 'code' => 'CS203', 'credits' => 4],
-                ['name' => 'الجبر العام', 'code' => 'CS111', 'credits' => 3],
-                ['name' => 'الجبر الخطي', 'code' => 'CS112', 'credits' => 3],
-                ['name' => 'تحليل 1', 'code' => 'CS113', 'credits' => 3],
-                ['name' => 'تحليل 2', 'code' => 'CS114', 'credits' => 3],
-                ['name' => 'تحليل 3', 'code' => 'CS115', 'credits' => 3],
-                ['name' => 'تحليل عددي', 'code' => 'CS116', 'credits' => 3],
-                ['name' => 'الاحتمالات و الإحصاء', 'code' => 'CS117', 'credits' => 3],
-                ['name' => 'مبادئ عمل الحاسوب', 'code' => 'CS121', 'credits' => 3],
-                ['name' => 'بنيان الحواسيب 1', 'code' => 'CS122', 'credits' => 4],
-                ['name' => 'بنيان الحواسيب 2', 'code' => 'CS123', 'credits' => 3],
-                ['name' => 'قواعد المعطيات 1', 'code' => 'CS231', 'credits' => 4],
-                ['name' => 'قواعد المعطيات 2', 'code' => 'CS232', 'credits' => 3],
-                ['name' => 'قواعد المعطيات المتقدمة', 'code' => 'CS331', 'credits' => 3],
-                ['name' => 'قواعد البيانات', 'code' => 'CS332', 'credits' => 3],
-                ['name' => 'الفيزياء', 'code' => 'CS131', 'credits' => 3],
-                ['name' => 'اللغة العربية', 'code' => 'CS141', 'credits' => 2],
-                ['name' => 'الدارات الكهربائية', 'code' => 'CS132', 'credits' => 3],
-                ['name' => 'الدارات المطقية', 'code' => 'CS133', 'credits' => 3],
-                ['name' => 'الخوارزميات وبنى المعطيات 1', 'code' => 'CS241', 'credits' => 4],
-                ['name' => 'الخوارزميات وبنى المعطيات 2', 'code' => 'CS242', 'credits' => 4],
-                ['name' => 'الاتصالات الرقمية', 'code' => 'CS251', 'credits' => 3],
-                ['name' => 'مهارات التواصل', 'code' => 'CS142', 'credits' => 2],
-                ['name' => 'بحوث العمليات', 'code' => 'CS252', 'credits' => 3],
-                ['name' => 'لغات البرمجة', 'code' => 'CS261', 'credits' => 3],
-                ['name' => 'مبادئ الذكاء الصنعي', 'code' => 'CS271', 'credits' => 3],
-                ['name' => 'أساسيات الشبكات المعلوماتية', 'code' => 'CS281', 'credits' => 3],
-                ['name' => 'اللغات الصورية', 'code' => 'CS262', 'credits' => 3],
-                ['name' => 'بيانيات حاسوبية', 'code' => 'CS263', 'credits' => 3],
-                ['name' => 'حسابات علمية', 'code' => 'CS264', 'credits' => 3],
-                ['name' => 'المشروع 1', 'code' => 'CS391', 'credits' => 3],
-                ['name' => 'المشروع 2', 'code' => 'CS392', 'credits' => 3],
-                ['name' => 'المشروع 3', 'code' => 'CS393', 'credits' => 3],
-                ['name' => 'بروتوكولات الاتصال الحاسوبية', 'code' => 'CS282', 'credits' => 3],
-                ['name' => 'خوارزميات البحث الذكية', 'code' => 'CS272', 'credits' => 3],
-                ['name' => 'نظم تشغيل 1', 'code' => 'CS341', 'credits' => 4],
-                ['name' => 'نظم تشغيل 2', 'code' => 'CS342', 'credits' => 3],
-                ['name' => 'البرمجة التفرعية', 'code' => 'CS343', 'credits' => 3],
-                ['name' => 'التسويق', 'code' => 'CS143', 'credits' => 2],
-                ['name' => 'الاقتصاد والإدارة في المؤسسة', 'code' => 'CS144', 'credits' => 2],
-                ['name' => 'إدارة المشاريع', 'code' => 'CS145', 'credits' => 2],
-                ['name' => 'هندسة الرمجيات 1', 'code' => 'SE351', 'credits' => 4],
-                ['name' => 'هندسة الرمجيات 2', 'code' => 'SE352', 'credits' => 3],
-                ['name' => 'هندسة الرمجيات 3', 'code' => 'SE353', 'credits' => 3],
-                ['name' => 'برمجة التطبيقات الشبكية', 'code' => 'CS381', 'credits' => 3],
-                ['name' => 'نظم وساءط متعددة وفائقة', 'code' => 'CS382', 'credits' => 3],
-                ['name' => 'الحقائق الافتراضية', 'code' => 'CS383', 'credits' => 3],
-                ['name' => 'المترجمات 1', 'code' => 'CS361', 'credits' => 3],
-                ['name' => 'مشروع المترجمات', 'code' => 'CS362', 'credits' => 3],
-                ['name' => 'نظم قواعد المعرفة', 'code' => 'CS333', 'credits' => 3],
-                ['name' => 'الشبكات العصبونية', 'code' => 'CS373', 'credits' => 3],
-                ['name' => 'نمذجة ومحاكاة النظم الشبكية', 'code' => 'CS283', 'credits' => 3],
-                ['name' => 'تصميم الشبكات الحاسوبية', 'code' => 'CS284', 'credits' => 3],
-                ['name' => 'أمن نظم المعلومات', 'code' => 'CS471', 'credits' => 3],
-                ['name' => 'النظم والتطبيقات الموزعة', 'code' => 'CS442', 'credits' => 3],
-                ['name' => 'معالجة اللغات الطبيعية', 'code' => 'CS374', 'credits' => 3],
-                ['name' => 'الروبوتية', 'code' => 'CS375', 'credits' => 3],
-                ['name' => 'تطبيقات الانترنت', 'code' => 'CS385', 'credits' => 3],
-                ['name' => 'نظم الزمن الحقيقي', 'code' => 'CS443', 'credits' => 3],
-                ['name' => 'إدارة الشبكات الحاسوبية', 'code' => 'CS285', 'credits' => 3],
-                ['name' => 'أمن الشبكات الحاسوبية', 'code' => 'CS472', 'credits' => 3],
-                ['name' => 'التعلم التلقائي', 'code' => 'CS376', 'credits' => 3],
-                ['name' => 'الرؤيا الحاسوبية', 'code' => 'CS377', 'credits' => 3],
-                ['name' => 'استكشاف المعرفة', 'code' => 'CS378', 'credits' => 3],
-                ['name' => 'نظم البحث عن الملومات', 'code' => 'CS379', 'credits' => 3],
-                ['name' => 'هندسة نظم المعلومات', 'code' => 'SE451', 'credits' => 3],
-            ],
-            'هندسة البرمجيات ونظم المعلومات' => [
+        // ============================================================
+        // 2. بيانات المواد (مع اسم القسم والكود والساعات فقط، بدون سنة/فصل)
+        // ============================================================
+        $coursesData = [
+            // ========== السنة الأولى - الفصل الأول ==========
+            ['name' => 'اللغة الانكليزية 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS101', 'credits' => 3],
+            ['name' => 'البرمجة 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS201', 'credits' => 4],
+            ['name' => 'مبادئ عمل الحاسوب', 'department_name' => 'العلوم الأساسية', 'code' => 'CS121', 'credits' => 3],
+            ['name' => 'الفيزياء', 'department_name' => 'العلوم الأساسية', 'code' => 'CS131', 'credits' => 3],
+            ['name' => 'اللغة العربية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS141', 'credits' => 2],
+            ['name' => 'تحليل 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS113', 'credits' => 3],
 
-                ['name' => 'اللغة الانكليزية 1', 'code' => 'CS101', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 2', 'code' => 'CS102', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 3', 'code' => 'CS103', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 4', 'code' => 'CS104', 'credits' => 3],
-                ['name' => 'البرمجة 1', 'code' => 'CS201', 'credits' => 4],
-                ['name' => 'البرمجة 2', 'code' => 'CS202', 'credits' => 4],
-                ['name' => 'البرمجة 3', 'code' => 'CS203', 'credits' => 4],
-                ['name' => 'الجبر العام', 'code' => 'CS111', 'credits' => 3],
-                ['name' => 'الجبر الخطي', 'code' => 'CS112', 'credits' => 3],
-                ['name' => 'تحليل 1', 'code' => 'CS113', 'credits' => 3],
-                ['name' => 'تحليل 2', 'code' => 'CS114', 'credits' => 3],
-                ['name' => 'تحليل 3', 'code' => 'CS115', 'credits' => 3],
-                ['name' => 'تحليل عددي', 'code' => 'CS116', 'credits' => 3],
-                ['name' => 'الاحتمالات و الإحصاء', 'code' => 'CS117', 'credits' => 3],
-                ['name' => 'مبادئ عمل الحاسوب', 'code' => 'CS121', 'credits' => 3],
-                ['name' => 'بنيان الحواسيب 1', 'code' => 'CS122', 'credits' => 4],
-                ['name' => 'بنيان الحواسيب 2', 'code' => 'CS123', 'credits' => 3],
-                ['name' => 'قواعد المعطيات 1', 'code' => 'CS231', 'credits' => 4],
-                ['name' => 'قواعد المعطيات 2', 'code' => 'CS232', 'credits' => 3],
-                ['name' => 'قواعد المعطيات المتقدمة', 'code' => 'CS331', 'credits' => 3],
-                ['name' => 'قواعد البيانات', 'code' => 'CS332', 'credits' => 3],
-                ['name' => 'الفيزياء', 'code' => 'CS131', 'credits' => 3],
-                ['name' => 'اللغة العربية', 'code' => 'CS141', 'credits' => 2],
-                ['name' => 'الدارات الكهربائية', 'code' => 'CS132', 'credits' => 3],
-                ['name' => 'الدارات المطقية', 'code' => 'CS133', 'credits' => 3],
-                ['name' => 'الخوارزميات وبنى المعطيات 1', 'code' => 'CS241', 'credits' => 4],
-                ['name' => 'الخوارزميات وبنى المعطيات 2', 'code' => 'CS242', 'credits' => 4],
-                ['name' => 'الاتصالات الرقمية', 'code' => 'CS251', 'credits' => 3],
-                ['name' => 'مهارات التواصل', 'code' => 'CS142', 'credits' => 2],
-                ['name' => 'بحوث العمليات', 'code' => 'CS252', 'credits' => 3],
-                ['name' => 'لغات البرمجة', 'code' => 'CS261', 'credits' => 3],
-                ['name' => 'مبادئ الذكاء الصنعي', 'code' => 'CS271', 'credits' => 3],
-                ['name' => 'أساسيات الشبكات المعلوماتية', 'code' => 'CS281', 'credits' => 3],
-                ['name' => 'اللغات الصورية', 'code' => 'CS262', 'credits' => 3],
-                ['name' => 'بيانيات حاسوبية', 'code' => 'CS263', 'credits' => 3],
-                ['name' => 'حسابات علمية', 'code' => 'CS264', 'credits' => 3],
-                ['name' => 'المشروع 1', 'code' => 'CS391', 'credits' => 3],
-                ['name' => 'المشروع 2', 'code' => 'CS392', 'credits' => 3],
-                ['name' => 'المشروع 3', 'code' => 'CS393', 'credits' => 3],
-                ['name' => 'بروتوكولات الاتصال الحاسوبية', 'code' => 'CS282', 'credits' => 3],
-                ['name' => 'خوارزميات البحث الذكية', 'code' => 'CS272', 'credits' => 3],
-                ['name' => 'نظم تشغيل 1', 'code' => 'CS341', 'credits' => 4],
-                ['name' => 'نظم تشغيل 2', 'code' => 'CS342', 'credits' => 3],
-                ['name' => 'البرمجة التفرعية', 'code' => 'CS343', 'credits' => 3],
-                ['name' => 'التسويق', 'code' => 'CS143', 'credits' => 2],
-                ['name' => 'الاقتصاد والإدارة في المؤسسة', 'code' => 'CS144', 'credits' => 2],
-                ['name' => 'إدارة المشاريع', 'code' => 'CS145', 'credits' => 2],
-                ['name' => 'هندسة الرمجيات 1', 'code' => 'SE351', 'credits' => 4],
-                ['name' => 'هندسة الرمجيات 2', 'code' => 'SE352', 'credits' => 3],
-                ['name' => 'هندسة الرمجيات 3', 'code' => 'SE353', 'credits' => 3],
-                ['name' => 'برمجة التطبيقات الشبكية', 'code' => 'CS381', 'credits' => 3],
-                ['name' => 'نظم وساءط متعددة وفائقة', 'code' => 'CS382', 'credits' => 3],
-                ['name' => 'الحقائق الافتراضية', 'code' => 'CS383', 'credits' => 3],
-                ['name' => 'المترجمات 1', 'code' => 'CS361', 'credits' => 3],
-                ['name' => 'مشروع المترجمات', 'code' => 'CS362', 'credits' => 3],
-                ['name' => 'نظم قواعد المعرفة', 'code' => 'CS333', 'credits' => 3],
-                ['name' => 'الشبكات العصبونية', 'code' => 'CS373', 'credits' => 3],
-                ['name' => 'نمذجة ومحاكاة النظم الشبكية', 'code' => 'CS283', 'credits' => 3],
-                ['name' => 'تصميم الشبكات الحاسوبية', 'code' => 'CS284', 'credits' => 3],
-                ['name' => 'أمن نظم المعلومات', 'code' => 'CS471', 'credits' => 3],
-                ['name' => 'النظم والتطبيقات الموزعة', 'code' => 'CS442', 'credits' => 3],
-                ['name' => 'معالجة اللغات الطبيعية', 'code' => 'CS374', 'credits' => 3],
-                ['name' => 'الروبوتية', 'code' => 'CS375', 'credits' => 3],
-                ['name' => 'تطبيقات الانترنت', 'code' => 'CS385', 'credits' => 3],
-                ['name' => 'نظم الزمن الحقيقي', 'code' => 'CS443', 'credits' => 3],
-                ['name' => 'إدارة الشبكات الحاسوبية', 'code' => 'CS285', 'credits' => 3],
-                ['name' => 'أمن الشبكات الحاسوبية', 'code' => 'CS472', 'credits' => 3],
-                ['name' => 'التعلم التلقائي', 'code' => 'CS376', 'credits' => 3],
-                ['name' => 'الرؤيا الحاسوبية', 'code' => 'CS377', 'credits' => 3],
-                ['name' => 'استكشاف المعرفة', 'code' => 'CS378', 'credits' => 3],
-                ['name' => 'نظم البحث عن الملومات', 'code' => 'CS379', 'credits' => 3],
-                ['name' => 'هندسة نظم المعلومات', 'code' => 'SE451', 'credits' => 3],
-            ],
-            'الذكاء الاصطناعي' => [
+            // ========== السنة الأولى - الفصل الثاني ==========
+            ['name' => 'البرمجة 2', 'department_name' => 'العلوم الأساسية', 'code' => 'CS202', 'credits' => 4],
+            ['name' => 'الجبر العام', 'department_name' => 'العلوم الأساسية', 'code' => 'CS111', 'credits' => 3],
+            ['name' => 'اللغة الانكليزية 2', 'department_name' => 'العلوم الأساسية', 'code' => 'CS102', 'credits' => 3],
+            ['name' => 'تحليل 2', 'department_name' => 'العلوم الأساسية', 'code' => 'CS114', 'credits' => 3],
+            ['name' => 'الدارات الكهربائية والالكترونية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS132', 'credits' => 3],
+            ['name' => 'الجبر الخطي', 'department_name' => 'العلوم الأساسية', 'code' => 'CS112', 'credits' => 3],
 
-                ['name' => 'اللغة الانكليزية 1', 'code' => 'CS101', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 2', 'code' => 'CS102', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 3', 'code' => 'CS103', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 4', 'code' => 'CS104', 'credits' => 3],
-                ['name' => 'البرمجة 1', 'code' => 'CS201', 'credits' => 4],
-                ['name' => 'البرمجة 2', 'code' => 'CS202', 'credits' => 4],
-                ['name' => 'البرمجة 3', 'code' => 'CS203', 'credits' => 4],
-                ['name' => 'الجبر العام', 'code' => 'CS111', 'credits' => 3],
-                ['name' => 'الجبر الخطي', 'code' => 'CS112', 'credits' => 3],
-                ['name' => 'تحليل 1', 'code' => 'CS113', 'credits' => 3],
-                ['name' => 'تحليل 2', 'code' => 'CS114', 'credits' => 3],
-                ['name' => 'تحليل 3', 'code' => 'CS115', 'credits' => 3],
-                ['name' => 'تحليل عددي', 'code' => 'CS116', 'credits' => 3],
-                ['name' => 'الاحتمالات و الإحصاء', 'code' => 'CS117', 'credits' => 3],
-                ['name' => 'مبادئ عمل الحاسوب', 'code' => 'CS121', 'credits' => 3],
-                ['name' => 'بنيان الحواسيب 1', 'code' => 'CS122', 'credits' => 4],
-                ['name' => 'بنيان الحواسيب 2', 'code' => 'CS123', 'credits' => 3],
-                ['name' => 'قواعد المعطيات 1', 'code' => 'CS231', 'credits' => 4],
-                ['name' => 'قواعد المعطيات 2', 'code' => 'CS232', 'credits' => 3],
-                ['name' => 'قواعد المعطيات المتقدمة', 'code' => 'CS331', 'credits' => 3],
-                ['name' => 'قواعد البيانات', 'code' => 'CS332', 'credits' => 3],
-                ['name' => 'الفيزياء', 'code' => 'CS131', 'credits' => 3],
-                ['name' => 'اللغة العربية', 'code' => 'CS141', 'credits' => 2],
-                ['name' => 'الدارات الكهربائية', 'code' => 'CS132', 'credits' => 3],
-                ['name' => 'الدارات المطقية', 'code' => 'CS133', 'credits' => 3],
-                ['name' => 'الخوارزميات وبنى المعطيات 1', 'code' => 'CS241', 'credits' => 4],
-                ['name' => 'الخوارزميات وبنى المعطيات 2', 'code' => 'CS242', 'credits' => 4],
-                ['name' => 'الاتصالات الرقمية', 'code' => 'CS251', 'credits' => 3],
-                ['name' => 'مهارات التواصل', 'code' => 'CS142', 'credits' => 2],
-                ['name' => 'بحوث العمليات', 'code' => 'CS252', 'credits' => 3],
-                ['name' => 'لغات البرمجة', 'code' => 'CS261', 'credits' => 3],
-                ['name' => 'مبادئ الذكاء الصنعي', 'code' => 'CS271', 'credits' => 3],
-                ['name' => 'أساسيات الشبكات المعلوماتية', 'code' => 'CS281', 'credits' => 3],
-                ['name' => 'اللغات الصورية', 'code' => 'CS262', 'credits' => 3],
-                ['name' => 'بيانيات حاسوبية', 'code' => 'CS263', 'credits' => 3],
-                ['name' => 'حسابات علمية', 'code' => 'CS264', 'credits' => 3],
-                ['name' => 'المشروع 1', 'code' => 'CS391', 'credits' => 3],
-                ['name' => 'المشروع 2', 'code' => 'CS392', 'credits' => 3],
-                ['name' => 'المشروع 3', 'code' => 'CS393', 'credits' => 3],
-                ['name' => 'بروتوكولات الاتصال الحاسوبية', 'code' => 'CS282', 'credits' => 3],
-                ['name' => 'خوارزميات البحث الذكية', 'code' => 'CS272', 'credits' => 3],
-                ['name' => 'نظم تشغيل 1', 'code' => 'CS341', 'credits' => 4],
-                ['name' => 'نظم تشغيل 2', 'code' => 'CS342', 'credits' => 3],
-                ['name' => 'البرمجة التفرعية', 'code' => 'CS343', 'credits' => 3],
-                ['name' => 'التسويق', 'code' => 'CS143', 'credits' => 2],
-                ['name' => 'الاقتصاد والإدارة في المؤسسة', 'code' => 'CS144', 'credits' => 2],
-                ['name' => 'إدارة المشاريع', 'code' => 'CS145', 'credits' => 2],
-                ['name' => 'هندسة الرمجيات 1', 'code' => 'SE351', 'credits' => 4],
-                ['name' => 'هندسة الرمجيات 2', 'code' => 'SE352', 'credits' => 3],
-                ['name' => 'هندسة الرمجيات 3', 'code' => 'SE353', 'credits' => 3],
-                ['name' => 'برمجة التطبيقات الشبكية', 'code' => 'CS381', 'credits' => 3],
-                ['name' => 'نظم وساءط متعددة وفائقة', 'code' => 'CS382', 'credits' => 3],
-                ['name' => 'الحقائق الافتراضية', 'code' => 'CS383', 'credits' => 3],
-                ['name' => 'المترجمات 1', 'code' => 'CS361', 'credits' => 3],
-                ['name' => 'مشروع المترجمات', 'code' => 'CS362', 'credits' => 3],
-                ['name' => 'نظم قواعد المعرفة', 'code' => 'CS333', 'credits' => 3],
-                ['name' => 'الشبكات العصبونية', 'code' => 'CS373', 'credits' => 3],
-                ['name' => 'نمذجة ومحاكاة النظم الشبكية', 'code' => 'CS283', 'credits' => 3],
-                ['name' => 'تصميم الشبكات الحاسوبية', 'code' => 'CS284', 'credits' => 3],
-                ['name' => 'أمن نظم المعلومات', 'code' => 'CS471', 'credits' => 3],
-                ['name' => 'النظم والتطبيقات الموزعة', 'code' => 'CS442', 'credits' => 3],
-                ['name' => 'معالجة اللغات الطبيعية', 'code' => 'CS374', 'credits' => 3],
-                ['name' => 'الروبوتية', 'code' => 'CS375', 'credits' => 3],
-                ['name' => 'تطبيقات الانترنت', 'code' => 'CS385', 'credits' => 3],
-                ['name' => 'نظم الزمن الحقيقي', 'code' => 'CS443', 'credits' => 3],
-                ['name' => 'إدارة الشبكات الحاسوبية', 'code' => 'CS285', 'credits' => 3],
-                ['name' => 'أمن الشبكات الحاسوبية', 'code' => 'CS472', 'credits' => 3],
-                ['name' => 'التعلم التلقائي', 'code' => 'CS376', 'credits' => 3],
-                ['name' => 'الرؤيا الحاسوبية', 'code' => 'CS377', 'credits' => 3],
-                ['name' => 'استكشاف المعرفة', 'code' => 'CS378', 'credits' => 3],
-                ['name' => 'نظم البحث عن الملومات', 'code' => 'CS379', 'credits' => 3],
-                ['name' => 'هندسة نظم المعلومات', 'code' => 'SE451', 'credits' => 3],
-            ],
-            'النظم والشبكات الحاسوبية' => [
+            // ========== السنة الثانية - الفصل الأول ==========
+            ['name' => 'الخوارزميات وبنى المعطيات 2', 'department_name' => 'العلوم الأساسية', 'code' => 'CS242', 'credits' => 4],
+            ['name' => 'البرمجة 3', 'department_name' => 'العلوم الأساسية', 'code' => 'CS203', 'credits' => 4],
+            ['name' => 'الدارات المنطقية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS133', 'credits' => 3],
+            ['name' => 'الاتصالات الرقمية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS251', 'credits' => 3],
+            ['name' => 'احتمالات وإحصاء', 'department_name' => 'العلوم الأساسية', 'code' => 'CS117', 'credits' => 3],
+            ['name' => 'مهارات تواصل', 'department_name' => 'العلوم الأساسية', 'code' => 'CS142', 'credits' => 2],
+            ['name' => 'تحليل 3', 'department_name' => 'العلوم الأساسية', 'code' => 'CS115', 'credits' => 3],
 
-                ['name' => 'اللغة الانكليزية 1', 'code' => 'CS101', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 2', 'code' => 'CS102', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 3', 'code' => 'CS103', 'credits' => 3],
-                ['name' => 'اللغة الانكليزية 4', 'code' => 'CS104', 'credits' => 3],
-                ['name' => 'البرمجة 1', 'code' => 'CS201', 'credits' => 4],
-                ['name' => 'البرمجة 2', 'code' => 'CS202', 'credits' => 4],
-                ['name' => 'البرمجة 3', 'code' => 'CS203', 'credits' => 4],
-                ['name' => 'الجبر العام', 'code' => 'CS111', 'credits' => 3],
-                ['name' => 'الجبر الخطي', 'code' => 'CS112', 'credits' => 3],
-                ['name' => 'تحليل 1', 'code' => 'CS113', 'credits' => 3],
-                ['name' => 'تحليل 2', 'code' => 'CS114', 'credits' => 3],
-                ['name' => 'تحليل 3', 'code' => 'CS115', 'credits' => 3],
-                ['name' => 'تحليل عددي', 'code' => 'CS116', 'credits' => 3],
-                ['name' => 'الاحتمالات و الإحصاء', 'code' => 'CS117', 'credits' => 3],
-                ['name' => 'مبادئ عمل الحاسوب', 'code' => 'CS121', 'credits' => 3],
-                ['name' => 'بنيان الحواسيب 1', 'code' => 'CS122', 'credits' => 4],
-                ['name' => 'بنيان الحواسيب 2', 'code' => 'CS123', 'credits' => 3],
-                ['name' => 'قواعد المعطيات 1', 'code' => 'CS231', 'credits' => 4],
-                ['name' => 'قواعد المعطيات 2', 'code' => 'CS232', 'credits' => 3],
-                ['name' => 'قواعد المعطيات المتقدمة', 'code' => 'CS331', 'credits' => 3],
-                ['name' => 'قواعد البيانات', 'code' => 'CS332', 'credits' => 3],
-                ['name' => 'الفيزياء', 'code' => 'CS131', 'credits' => 3],
-                ['name' => 'اللغة العربية', 'code' => 'CS141', 'credits' => 2],
-                ['name' => 'الدارات الكهربائية', 'code' => 'CS132', 'credits' => 3],
-                ['name' => 'الدارات المطقية', 'code' => 'CS133', 'credits' => 3],
-                ['name' => 'الخوارزميات وبنى المعطيات 1', 'code' => 'CS241', 'credits' => 4],
-                ['name' => 'الخوارزميات وبنى المعطيات 2', 'code' => 'CS242', 'credits' => 4],
-                ['name' => 'الاتصالات الرقمية', 'code' => 'CS251', 'credits' => 3],
-                ['name' => 'مهارات التواصل', 'code' => 'CS142', 'credits' => 2],
-                ['name' => 'بحوث العمليات', 'code' => 'CS252', 'credits' => 3],
-                ['name' => 'لغات البرمجة', 'code' => 'CS261', 'credits' => 3],
-                ['name' => 'مبادئ الذكاء الصنعي', 'code' => 'CS271', 'credits' => 3],
-                ['name' => 'أساسيات الشبكات المعلوماتية', 'code' => 'CS281', 'credits' => 3],
-                ['name' => 'اللغات الصورية', 'code' => 'CS262', 'credits' => 3],
-                ['name' => 'بيانيات حاسوبية', 'code' => 'CS263', 'credits' => 3],
-                ['name' => 'حسابات علمية', 'code' => 'CS264', 'credits' => 3],
-                ['name' => 'المشروع 1', 'code' => 'CS391', 'credits' => 3],
-                ['name' => 'المشروع 2', 'code' => 'CS392', 'credits' => 3],
-                ['name' => 'المشروع 3', 'code' => 'CS393', 'credits' => 3],
-                ['name' => 'بروتوكولات الاتصال الحاسوبية', 'code' => 'CS282', 'credits' => 3],
-                ['name' => 'خوارزميات البحث الذكية', 'code' => 'CS272', 'credits' => 3],
-                ['name' => 'نظم تشغيل 1', 'code' => 'CS341', 'credits' => 4],
-                ['name' => 'نظم تشغيل 2', 'code' => 'CS342', 'credits' => 3],
-                ['name' => 'البرمجة التفرعية', 'code' => 'CS343', 'credits' => 3],
-                ['name' => 'التسويق', 'code' => 'CS143', 'credits' => 2],
-                ['name' => 'الاقتصاد والإدارة في المؤسسة', 'code' => 'CS144', 'credits' => 2],
-                ['name' => 'إدارة المشاريع', 'code' => 'CS145', 'credits' => 2],
-                ['name' => 'هندسة الرمجيات 1', 'code' => 'SE351', 'credits' => 4],
-                ['name' => 'هندسة الرمجيات 2', 'code' => 'SE352', 'credits' => 3],
-                ['name' => 'هندسة الرمجيات 3', 'code' => 'SE353', 'credits' => 3],
-                ['name' => 'برمجة التطبيقات الشبكية', 'code' => 'CS381', 'credits' => 3],
-                ['name' => 'نظم وساءط متعددة وفائقة', 'code' => 'CS382', 'credits' => 3],
-                ['name' => 'الحقائق الافتراضية', 'code' => 'CS383', 'credits' => 3],
-                ['name' => 'المترجمات 1', 'code' => 'CS361', 'credits' => 3],
-                ['name' => 'مشروع المترجمات', 'code' => 'CS362', 'credits' => 3],
-                ['name' => 'نظم قواعد المعرفة', 'code' => 'CS333', 'credits' => 3],
-                ['name' => 'الشبكات العصبونية', 'code' => 'CS373', 'credits' => 3],
-                ['name' => 'نمذجة ومحاكاة النظم الشبكية', 'code' => 'CS283', 'credits' => 3],
-                ['name' => 'تصميم الشبكات الحاسوبية', 'code' => 'CS284', 'credits' => 3],
-                ['name' => 'أمن نظم المعلومات', 'code' => 'CS471', 'credits' => 3],
-                ['name' => 'النظم والتطبيقات الموزعة', 'code' => 'CS442', 'credits' => 3],
-                ['name' => 'معالجة اللغات الطبيعية', 'code' => 'CS374', 'credits' => 3],
-                ['name' => 'الروبوتية', 'code' => 'CS375', 'credits' => 3],
-                ['name' => 'تطبيقات الانترنت', 'code' => 'CS385', 'credits' => 3],
-                ['name' => 'نظم الزمن الحقيقي', 'code' => 'CS443', 'credits' => 3],
-                ['name' => 'إدارة الشبكات الحاسوبية', 'code' => 'CS285', 'credits' => 3],
-                ['name' => 'أمن الشبكات الحاسوبية', 'code' => 'CS472', 'credits' => 3],
-                ['name' => 'التعلم التلقائي', 'code' => 'CS376', 'credits' => 3],
-                ['name' => 'الرؤيا الحاسوبية', 'code' => 'CS377', 'credits' => 3],
-                ['name' => 'استكشاف المعرفة', 'code' => 'CS378', 'credits' => 3],
-                ['name' => 'نظم البحث عن الملومات', 'code' => 'CS379', 'credits' => 3],
-                ['name' => 'هندسة نظم المعلومات', 'code' => 'SE451', 'credits' => 3],
-            ]
+            // ========== السنة الثانية - الفصل الثاني ==========
+            ['name' => 'التحليل العددي', 'department_name' => 'العلوم الأساسية', 'code' => 'CS116', 'credits' => 3],
+            ['name' => 'اللغة الانكليزية 3', 'department_name' => 'العلوم الأساسية', 'code' => 'CS103', 'credits' => 3],
+            ['name' => 'اللغة الانكليزية 4', 'department_name' => 'العلوم الأساسية', 'code' => 'CS104', 'credits' => 3],
+            ['name' => 'الخوارزميات وبنى المعطيات 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS241', 'credits' => 4],
+
+            // ========== السنة الثالثة - الفصل الأول ==========
+            ['name' => 'لغات البرمجة', 'department_name' => 'العلوم الأساسية', 'code' => 'CS261', 'credits' => 3],
+            ['name' => 'بنيان الحواسيب 2', 'department_name' => 'العلوم الأساسية', 'code' => 'CS123', 'credits' => 3],
+            ['name' => 'اللغات الصورية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS262', 'credits' => 3],
+            ['name' => 'أساسيات الشبكات المعلوماتية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS281', 'credits' => 3],
+            ['name' => 'بيانيات حاسوبية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS263', 'credits' => 3],
+            ['name' => 'حسابات علمية', 'department_name' => 'العلوم الأساسية', 'code' => 'CS264', 'credits' => 3],
+
+            // ========== السنة الثالثة - الفصل الثاني ==========
+            ['name' => 'بحوث العمليات', 'department_name' => 'العلوم الأساسية', 'code' => 'CS252', 'credits' => 3],
+            ['name' => 'مشروع 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS391', 'credits' => 3],
+            ['name' => 'قواعد المعطيات 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS231', 'credits' => 4],
+            ['name' => 'مبادئ الذكاء الصنعي', 'department_name' => 'العلوم الأساسية', 'code' => 'CS271', 'credits' => 3],
+            ['name' => 'بنيان الحواسيب 1', 'department_name' => 'العلوم الأساسية', 'code' => 'CS122', 'credits' => 4],
+
+            // ========== السنة الرابعة - هندسة البرمجيات ==========
+            ['name' => 'نظم تشغيل 1', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS341', 'credits' => 4],
+            ['name' => 'المترجمات', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS361', 'credits' => 3],
+            ['name' => 'الاقتصاد والإدارة في المؤسسة', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS144', 'credits' => 2],
+            ['name' => 'هندسة البرمجيات 1', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'SE351', 'credits' => 4],
+            ['name' => 'قواعد المعطيات 2', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS232', 'credits' => 3],
+            ['name' => 'نظم وسائط متعددة وفائقة', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS382', 'credits' => 3],
+            ['name' => 'هندسة البرمجيات 2', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'SE352', 'credits' => 3],
+            ['name' => 'مشروع 2', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS392', 'credits' => 3],
+            ['name' => 'خوارزميات البحث الذكية', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS272', 'credits' => 3],
+            ['name' => 'مشروع مترجمات', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS362', 'credits' => 3],
+            ['name' => 'البرمجة التفرعية', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS343', 'credits' => 3],
+            ['name' => 'التسويق', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS143', 'credits' => 2],
+
+            // ========== السنة الرابعة - النظم والشبكات ==========
+            ['name' => 'نظم تشغيل 1', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS341', 'credits' => 4],
+            ['name' => 'المترجمات', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS361', 'credits' => 3],
+            ['name' => 'الاقتصاد والإدارة في المؤسسة', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS144', 'credits' => 2],
+            ['name' => 'هندسة البرمجيات 1', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'SE351', 'credits' => 4],
+            ['name' => 'برمجة التطبيقات الشبكية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS381', 'credits' => 3],
+            ['name' => 'نظم وسائط متعددة وفائقة', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS382', 'credits' => 3],
+            ['name' => 'بروتوكولات الاتصال الحاسوبية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS282', 'credits' => 3],
+            ['name' => 'مشروع 2', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS392', 'credits' => 3],
+            ['name' => 'خوارزميات البحث الذكية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS272', 'credits' => 3],
+            ['name' => 'البرمجة التفرعية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS343', 'credits' => 3],
+            ['name' => 'التسويق', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS143', 'credits' => 2],
+            ['name' => 'نظم تشغيل 2', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS342', 'credits' => 3],
+
+            // ========== السنة الرابعة - الذكاء الصنعي ==========
+            ['name' => 'نظم تشغيل 1', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS341', 'credits' => 4],
+            ['name' => 'المترجمات', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS361', 'credits' => 3],
+            ['name' => 'الاقتصاد والإدارة في المؤسسة', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS144', 'credits' => 2],
+            ['name' => 'هندسة البرمجيات 1', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'SE351', 'credits' => 4],
+            ['name' => 'الشبكات العصبونية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS373', 'credits' => 3],
+            ['name' => 'نظم وسائط متعددة وفائقة', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS382', 'credits' => 3],
+            ['name' => 'الحقائق الافتراضية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS383', 'credits' => 3],
+            ['name' => 'مشروع 2', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS392', 'credits' => 3],
+            ['name' => 'خوارزميات البحث الذكية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS272', 'credits' => 3],
+            ['name' => 'البرمجة التفرعية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS343', 'credits' => 3],
+            ['name' => 'التسويق', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS143', 'credits' => 2],
+            ['name' => 'نظم قواعد المعرفة', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS333', 'credits' => 3],
+
+            // ========== السنة الخامسة - هندسة البرمجيات ==========
+            ['name' => 'أمن نظم المعلومات', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS471', 'credits' => 3],
+            ['name' => 'تطبيقات الانترنت', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS385', 'credits' => 3],
+            ['name' => 'نظم البحث عن المعلومات', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS379', 'credits' => 3],
+            ['name' => 'قواعد معطيات متقدمة', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS331', 'credits' => 3],
+            ['name' => 'هندسة نظم المعلومات', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'SE451', 'credits' => 3],
+            ['name' => 'النظم والتطبيقات الموزعة', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS442', 'credits' => 3],
+            ['name' => 'إدارة المشاريع', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'CS145', 'credits' => 2],
+            ['name' => 'هندسة البرمجيات 3', 'department_name' => 'هندسة البرمجيات ونظم المعلومات', 'code' => 'SE353', 'credits' => 3],
+
+            // ========== السنة الخامسة - النظم والشبكات ==========
+            ['name' => 'أمن نظم المعلومات', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS471', 'credits' => 3],
+            ['name' => 'النظم والتطبيقات الموزعة', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS442', 'credits' => 3],
+            ['name' => 'نظم الزمن الحقيقي', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS443', 'credits' => 3],
+            ['name' => 'إدارة الشبكات الحاسوبية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS285', 'credits' => 3],
+            ['name' => 'أمن الشبكات الحاسوبية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS472', 'credits' => 3],
+            ['name' => 'نمذجة ومحاكاة النظم الشبكية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS283', 'credits' => 3],
+            ['name' => 'إدارة المشاريع', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS145', 'credits' => 2],
+            ['name' => 'تصميم الشبكات الحاسوبية', 'department_name' => 'النظم والشبكات الحاسوبية', 'code' => 'CS284', 'credits' => 3],
+
+            // ========== السنة الخامسة - الذكاء الصنعي ==========
+            ['name' => 'أمن نظم المعلومات', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS471', 'credits' => 3],
+            ['name' => 'الروبوتية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS375', 'credits' => 3],
+            ['name' => 'التعلم التلقائي', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS376', 'credits' => 3],
+            ['name' => 'الرؤيا الحاسوبية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS377', 'credits' => 3],
+            ['name' => 'استكشاف المعرفة', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS378', 'credits' => 3],
+            ['name' => 'إدارة المشاريع', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS145', 'credits' => 2],
+            ['name' => 'معالجة اللغات الطبيعية', 'department_name' => 'الذكاء الاصطناعي', 'code' => 'CS374', 'credits' => 3],
         ];
-        foreach ($coursesByDepartment as $departmentName => $courses) {
-            if (!isset($departments[$departmentName])) {
+
+        // ============================================================
+        // 3. إدراج المواد (لكل قسم بنفس الاسم، مع ترتيب ID حسب college_id)
+        // ============================================================
+
+        // متغير لتتبع الـ ID الحالي
+        $currentId = 1;
+
+        foreach ($coursesData as $courseData) {
+            // جلب جميع الأقسام التي تحمل هذا الاسم (مرتبة حسب college_id)
+            $departments = $departmentsGrouped[$courseData['department_name']] ?? collect();
+
+            if ($departments->isEmpty()) {
+                $this->command->warn("⚠️  القسم '{$courseData['department_name']}' غير موجود. تخطي المادة: {$courseData['name']}");
                 continue;
             }
-            $department = $departments[$departmentName];
-            foreach ($courses as $courseData) {
-                DB::transaction(function () use ($courseData, $department) {
-                    $universalCourse = UniversalCourse::firstOrCreate(
-                        ['name' => $courseData['name']],
-                        ['image' => null]
-                    );
-                    $exists = \App\Models\Course::where('code', $courseData['code'])
-                        ->where('department_id', $department->id)
-                        ->exists();
-                    if (!$exists) {
-                        $this->courseRepo->create([
-                            'code' => $courseData['code'],
-                            'credits' => $courseData['credits'],
-                            'universal_course_id' => $universalCourse->id,
-                            'college_id' => $department->college_id,
-                            'department_id' => $department->id,
-                        ]);
-                    }
-                });
+
+            // إضافة المادة لكل قسم موجود بهذا الاسم
+            foreach ($departments as $department) {
+                // 1. إنشاء UniversalCourse (المادة العالمية)
+                $universalCourse = UniversalCourse::firstOrCreate(
+                    ['name' => $courseData['name']],
+                    ['image' => null]
+                );
+
+                // 2. إنشاء Course مرتبط بالقسم مع تعيين ID يدوياً (بدون year/semester)
+                $course = Course::firstOrCreate(
+                    [
+                        'code' => $courseData['code'],
+                        'department_id' => $department->id,
+                    ],
+                    [
+                        'id' => $currentId,
+                        'credits' => $courseData['credits'],
+                        'universal_course_id' => $universalCourse->id,
+                        'college_id' => $department->college_id,
+                        'department_id' => $department->id,
+                    ]
+                );
+
+                // إذا تم إنشاء سجل جديد (وليس موجوداً مسبقاً)، نزيد الـ ID
+                if ($course->wasRecentlyCreated) {
+                    $currentId++;
+                }
             }
         }
+
+        // ============================================================
+        // 4. إعادة تعيين التسلسل التلقائي إلى آخر قيمة
+        // ============================================================
+        $lastId = Course::max('id') ?? 1;
+        DB::statement("ALTER TABLE courses AUTO_INCREMENT = " . ($lastId + 1));
+
+        $this->command->info("✅ تم إضافة جميع المواد للأقسام بنجاح! عدد المواد: " . ($currentId - 1));
     }
 }

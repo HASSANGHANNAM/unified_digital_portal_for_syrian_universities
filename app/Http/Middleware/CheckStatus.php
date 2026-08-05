@@ -8,14 +8,20 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckStatus
 {
-
     public function handle(Request $request, Closure $next): Response
     {
-        if(auth()->user()->status !== 'active') {
+        $user = auth()->user();
+        if ($user->status !== 'active') {
+            if ($user->hasRole('Student')) {
+                return response()->json([
+                    'message' => 'حسابك غير مفعل. يرجى التواصل مع شؤون الطلاب.'
+                ], 403);
+            }
             return response()->json([
-                'message' => 'Your account is not active. Please contact support.'
+                'message' => 'حسابك غير مفعل.'
             ], 403);
         }
+
         return $next($request);
     }
 }

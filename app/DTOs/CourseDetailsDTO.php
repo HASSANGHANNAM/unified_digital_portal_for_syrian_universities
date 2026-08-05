@@ -9,6 +9,7 @@ class CourseDetailsDTO
     public function __construct(
         public int $id,
         public string $code,
+        public string $course_name,
         public int $credits,
         public int $college_id,
         public int $department_id,
@@ -32,6 +33,7 @@ class CourseDetailsDTO
         return new self(
             (int) $model->id,
             (string) $model->code,
+            (string) $model->course_name,
             (int) $model->credits,
             (int) $model->college_id,
             (int) $model->department_id,
@@ -44,6 +46,7 @@ class CourseDetailsDTO
         return [
             'id' => $this->id,
             'code' => $this->code,
+            'course_name' => $this->course_name,
             'credits' => $this->credits,
             'college_id' => $this->college_id,
             'department_id' => $this->department_id,
