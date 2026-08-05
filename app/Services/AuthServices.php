@@ -34,9 +34,6 @@ class AuthServices
                 'username' => ['data is incorrect'],
             ]);
         }
-        if (!$user->email_verified_at) {
-            throw new \Exception('Email must be verified before logging in');
-        }
         if (!Hash::check($request['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['data is incorrect.'],
@@ -99,8 +96,10 @@ class AuthServices
 
         if ($request->hasFile('profile_image')) {
 
-            if ($user->person->profile_image &&
-                Storage::disk('public')->exists($user->person->profile_image)) {
+            if (
+                $user->person->profile_image &&
+                Storage::disk('public')->exists($user->person->profile_image)
+            ) {
 
                 Storage::disk('public')->delete($user->person->profile_image);
             }

@@ -134,7 +134,7 @@ class UsersSeederV2 extends Seeder
                 'password' => 'Student@123456',
                 'new_password' => 'Dean@123456',
                 'role' => 'Student',
-                'status' => 'active',
+                'status' => 'pending',
                 'person_id' => 8,
                 'last_login' => '2026-09-19',
                 'email_verified_at' => '2026-09-19 15:13:02',

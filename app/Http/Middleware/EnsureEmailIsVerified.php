@@ -16,7 +16,7 @@ class EnsureEmailIsVerified
     public function handle(Request $request, Closure $next)
     {
         if (!auth()->user()?->email_verified_at) {
-            return response()->json(['message' => 'Please verify your email'], 403);
+            return response()->json(['message' => 'حسابك غير مفعل يرجى تأكيد حسابك اولاً'], 405);
         }
 
         return $next($request);

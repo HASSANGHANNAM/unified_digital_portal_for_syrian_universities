@@ -34,7 +34,7 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
 //  V1 
 Route::prefix('V1')->group(function () {
-    Route::middleware(['auth:sanctum',])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
         Route::post('/complete-profile', [ProfileController::class, 'completeProfile'])->middleware(['permission:complete profile']);
         Route::post('/upload-document', [ProfileController::class, 'uploadDocument'])->middleware(['permission:upload document']);
@@ -43,7 +43,7 @@ Route::prefix('V1')->group(function () {
     });
 });
 Route::prefix('V1')->group(function () {
-    Route::middleware(['auth:sanctum', 'CheckStatus'])->group(function () {
+    Route::middleware(['auth:sanctum', 'CheckStatus', 'verified.email'])->group(function () {
         // Notifications
         Route::get('notifications', [NotificationController::class, 'index'])->middleware(['permission:get my notifications']);
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->middleware(['permission:get my count notifications unread']);

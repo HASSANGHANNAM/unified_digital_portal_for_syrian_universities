@@ -12,16 +12,21 @@ class CheckStatus
     {
         $user = auth()->user();
         if ($user->status !== 'active') {
-            if ($user->hasRole('Student')) {
+            if ($user->status === 'pending') {
+                if ($user->hasRole('Student')) {
+                    return response()->json([
+                        'message' => 'حسابك قيد الانتظار. يرجى الانتظار حتى يتم مراجعة أوراقك من قبل شؤون الطلاب أو قم بملء بياناتك و الانتظار .'
+                    ], 403);
+                }
                 return response()->json([
-                    'message' => 'حسابك غير مفعل. يرجى التواصل مع شؤون الطلاب.'
+                    'message' => 'حسابك قيد الانتظار.'
+                ], 403);
+            } else {
+                return response()->json([
+                    'message' => 'حسابك غير نشط.'
                 ], 403);
             }
-            return response()->json([
-                'message' => 'حسابك غير مفعل.'
-            ], 403);
         }
-
         return $next($request);
     }
 }
