@@ -29,7 +29,6 @@ class CourseService
                 'code' => 200,
             ];
         }
-
         $item = CourseDetailsDTO::fromModel($course)->toArray();
 
         return [
