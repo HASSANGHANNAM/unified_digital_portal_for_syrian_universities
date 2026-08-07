@@ -15,6 +15,7 @@ use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\CoursePartRepositoryInterface;
 use App\Repositories\Contracts\CourseRepositoryInterface;
 use App\Repositories\RequestRepository;
+use App\Services\Traits\TokenDataTrait;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\DB;
 
 class GradeService
 {
+    use TokenDataTrait;
     public function __construct(
         private UserRepositoryInterface $userRepositoryInterface,
         private StudentCoursePartRepositoryInterface $studentCoursePartRepositoryInterface,
@@ -122,10 +124,10 @@ class GradeService
         ];
     }
     // استعراض نتيجة مادة معينة للطالب مع حالة النجاح أو الرسوب
-    public function getgrade(int $courseId): array
+    public function getgrade(int $studentCourseId): array
     {
         $user = Auth::user();
-        $studentCourse = $this->studentCourseRepositoryInterface->findStudentCourse($user->id, $courseId);
+        $studentCourse = $this->studentCourseRepositoryInterface->findStudentCourse($this->getStudentId(), $studentCourseId);
         if (!$studentCourse) {
             return [
                 'data' => [],
@@ -133,7 +135,7 @@ class GradeService
                 'code' => 404,
             ];
         }
-        $grades = $this->studentCoursePartRepositoryInterface->getStudentCourseGrades($studentCourse->id);
+        $grades = $this->studentCoursePartRepositoryInterface->getStudentCourseGrades($studentCourseId);
         if ($grades->isEmpty()) {
 
             return [
@@ -148,7 +150,8 @@ class GradeService
 
         return [
             'data' => [
-                'course_id'       => $courseId,
+                'stusent_course_id' => $studentCourseId,
+                'course_id'       => $studentCourse->course->id,
                 'course_name'     => optional($studentCourse->course->universalCourse)->name,
                 'code'            => $studentCourse->course->code,
                 'credits'         => $studentCourse->course->credits, // أو $studentCourse->credits حسب المطلوب
@@ -199,8 +202,8 @@ class GradeService
                 ->where('published', true);
 
             $total = $publishedGrades->sum('credits');
-
             return [
+                'student_course_id' => $studentCourse->id,
                 'course_id'       => $studentCourse->course_id,
                 'course_name'     => optional($studentCourse->course->universalCourse)->name,
                 'code'            => $studentCourse->course->code,

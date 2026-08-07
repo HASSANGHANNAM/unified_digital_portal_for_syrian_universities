@@ -14,4 +14,5 @@ interface StudentCoursePartRepositoryInterface
     public function findById(string $id): ?StudentCoursePart;
     public function getPartById(int $id);
     public function updateGrade(int $studentCoursePartId, float $grade): bool;
+    public function getStudentCourseGrades(int $studentCourseId);
 }

@@ -45,20 +45,21 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
         return $this->model
             ->with('course')
             ->where('student_id', $studentId)
-            ->where('course_id', $courseId)
+            ->where('id', $courseId)
             ->first();
     }
 
-    public function getStudentCoursesWithGrades(int $userId,int $perPage,array $filters = []) {
+    public function getStudentCoursesWithGrades(int $userId, int $perPage, array $filters = [])
+    {
         $query = StudentCourse::with([
             'course.universalCourse',
             'course.department',
             'parts.coursePart',
             'student.person.user',
         ])
-        ->whereHas('student.person.user', function ($q) use ($userId) {
-            $q->where('id', $userId);
-        });
+            ->whereHas('student.person.user', function ($q) use ($userId) {
+                $q->where('id', $userId);
+            });
 
         // اسم المادة
         if (!empty($filters['course_name'])) {
@@ -85,27 +86,25 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
                 $query->whereHas('parts', function ($q) {
                     $q->where('published', 1);
                 })
-                ->withSum([
-                    'parts as total_grade' => function ($q) {
-                        $q->where('published', 1);
-                    }
-                ], 'credits')
-                ->having('total_grade', '>=', 60);
-
+                    ->withSum([
+                        'parts as total_grade' => function ($q) {
+                            $q->where('published', 1);
+                        }
+                    ], 'credits')
+                    ->having('total_grade', '>=', 60);
             } elseif ($filters['status'] == 'failed') {
 
                 $query->whereHas('parts', function ($q) {
                     $q->where('published', 1);
                 })
-                ->withSum([
-                    'parts as total_grade' => function ($q) {
-                        $q->where('published', 1);
-                    }
-                ], 'credits')
-                ->having('total_grade', '<', 60);
+                    ->withSum([
+                        'parts as total_grade' => function ($q) {
+                            $q->where('published', 1);
+                        }
+                    ], 'credits')
+                    ->having('total_grade', '<', 60);
             }
         }
-
         return $query->paginate($perPage);
     }
     public function getStudentCoursesWithGradesArray(int $studentId): array
@@ -171,17 +170,17 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             ->first();
     }
 
-        public function getUnpublishedMarks(int $courseId,int $perPage, array $filters = [])
+    public function getUnpublishedMarks(int $courseId, int $perPage, array $filters = [])
     {
         $query = StudentCourse::with([
             'course.universalCourse',
             'student.person',
             'parts.coursePart'
         ])
-        ->where('course_id', $courseId)
-        ->whereHas('parts', function ($q) {
-            $q->where('published', 0);
-        });
+            ->where('course_id', $courseId)
+            ->whereHas('parts', function ($q) {
+                $q->where('published', 0);
+            });
 
         if (!empty($filters['course_name'])) {
             $query->whereHas('course.universalCourse', function ($q) use ($filters) {
@@ -200,14 +199,14 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
         $query->with([
             'parts' => function ($q) {
                 $q->where('published', 0)
-                ->with('coursePart');
+                    ->with('coursePart');
             }
         ]);
 
         return $query->paginate($perPage);
     }
 
-        public function publishMarks(int $courseId,array $filters = [])
+    public function publishMarks(int $courseId, array $filters = [])
     {
         $query = StudentCoursePart::query()
             ->where('published', 0)
@@ -229,6 +228,4 @@ class StudentCourseRepository implements StudentCourseRepositoryInterface
             'published' => 1
         ]);
     }
-
-
 }

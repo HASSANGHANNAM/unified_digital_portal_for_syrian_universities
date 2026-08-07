@@ -95,7 +95,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/grades', [AcademicController::class, 'getGrades'])->middleware(['permission:get my grades']);
         Route::get('/allGrades', [GradeController::class, 'getAllGrades'])->middleware(['permission:get all grades']);
         Route::post('/addGrade', [GradeController::class, 'addGrade'])->middleware(['permission:add grade']);
-        Route::get('/my-grades/{courseId}', [GradeController::class, 'getgrade'])->middleware(['permission:get my grades']);
+        Route::get('/my-grades/{studentCourseId}', [GradeController::class, 'getgrade'])->middleware(['permission:get my grades']);
         Route::get('/grades/appeals', [GradeController::class, 'getGradeAppeals'])->middleware(['permission:get grade appeals']);
         Route::put('/grades/appeals/{appealId}', [GradeController::class, 'processAppeal'])->middleware(['permission:process grade appeal']);
         Route::get('/my-grades/{courseId}', [GradeController::class, 'getgrade'])->middleware(['permission:get my grades']);
@@ -186,6 +186,12 @@ Route::prefix('V1')->group(function () {
 
         // student affairs courses
         Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses'])->middleware(['permission:get college courses']);
+
+        // suggestion
+        Route::post('/student-suggestion', [StudentController::class, 'addStudentSuggestion']); //->middleware(['permission:add student suggestion']);
+        Route::get('/student-suggestions', [StudentController::class, 'getStudentSuggestions']); //->middleware(['permission:get student suggestions']);
+        Route::get('/college/suggestions', [StudentController::class, 'collegeSuggestions']); //->middleware(['permission:get college suggestions']);
+        Route::put('/college/suggestion/{id}/status', [StudentController::class, 'updateSuggestionStatus']); //->middleware(['permission:update suggestion status']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

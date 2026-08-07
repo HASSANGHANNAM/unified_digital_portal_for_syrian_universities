@@ -163,6 +163,14 @@ class RequestService
                     'name' => $request->processedBy->person->full_name ?? '',
                 ]
                 : null,
+            'student' => $request->student
+                ? [
+                    'student_id'             => $request->student->id,
+                    'full_name'      => $request->student->person->full_name ?? '',
+                    'student_id_number' => $request->student->student_id_number ?? '',
+                    'academic_status'  => $request->student->academic_status ?? '',
+                ]
+                : null,
 
             'requestType' => [
                 'request_type_id' => $request->requestType->id,

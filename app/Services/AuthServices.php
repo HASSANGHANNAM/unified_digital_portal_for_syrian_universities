@@ -158,7 +158,10 @@ class AuthServices
             if (Storage::disk('public')->exists($user->person->profile_image)) {
                 return [
                     'data' => [
-                        'profile_image' => Storage::disk('public')->url($user->person->profile_image),
+                        'profile_image' => Storage::disk('public')->temporaryUrl(
+                            $user->person->profile_image,
+                            now()->addDays(7)
+                        )
                     ],
                     'message' => 'Profile image retrieved successfully',
                     'code' => 200,

@@ -103,7 +103,8 @@ class RequestRepository
         $query = $this->model->with([
             'course.universalCourse',
             'processedBy.person',
-            'requestType'
+            'requestType',
+            'student.person',
         ])->newQuery()
             ->whereIn('requests.status', $waitingStatuses)
             ->where(function ($query) use ($userId, $requestRoles) {
@@ -152,7 +153,8 @@ class RequestRepository
                 'course.universalCourse',
                 'processedBy.person',
                 'media',
-                'requestType.requestTypeMedia'
+                'requestType.requestTypeMedia',
+                'student.person'
             ])
             ->where('id', $requestId)
             ->first();

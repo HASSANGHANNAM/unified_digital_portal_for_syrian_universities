@@ -95,7 +95,15 @@ class RequestListDTO
                         'name' => $request->processedBy->person->full_name,
                     ];
                 }
-
+                $student = null;
+                if ($request->student && $request->student->person) {
+                    $student = [
+                        'student_id' => $request->student->id,
+                        'full_name' => $request->student->person->full_name,
+                        'student_id_number' => $request->student->student_id_number,
+                        'academic_status' => $request->student->academic_status,
+                    ];
+                }
                 return [
                     'request_id'      => $request->id,
                     'request_type_id' => $request->request_type_id,
@@ -106,6 +114,7 @@ class RequestListDTO
                     'decision_reason' => $request->decision_reason,
                     'course'          => $course,
                     'status'          => $request->status,
+                    'student'         => $student, // ✅ الحقل الجديد
                     'staff'           => $staff,
                 ];
             })->toArray(),

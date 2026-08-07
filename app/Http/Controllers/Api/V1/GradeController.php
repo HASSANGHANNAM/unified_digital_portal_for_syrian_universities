@@ -33,7 +33,7 @@ class GradeController extends Controller
         }
     }
 
-    public function addGrade(AddGradeRequest $addGradeRequest,int $courseId,string $academicYear,int $semester): JsonResponse
+    public function addGrade(AddGradeRequest $addGradeRequest, int $courseId, string $academicYear, int $semester): JsonResponse
     {
         try {
             $data = $this->gradeService->addGrade($courseId, $academicYear, $semester, $addGradeRequest->file('file'));
@@ -62,10 +62,10 @@ class GradeController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-    public function getgrade(int $courseId): JsonResponse
+    public function getgrade(int $studentCourseId): JsonResponse
     {
         try {
-            $data = $this->gradeService->getgrade($courseId);
+            $data = $this->gradeService->getgrade($studentCourseId);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -75,7 +75,7 @@ class GradeController extends Controller
     {
         try {
             $data = $this->gradeService->getAllMyGrades();
-            return Response::success($data['data'],$data['message'],$data['code']);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }
@@ -83,7 +83,7 @@ class GradeController extends Controller
     public function getCourseGrades(int $courseId, string $academicYear, int $semester): JsonResponse
     {
         try {
-            $data = $this->gradeService->getCourseGrades(auth()->user(),$courseId, $academicYear, $semester);
+            $data = $this->gradeService->getCourseGrades(auth()->user(), $courseId, $academicYear, $semester);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
@@ -100,42 +100,33 @@ class GradeController extends Controller
         }
     }
 
-    public function addGradesforonestudent(AddGradesforonestudentRequest $request,int $courseId,string $academicYear,int $semester): JsonResponse
+    public function addGradesforonestudent(AddGradesforonestudentRequest $request, int $courseId, string $academicYear, int $semester): JsonResponse
     {
-    try{
-        $data=$this->gradeService->addGradesforonestudent(auth()->user(),$courseId,$academicYear,$semester,$request->validated());
-        return Response::success($data['data'],$data['message'],$data['code']);
-    }catch(Throwable $th){
-        return Response::Error([],$th->getMessage(),400);
+        try {
+            $data = $this->gradeService->addGradesforonestudent(auth()->user(), $courseId, $academicYear, $semester, $request->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
     }
 
-}
-
-public function getUnpublishedMarks(int $courseId): JsonResponse
-{
-    try {
-        $data = $this->gradeService->getUnpublishedMarks(auth()->user(),$courseId);
-        return Response::success($data['data'],$data['message'],$data['code']);
-    } catch (Throwable $th) {
-        return Response::Error([], $th->getMessage(), 400);
+    public function getUnpublishedMarks(int $courseId): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->getUnpublishedMarks(auth()->user(), $courseId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
     }
-}
 
-public function publishMarks(int $courseId): JsonResponse
-{
-    try {
-        $data = $this->gradeService->publishMarks(auth()->user(),$courseId);
-        return Response::success($data['data'],$data['message'],$data['code']);
-    } catch (Throwable $th) {
-        return Response::Error([], $th->getMessage(), 400);
+    public function publishMarks(int $courseId): JsonResponse
+    {
+        try {
+            $data = $this->gradeService->publishMarks(auth()->user(), $courseId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
     }
-}
-
-
-
-
-
-
-
-
 }

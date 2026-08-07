@@ -130,7 +130,7 @@ class SanctionService
         $user = Auth::user();
         $perPage = request()->input('per_page', 10);
 
-        $sanctions = $this->sanctionRepositoryInterface->getStudentSanctions($user->id, $perPage);
+        $sanctions = $this->sanctionRepositoryInterface->getStudentSanctions($this->getStudentId(), $perPage);
 
         if ($sanctions->isEmpty()) {
             return [
@@ -170,7 +170,7 @@ class SanctionService
     public function getSanctionDetails(int $sanctionId): array
     {
         $user = Auth::user();
-        $sanction = $this->sanctionRepositoryInterface->getStudentSanctionById($user->id, $sanctionId);
+        $sanction = $this->sanctionRepositoryInterface->getStudentSanctionById($this->getStudentId(), $sanctionId);
         if (!$sanction) {
             return [
                 'data' => [],

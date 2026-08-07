@@ -118,6 +118,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ];
 
         foreach ($permissions as $permissionsname) {
@@ -222,6 +224,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $headofdepartmentRole->givePermissionTo([
             'get my notifications',
@@ -321,6 +325,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $examinationRole->givePermissionTo([
             'get my notifications',
@@ -420,6 +426,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $studentaffairsRole->givePermissionTo([
             'get my notifications',
@@ -519,6 +527,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $instructorRole->givePermissionTo([
             'get my notifications',
@@ -618,6 +628,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $teachingassistantRole->givePermissionTo([
             'get my notifications',
@@ -717,6 +729,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $studentRole->givePermissionTo([
             'get my notifications',
@@ -816,6 +830,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $administrativeStaffRole->givePermissionTo([
             'get my notifications',
@@ -915,6 +931,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
         $systemAdministratorRole->givePermissionTo([
             'get my notifications',
@@ -1014,6 +1032,8 @@ class RolesAndPermissionsSeederV2 extends Seeder
             'get academic profile',
             'logout',
             'get college courses',
+            'add student suggestion',
+            'get student suggestion',
         ]);
     }
 }
