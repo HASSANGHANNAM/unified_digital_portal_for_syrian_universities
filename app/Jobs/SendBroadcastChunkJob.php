@@ -51,10 +51,8 @@ class SendBroadcastChunkJob implements ShouldQueue
 
         foreach ($users as $user) {
             if ($this->advertisementId) {
-                $student = Student::whereHas('person.user', function ($query) use ($user) {
-                    $query->where('id', $user->id);
-                })->first();
-
+                $u = User::with('person.student')->find($user->id);
+                $student = $u->person->student;
                 if ($student) {
                     AdvertisementStudent::firstOrCreate([
                         'advertisement_id' => $this->advertisementId,
