@@ -60,4 +60,8 @@ class FileStorageController extends Controller
 
         abort(404);
     }
+    public function viewAdvertisementAattachment(string $id): StreamedResponse
+    {
+        return $this->mediaService->viewAdvertisementAattachment($id);
+    }
 }

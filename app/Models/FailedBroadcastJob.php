@@ -16,6 +16,7 @@ class FailedBroadcastJob extends Model
         'type',
         'attempts',
         'last_attempt_at',
+        'advertisement_id',
     ];
 
     protected $casts = [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\V1;
 
+use App\Enums\NotificationColor;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
 
@@ -14,10 +15,13 @@ class BroadcastNotificationRequest extends FormRequest
 
     public function rules(): array
     {
+        $allowedTypes = implode(',', array_column(NotificationColor::cases(), 'name'));
         return [
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            'type' => 'required|string|max:50',
+            'type' => 'required|string|in:' . $allowedTypes,
+            'attachment' => 'nullable|array',
+            'attachment.*' => 'file|max:20480|mimes:jpg,jpeg,png,mp4,pdf,doc,docx,xls,xlsx,csv',
             'student_id' => 'sometimes|integer|exists:students,id',
             'college_id' => 'sometimes|integer|exists:colleges,id',
             'department_id' => 'sometimes|integer|exists:departments,id',
@@ -27,7 +31,10 @@ class BroadcastNotificationRequest extends FormRequest
 
     public function messages(): array
     {
-        return [];
+        return [
+            'type.in' => 'نوع الإشعار غير صحيح. القيم المسموحة: ' . implode(', ', array_column(NotificationColor::cases(), 'name')),
+            'attachment.*.mimes' => 'نوع الملف غير مسموح. الأنواع المسموحة: jpg, jpeg, png, mp4, pdf, doc, docx, xls, xlsx, csv.',
+        ];
     }
 
     public function withValidator(Validator $validator): void
@@ -57,6 +64,8 @@ class BroadcastNotificationRequest extends FormRequest
             if ($hasAcademicYear && ! ($hasDepartment || $hasCollege)) {
                 $validator->errors()->add('academic_year', 'academic_year يجب أن يُستخدم مع department_id أو college_id.');
             }
+            $type = $this->input('type');
+            $uploaded = $this->file('attachment') ?? [];
         });
     }
 }

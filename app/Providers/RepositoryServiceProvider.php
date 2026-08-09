@@ -38,6 +38,7 @@ use App\Repositories\Contracts\EmailVerificationRepositoryInterface;
 use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
 use App\Repositories\Contracts\StudentVerificationRepositoryInterface;
 // use App\Repositories\Contracts\NotificationRepositoryInterface;
+use App\Repositories\Contracts\AdvertisementRepositoryInterface;
 
 use App\Repositories\UniversityRepository;
 use App\Repositories\UserRepository;
@@ -76,6 +77,7 @@ use App\Repositories\RequestUserRepository;
 use App\Repositories\StudyPlanCourseRepository;
 use App\Repositories\StudentVerificationRepository;
 use App\Repositories\UserSignatureRepository;
+use App\Repositories\AdvertisementRepository;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -117,6 +119,7 @@ class RepositoryServiceProvider extends ServiceProvider
         // $this->app->bind(NotificationRepositoryInterface::class, NotificationRepository::class);
         $this->app->bind(UserSignatureRepositoryInterface::class, UserSignatureRepository::class);
         $this->app->bind(RequestUserRepositoryInterface::class, RequestUserRepository::class);
+        $this->app->bind(AdvertisementRepositoryInterface::class, AdvertisementRepository::class);
     }
     public function boot(): void
     {

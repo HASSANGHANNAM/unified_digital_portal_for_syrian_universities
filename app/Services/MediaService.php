@@ -217,4 +217,44 @@ class MediaService
 
         return 'attachment; filename="' . $filename . '"';
     }
+    public function viewAdvertisementAttachment(string $attachmentId): StreamedResponse
+    {
+        $attachment = AdvertisementAttachment::find($attachmentId);
+        abort_if(!$attachment, 404, 'المرفق غير موجود');
+        $originalPath = $attachment->path ?? '';
+        $candidates = [];
+        if ($originalPath !== '') {
+            $candidates[] = $originalPath;
+        }
+        $normalized = ltrim(preg_replace('#^(private/|public/|storage/)#i', '', $originalPath), '/');
+        if ($normalized !== '' && $normalized !== $originalPath) {
+            $candidates[] = $normalized;
+        }
+        $found = false;
+        $disk = null;
+        $filePath = null;
+        foreach ($candidates as $candidate) {
+            if (Storage::disk('private')->exists($candidate)) {
+                $found = true;
+                $disk = 'private';
+                $filePath = $candidate;
+                break;
+            }
+            if (Storage::disk('public')->exists($candidate)) {
+                $found = true;
+                $disk = 'public';
+                $filePath = $candidate;
+                break;
+            }
+        }
+        abort_if(!$found || !$filePath, 404, 'الملف غير موجود على الخادم');
+        $mime = Storage::disk($disk)->mimeType($filePath) ?: 'application/octet-stream';
+        $headers = ['Content-Type' => $mime];
+        if (in_array(strtolower($attachment->type), ['image', 'pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+            $headers['Content-Disposition'] = 'inline; filename="' . $attachment->name . '"';
+        } else {
+            $headers['Content-Disposition'] = 'attachment; filename="' . $attachment->name . '"';
+        }
+        return Storage::disk($disk)->response($filePath, $attachment->name, $headers);
+    }
 }

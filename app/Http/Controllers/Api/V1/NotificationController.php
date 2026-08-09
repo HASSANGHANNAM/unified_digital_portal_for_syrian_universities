@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\GetAdvertisementDetailsRequest;
+use App\Http\Requests\V1\GetMyReceivedAdvertisementsRequest;
+use App\Http\Requests\V1\GetMySendAdvertisementsRequest;
 use App\Http\Resources\NotificationResource;
 use App\Http\Responses\Response;
+use App\Services\NotificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -13,6 +17,11 @@ use Throwable;
 
 class NotificationController extends Controller
 {
+    private NotificationService $notificationService;
+    public function __construct(NotificationService $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
     public function index(Request $request): JsonResponse
     {
         try {
@@ -88,7 +97,8 @@ class NotificationController extends Controller
     {
         try {
             $service = new \App\Services\NotificationBroadcastService();
-            $result = $service->broadcast($request->validated());
+            $files = $request->file('attachment') ?? [];
+            $result = $service->broadcast($request->validated(), $files);
 
             if (! empty($result['success']) && $result['success'] === true) {
                 return Response::Success($result['data'] ?? [], $result['message'] ?? 'تم بدء عملية البث', 200);
@@ -97,6 +107,35 @@ class NotificationController extends Controller
             return Response::Error([], $result['message'] ?? 'فشل البث', $result['code'] ?? 422);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 500);
+        }
+    }
+
+
+    public function mySendadvertisements(GetMySendAdvertisementsRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->notificationService->mySendadvertisements($request->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function myReceivedAdvertisements(GetMyReceivedAdvertisementsRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->notificationService->myReceivedAdvertisements($request->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function advertisement(GetAdvertisementDetailsRequest $request): JsonResponse
+    {
+        try {
+            $data = $this->notificationService->getAdvertisementDetail($request->validated());
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
         }
     }
 }

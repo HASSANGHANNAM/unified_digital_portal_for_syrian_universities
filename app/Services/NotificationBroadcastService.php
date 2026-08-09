@@ -3,15 +3,18 @@
 namespace App\Services;
 
 use App\Jobs\SendBroadcastChunkJob;
+use App\Models\Advertisement;
+use App\Models\AdvertisementAttachment;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Throwable;
 
 class NotificationBroadcastService
 {
-    public function broadcast(array $data): array
+    public function broadcast(array $data, array $files): array
     {
         $title = $data['title'] ?? '';
         $message = $data['message'] ?? '';
@@ -20,7 +23,6 @@ class NotificationBroadcastService
         $maxRecipients = (int) config('notification.max_recipients', 0);
 
         $userIds = $this->resolveRecipientUserIds($data);
-
         if (empty($userIds)) {
             return [
                 'success' => false,
@@ -36,13 +38,39 @@ class NotificationBroadcastService
                 'code' => 422,
             ];
         }
+        $advertisement = null;
 
-        $this->storeDatabaseNotifications($userIds, $title, $message, $type);
+        DB::transaction(function () use ($userIds, $title, $message, $type, $data, $files, &$advertisement) {
+            $this->storeDatabaseNotifications($userIds, $title, $message, $type);
+            $advertisement = Advertisement::create([
+                'title'   => $data['title'],
+                'message' => $data['message'],
+                'user_id' => auth()->id(),
+            ]);
+            foreach (array_values($files) as $file) {
+                $filename = Str::uuid()->toString() . '.' . $file->getClientOriginalExtension();
+                $path = "advertisement_attachments/{$advertisement->id}";
+                Storage::disk('private')->putFileAs($path, $file, $filename);
+                AdvertisementAttachment::create([
+                    'advertisement_id' => $advertisement->id,
+                    'name'             => $file->getClientOriginalName(),
+                    'type'             => $file->getClientOriginalExtension(),
+                    'path' => $path . '/' . $filename,
+                ]);
+            }
+        });
 
         $chunks = array_chunk($userIds, $chunkSize);
-
+        if ($advertisement == null) {
+            return [
+                'success' => false,
+                'data' => [],
+                'message' => ' لم يتم حفظ الاعلان',
+                'code' => 403,
+            ];
+        }
         foreach ($chunks as $chunk) {
-            SendBroadcastChunkJob::dispatch($chunk, $title, $message, $type);
+            SendBroadcastChunkJob::dispatch($chunk, $title, $message, $type, $advertisement->id ?? null);
         }
 
         return [

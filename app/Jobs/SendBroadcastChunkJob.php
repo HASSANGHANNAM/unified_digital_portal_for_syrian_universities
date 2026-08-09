@@ -3,7 +3,9 @@
 namespace App\Jobs;
 
 use App\Events\SendCustomNotification;
+use App\Models\AdvertisementStudent;
 use App\Models\FailedBroadcastJob;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -12,7 +14,6 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Throwable;
-use RuntimeException;
 
 class SendBroadcastChunkJob implements ShouldQueue
 {
@@ -25,49 +26,72 @@ class SendBroadcastChunkJob implements ShouldQueue
     public string $message;
     public string $type;
     public ?int $failedBroadcastJobId;
+    public ?int $advertisementId;
 
-    public function __construct(array $userIds, string $title, string $message, string $type, ?int $failedBroadcastJobId = null)
-    {
+    public function __construct(
+        array $userIds,
+        string $title,
+        string $message,
+        string $type,
+        ?int $failedBroadcastJobId = null,
+        ?int $advertisementId = null
+    ) {
         $this->userIds = array_values(array_unique(array_map('intval', $userIds)));
         $this->title = $title;
         $this->message = $message;
         $this->type = $type;
         $this->failedBroadcastJobId = $failedBroadcastJobId;
+        $this->advertisementId = $advertisementId;
     }
 
     public function handle(): void
     {
         $users = User::query()->whereIn('id', $this->userIds)->get();
-        $successfulCount = 0;
-        $failedCount = 0;
+        $failedUserIds = [];
 
         foreach ($users as $user) {
+            if ($this->advertisementId) {
+                $student = Student::whereHas('person.user', function ($query) use ($user) {
+                    $query->where('id', $user->id);
+                })->first();
+
+                if ($student) {
+                    AdvertisementStudent::firstOrCreate([
+                        'advertisement_id' => $this->advertisementId,
+                        'student_id'       => $student->id,
+                    ]);
+                }
+            }
+
             try {
                 event(new SendCustomNotification($user, $this->title, $this->message, $this->type));
-                $successfulCount++;
             } catch (Throwable $exception) {
-                $failedCount++;
+                $failedUserIds[] = $user->id;
 
                 Log::error('Broadcast chunk user delivery failed.', [
                     'user_id' => $user->id,
-                    'user_ids' => $this->userIds,
-                    'title' => $this->title,
-                    'message' => $this->message,
-                    'type' => $this->type,
-                    'exception' => get_class($exception),
-                    'error' => $exception->getMessage(),
+                    'error'   => $exception->getMessage(),
                 ]);
             }
         }
 
-        if ($failedCount > 0 && $failedCount >= $successfulCount) {
-            throw new RuntimeException('Broadcast chunk failed for the majority of recipients.');
+        if (!empty($failedUserIds)) {
+            foreach ($failedUserIds as $userId) {
+                SendSingleUserRetryJob::dispatch(
+                    $userId,
+                    $this->title,
+                    $this->message,
+                    $this->type,
+                    $this->advertisementId
+                );
+            }
         }
 
         if ($this->failedBroadcastJobId !== null) {
             FailedBroadcastJob::query()->whereKey($this->failedBroadcastJobId)->delete();
         }
     }
+
 
     public function backoff(): array
     {
@@ -102,13 +126,8 @@ class SendBroadcastChunkJob implements ShouldQueue
             ]);
         }
 
-        Log::error('Broadcast chunk failed after all attempts.', [
+        Log::error('Broadcast chunk failed after all attempts (unexpected).', [
             'user_ids' => $this->userIds,
-            'title' => $this->title,
-            'message' => $this->message,
-            'type' => $this->type,
-            'failed_broadcast_job_id' => $this->failedBroadcastJobId,
-            'exception' => get_class($exception),
             'error' => $exception->getMessage(),
         ]);
     }

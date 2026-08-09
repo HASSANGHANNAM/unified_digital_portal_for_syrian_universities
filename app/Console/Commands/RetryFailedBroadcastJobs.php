@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendBroadcastChunkJob;
+use App\Jobs\SendSingleUserRetryJob;
 use App\Models\FailedBroadcastJob;
 use Illuminate\Console\Command;
 
@@ -29,13 +30,26 @@ class RetryFailedBroadcastJobs extends Command
                 foreach ($jobs as $job) {
                     $job->forceFill(['last_attempt_at' => now()])->save();
 
-                    SendBroadcastChunkJob::dispatch(
-                        $job->user_ids,
-                        $job->title,
-                        $job->message,
-                        $job->type,
-                        $job->id
-                    );
+                    $userIds = $job->user_ids;
+
+                    if (count($userIds) === 1) {
+                        SendSingleUserRetryJob::dispatch(
+                            $userIds[0],
+                            $job->title,
+                            $job->message,
+                            $job->type,
+                            $job->advertisement_id
+                        );
+                    } else {
+                        SendBroadcastChunkJob::dispatch(
+                            $userIds,
+                            $job->title,
+                            $job->message,
+                            $job->type,
+                            $job->id,
+                            $job->advertisement_id
+                        );
+                    }
 
                     $dispatched++;
                 }

@@ -49,7 +49,10 @@ Route::prefix('V1')->group(function () {
         Route::get('notifications/unread-count', [NotificationController::class, 'unreadCount'])->middleware(['permission:get my count notifications unread']);
         Route::patch('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->middleware(['permission:read notification']);
         Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->middleware(['permission:read all my notifications']);
-        Route::post('notifications/broadcast', [NotificationController::class, 'broadcast']); //->middleware(['permission:send broadcast notifications']);
+        Route::post('advertisement/broadcast', [NotificationController::class, 'broadcast']); //->middleware(['permission:send broadcast advertisement']);
+        Route::get('/mySendadvertisements', [NotificationController::class, 'mySendadvertisements']); //->middleware(['permission:get send advertisements']);
+        Route::get('/my-received-advertisements', [NotificationController::class, 'myReceivedAdvertisements']); //->middleware(['permission:get received advertisements']);
+        Route::get('/advertisement/{id}', [NotificationController::class, 'advertisement']); //->middleware(['permission:get advertisement detailes']);
 
         // Auth and verify code and profile
         Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
@@ -128,6 +131,7 @@ Route::prefix('V1')->group(function () {
         // View filse
         Route::get('/media/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewMedia'])->middleware(['permission:view media']);
         Route::get('/pdf/{request}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewPdf'])->middleware(['permission:view pdf']);
+        Route::get('/advertisement_attachments/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewAdvertisementAattachment']); //->middleware(['permission:view viewAdvertisementAattachment']);
 
         // payment and invoices
         Route::get('/invoices', [PaymentController::class, 'getInvoices'])->middleware(['permission:get invoices']);

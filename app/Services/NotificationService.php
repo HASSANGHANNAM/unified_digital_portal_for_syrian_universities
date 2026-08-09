@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\DTOs\AdvertisementDetailDTO;
+use App\DTOs\MyAdvertisementDTO;
 use App\Jobs\ProcessQueryableUserNotificationsJob;
+use App\Models\Student;
 use App\Models\User;
+use App\Repositories\Contracts\AdvertisementRepositoryInterface;
 use App\Services\Traits\HasCache;
 use App\Services\Traits\HasLogging;
 use App\Support\NotificationChunkWriter;
@@ -15,6 +19,9 @@ use Laravel\SerializableClosure\SerializableClosure;
 
 class NotificationService
 {
+    public function __construct(
+        private AdvertisementRepositoryInterface $adRepo
+    ) {}
     use HasCache;
     use HasLogging;
 
@@ -53,13 +60,13 @@ class NotificationService
 
         $this->dispatchBulkJob(
             $notification,
-            new SerializableClosure(fn () => User::query()->whereIn('id', $ids)->orderBy('id'))
+            new SerializableClosure(fn() => User::query()->whereIn('id', $ids)->orderBy('id'))
         );
     }
 
     public function sendToRole(string $roleName, Notification $notification): void
     {
-        $query = User::query()->whereHas('roles', fn (Builder $q) => $q->where('name', $roleName));
+        $query = User::query()->whereHas('roles', fn(Builder $q) => $q->where('name', $roleName));
         $count = (clone $query)->count();
 
         $this->logInfo('notification.send_to_role', ['role' => $roleName, 'count' => $count, 'type' => $notification::class]);
@@ -79,7 +86,7 @@ class NotificationService
 
         $this->dispatchBulkJob(
             $notification,
-            new SerializableClosure(fn () => User::query()->whereHas('roles', fn (Builder $q) => $q->where('name', $roleName))->orderBy('id'))
+            new SerializableClosure(fn() => User::query()->whereHas('roles', fn(Builder $q) => $q->where('name', $roleName))->orderBy('id'))
         );
     }
 
@@ -166,5 +173,91 @@ class NotificationService
     protected function normalizeIds(iterable $userIds): array
     {
         return array_values(array_unique(array_map('intval', is_array($userIds) ? $userIds : iterator_to_array($userIds))));
+    }
+    public function mySendadvertisements(array $validated): array
+    {
+        $userId = auth()->user()->id;
+
+        $paginator = $this->adRepo->getMySendAdvertisements(
+            $userId,
+            $validated,
+            $validated['per_page'] ?? 15
+        );
+
+        $items = collect($paginator->items())
+            ->map(fn($ad) => MyAdvertisementDTO::fromModel($ad))
+            ->values()
+            ->toArray();
+
+        return [
+            'data' => [
+                'advertisements' => $items,
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page'    => $paginator->lastPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                ],
+            ],
+            'message' => 'تم جلب الإعلانات بنجاح',
+            'code'    => 200,
+        ];
+    }
+    public function myReceivedAdvertisements(array $validated): array
+    {
+        $student = Student::where('person_id', auth()->user()->person_id)->first();
+        if (!$student) {
+            return [
+                'data'    => ['data' => [], 'meta' => []],
+                'message' => 'الطالب غير موجود',
+                'code'    => 404,
+            ];
+        }
+
+        $paginator = $this->adRepo->getMyReceivedAdvertisements(
+            $student->id,
+            $validated,
+            $validated['per_page'] ?? 15
+        );
+
+        $items = collect($paginator->items())
+            ->map(fn($ad) => MyAdvertisementDTO::fromModel($ad))
+            ->values()
+            ->toArray();
+
+        return [
+            'data' => [
+                'advertisements' => $items,
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page'    => $paginator->lastPage(),
+                    'per_page'     => $paginator->perPage(),
+                    'total'        => $paginator->total(),
+                ],
+            ],
+            'message' => 'تم جلب الإعلانات المستلمة بنجاح',
+            'code'    => 200,
+        ];
+    }
+    public function getAdvertisementDetail(int $advertisementId): array
+    {
+        $student = Student::where('person_id', auth()->user()->person_id)->first();
+        if (!$student) {
+            throw new \Exception('لم يتم العثور على بيانات الطالب.', 404);
+        }
+
+        $advertisement = $this->adRepo->findForStudent($advertisementId, $student->id);
+
+        if (!$advertisement) {
+            throw new \Exception('الإعلان غير موجود أو غير موجه لك.', 404);
+        }
+
+        $data = AdvertisementDetailDTO::fromModel($advertisement);
+
+        return [
+            'data'    => $data,
+            'message' => 'تم جلب تفاصيل الإعلان بنجاح',
+            'code'    => 200,
+        ];
     }
 }
