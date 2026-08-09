@@ -34,7 +34,7 @@ class SendBroadcastChunkJob implements ShouldQueue
         string $message,
         string $type,
         ?int $failedBroadcastJobId = null,
-        ?int $advertisementId
+        int $advertisementId
     ) {
         $this->userIds = array_values(array_unique(array_map('intval', $userIds)));
         $this->title = $title;
