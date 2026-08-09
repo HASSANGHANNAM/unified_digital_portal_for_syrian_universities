@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetMySendAdvertisementsRequest extends FormRequest
+class GetMySendadvertisementsRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -13,6 +13,7 @@ class GetMySendAdvertisementsRequest extends FormRequest
 
     public function rules(): array
     {
+
         return [
             'page'     => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -20,6 +21,7 @@ class GetMySendAdvertisementsRequest extends FormRequest
     }
     public function messages(): array
     {
+
         return [
             'page.integer'     => 'رقم الصفحة يجب أن يكون عدداً صحيحاً.',
             'page.min'         => 'رقم الصفحة لا يمكن أن يقل عن 1.',

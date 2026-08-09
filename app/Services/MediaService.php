@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\MediaFileDTO;
+use App\Models\AdvertisementAttachment;
 use App\Models\Lecture;
 use App\Models\Request;
 use App\Repositories\Contracts\RequestMediaRepositoryInterface;
@@ -26,7 +27,7 @@ class MediaService
         abort_if(!$media, 404);
         abort_if(!$media->request || !$media->request->student || (string) $media->request->student_id !== (string) $studentId, 403);
         $originalPath = $media->path ?? '';
-        $normalized = ltrim(preg_replace('#^(private/|public/|storage/)#i', '', $originalPath), '/');
+        $normalized = ltrim((string) preg_replace('#^(private/|public/|storage/)#i', '', $originalPath), '/');
         $candidates = [];
         if ($originalPath !== '') {
             $candidates[] = $originalPath;
@@ -221,18 +222,22 @@ class MediaService
     {
         $attachment = AdvertisementAttachment::find($attachmentId);
         abort_if(!$attachment, 404, 'المرفق غير موجود');
-        $originalPath = $attachment->path ?? '';
-        $candidates = [];
-        if ($originalPath !== '') {
-            $candidates[] = $originalPath;
+
+        $originalPath = $attachment->path;
+        if (empty($originalPath)) {
+            abort(404, 'المرفق غير موجود');
         }
+
+        $candidates = [$originalPath];
         $normalized = ltrim(preg_replace('#^(private/|public/|storage/)#i', '', $originalPath), '/');
-        if ($normalized !== '' && $normalized !== $originalPath) {
+        if ($normalized !== $originalPath) {
             $candidates[] = $normalized;
         }
+
         $found = false;
         $disk = null;
         $filePath = null;
+
         foreach ($candidates as $candidate) {
             if (Storage::disk('private')->exists($candidate)) {
                 $found = true;
@@ -247,14 +252,18 @@ class MediaService
                 break;
             }
         }
+
         abort_if(!$found || !$filePath, 404, 'الملف غير موجود على الخادم');
+
+        $uuid = pathinfo($attachment->path, PATHINFO_FILENAME);
+        $fullFilename = $uuid . '.' . $attachment->type;
+
         $mime = Storage::disk($disk)->mimeType($filePath) ?: 'application/octet-stream';
-        $headers = ['Content-Type' => $mime];
-        if (in_array(strtolower($attachment->type), ['image', 'pdf', 'jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-            $headers['Content-Disposition'] = 'inline; filename="' . $attachment->name . '"';
-        } else {
-            $headers['Content-Disposition'] = 'attachment; filename="' . $attachment->name . '"';
-        }
-        return Storage::disk($disk)->response($filePath, $attachment->name, $headers);
+        $headers = [
+            'Content-Type' => $mime,
+            'Content-Disposition' => $this->getLectureDisposition($attachment->type, $fullFilename),
+        ];
+
+        return Storage::disk($disk)->response($filePath, $fullFilename, $headers);
     }
 }

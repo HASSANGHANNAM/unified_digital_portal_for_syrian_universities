@@ -241,12 +241,8 @@ class NotificationService
     }
     public function getAdvertisementDetail(int $advertisementId): array
     {
-        $student = Student::where('person_id', auth()->user()->person_id)->first();
-        if (!$student) {
-            throw new \Exception('لم يتم العثور على بيانات الطالب.', 404);
-        }
 
-        $advertisement = $this->adRepo->findForStudent($advertisementId, $student->id);
+        $advertisement = $this->adRepo->find($advertisementId);
 
         if (!$advertisement) {
             throw new \Exception('الإعلان غير موجود أو غير موجه لك.', 404);

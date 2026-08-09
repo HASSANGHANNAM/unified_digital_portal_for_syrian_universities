@@ -28,7 +28,6 @@ use App\Http\Controllers\Api\V1\FileStorageController;
 // Login and RefreshToken
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
-
 // add grade 
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
@@ -131,7 +130,7 @@ Route::prefix('V1')->group(function () {
         // View filse
         Route::get('/media/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewMedia'])->middleware(['permission:view media']);
         Route::get('/pdf/{request}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewPdf'])->middleware(['permission:view pdf']);
-        Route::get('/advertisement_attachments/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewAdvertisementAattachment']); //->middleware(['permission:view viewAdvertisementAattachment']);
+        Route::get('/advertisement_attachments/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewAdvertisementAttachment']); //->middleware(['permission:view viewAdvertisementAattachment']);
 
         // payment and invoices
         Route::get('/invoices', [PaymentController::class, 'getInvoices'])->middleware(['permission:get invoices']);

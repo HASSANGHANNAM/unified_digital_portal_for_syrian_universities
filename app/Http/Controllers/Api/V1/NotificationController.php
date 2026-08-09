@@ -111,7 +111,7 @@ class NotificationController extends Controller
     }
 
 
-    public function mySendadvertisements(GetMySendAdvertisementsRequest $request): JsonResponse
+    public function mySendadvertisements(\App\Http\Requests\V1\GetMySendadvertisementsRequest $request): JsonResponse
     {
         try {
             $data = $this->notificationService->mySendadvertisements($request->validated());
@@ -129,10 +129,18 @@ class NotificationController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-    public function advertisement(GetAdvertisementDetailsRequest $request): JsonResponse
+    public function advertisement($id): JsonResponse
     {
+
         try {
-            $data = $this->notificationService->getAdvertisementDetail($request->validated());
+            if (!is_numeric($id)) {
+                return response()->json(['errors' => ['id' => 'The id must be a number.']], 422);
+            }
+            $exists = \App\Models\Advertisement::where('id', $id)->exists();
+            if (!$exists) {
+                return response()->json(['errors' => ['id' => 'The selected id is invalid or does not exist.']], 422);
+            }
+            $data = $this->notificationService->getAdvertisementDetail($id);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

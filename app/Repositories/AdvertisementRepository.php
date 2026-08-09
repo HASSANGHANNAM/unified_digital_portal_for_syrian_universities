@@ -30,12 +30,9 @@ class AdvertisementRepository implements AdvertisementRepositoryInterface
             ->orderBy('created_at', 'desc')
             ->paginate($perPage, ['*'], 'page', $page);
     }
-    public function findForStudent(int $advertisementId, int $studentId): ?Advertisement
+    public function find(int $advertisementId): ?Advertisement
     {
         return Advertisement::where('id', $advertisementId)
-            ->whereHas('students', function ($query) use ($studentId) {
-                $query->where('student_id', $studentId);
-            })
             ->with(['user.person', 'attachments'])
             ->first();
     }
