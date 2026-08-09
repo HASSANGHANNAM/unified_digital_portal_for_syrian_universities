@@ -70,7 +70,7 @@ class NotificationBroadcastService
             ];
         }
         foreach ($chunks as $chunk) {
-            SendBroadcastChunkJob::dispatch($chunk, $title, $message, $type, $advertisement->id ?? null);
+            SendBroadcastChunkJob::dispatch($chunk, $title, $message, $type, null, $advertisement->id);
         }
 
         return [
