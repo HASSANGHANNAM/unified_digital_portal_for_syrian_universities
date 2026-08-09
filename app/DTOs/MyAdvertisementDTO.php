@@ -15,7 +15,6 @@ class MyAdvertisementDTO
             'id'         => $advertisement->id,
             'title'      => $advertisement->title,
             'message'    => $advertisement->message,
-            'type'       => $advertisement->type,
             'created_at' => $advertisement->created_at->toDateTimeString(),
         ];
     }
