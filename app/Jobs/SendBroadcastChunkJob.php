@@ -26,7 +26,7 @@ class SendBroadcastChunkJob implements ShouldQueue
     public string $message;
     public string $type;
     public ?int $failedBroadcastJobId;
-    public ?int $advertisementId;
+    public int $advertisementId;
 
     public function __construct(
         array $userIds,
@@ -46,22 +46,22 @@ class SendBroadcastChunkJob implements ShouldQueue
 
     public function handle(): void
     {
-        $users = User::query()->whereIn('id', $this->userIds)->get();
+        // التعديل 1: جلب العلاقات مباشرة مع الاستعلام الأساسي لتجنب تكرار الاستعلامات
+        $users = User::with('person.student')->whereIn('id', $this->userIds)->get();
         $failedUserIds = [];
 
         foreach ($users as $user) {
-            if ($this->advertisementId) {
-                $u = User::with('person.student')->find($user->id);
-                $student = $u->person->student;
-                if ($student) {
-                    AdvertisementStudent::firstOrCreate([
-                        'advertisement_id' => $this->advertisementId,
-                        'student_id'       => $student->id,
-                    ]);
-                }
+            // التعديل 2: التحقق من وجود person و student قبل الوصول لهما لتجنب خطأ الانهيار
+            if ($user->person && $user->person->student) {
+                $student = $user->person->student;
+                AdvertisementStudent::firstOrCreate([
+                    'advertisement_id' => $this->advertisementId,
+                    'student_id'       => $student->id,
+                ]);
             } else {
-                Log::warning('Advertisement ID is null for user.', [
+                Log::warning('User is not linked to a student during broadcast.', [
                     'user_id' => $user->id,
+                    'advertisement_id' => $this->advertisementId,
                 ]);
             }
 
@@ -108,9 +108,11 @@ class SendBroadcastChunkJob implements ShouldQueue
             $record = FailedBroadcastJob::query()->find($this->failedBroadcastJobId);
         }
 
+        // التعديل 3: إضافة advertisement_id عند حفظ سجل الفشل
         if ($record) {
             $record->update([
                 'user_ids' => $this->userIds,
+                'advertisement_id' => $this->advertisementId, // تمت الإضافة
                 'title' => $this->title,
                 'message' => $this->message,
                 'type' => $this->type,
@@ -120,6 +122,7 @@ class SendBroadcastChunkJob implements ShouldQueue
         } else {
             FailedBroadcastJob::query()->create([
                 'user_ids' => $this->userIds,
+                'advertisement_id' => $this->advertisementId, // تمت الإضافة
                 'title' => $this->title,
                 'message' => $this->message,
                 'type' => $this->type,
