@@ -22,10 +22,10 @@ class StudentAttachmentService
         private StudentVerificationRepositoryInterface $studentVerificationRepo
     ) {}
 
-    public function getStudentAttachments(User $user,int $personId): array
+    public function getStudentAttachments(User $user, int $personId): array
     {
         if (!$user->hasRole('StudentAffairs')) {
-        throw new \Exception('غير مصرح لك بالوصول');
+            throw new \Exception('غير مصرح لك بالوصول');
         }
 
         if (!Person::find($personId)) {
@@ -35,7 +35,7 @@ class StudentAttachmentService
         $attachments = $this->personAttachmentRepo->getByPersonId($personId);
 
         if ($attachments->isEmpty()) {
-        throw new \Exception('لا يوجد ملفات مرفوعة لهذا الطالب');
+            throw new \Exception('لا يوجد ملفات مرفوعة لهذا الطالب');
         }
 
         $dto = $attachments->map(function ($attachment) {
@@ -81,7 +81,7 @@ class StudentAttachmentService
             if ($data['status'] === 'approved') {
                 $updateData['status'] = 'active';
 
-                    if (!empty($student->new_password)) {
+                if (!empty($student->new_password)) {
                     $updateData['password'] = $student->new_password;
                     $updateData['new_password'] = null; // تصفير الحقل القديم لكي لا يُعاد استخدامه
                 }
@@ -99,13 +99,12 @@ class StudentAttachmentService
                 'code'    => 200,
             ];
         });
-
     }
 
-        public function getPendingStudents(User $user): array
+    public function getPendingStudents(User $user): array
     {
         if (!$user->hasRole('StudentAffairs')) {
-        throw new \Exception('غير مصرح لك بالوصول');
+            throw new \Exception('غير مصرح لك بالوصول');
         }
         $students = $this->studentRepo->getPendingStudents();
 
@@ -119,14 +118,15 @@ class StudentAttachmentService
 
         $data = $students->map(function ($student) {
             return [
-            'student_id'      => $student->id,
-            'student_number'  => $student->student_id_number,
-            'full_name'       => $student->person->full_name,
-            'national_number' => $student->person->national_number,
-            'phone'           => $student->person->phone,
-            'email'           => $student->person->user?->email,
-            'username'        => $student->person->user?->username,
-            'status'          => $student->person->user?->status,
+                'student_id'      => $student->id,
+                'person_id'       => $student->person->id,
+                'student_number'  => $student->student_id_number,
+                'full_name'       => $student->person->full_name,
+                'national_number' => $student->person->national_number,
+                'phone'           => $student->person->phone,
+                'email'           => $student->person->user?->email,
+                'username'        => $student->person->user?->username,
+                'status'          => $student->person->user?->status,
             ];
         });
 
@@ -136,12 +136,4 @@ class StudentAttachmentService
             'code' => 200,
         ];
     }
-
-
-
-
-
-
-
-
 }

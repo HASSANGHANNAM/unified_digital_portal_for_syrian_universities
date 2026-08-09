@@ -258,23 +258,22 @@ class GradeService
         }
 
         $data = collect($studentCourses->items())->map(function ($studentCourse) {
-            $publishedGrades = collect($studentCourse->parts)->where('published', 1);
-            $total = $publishedGrades->sum('credits');
-
+            $allParts = collect($studentCourse->parts);
+            $total = $allParts->sum('credits');
             return [
                 'student_name'   => optional($studentCourse->student->person)->full_name,
                 'student_number' => $studentCourse->student->student_id_number,
-                'parts' => $publishedGrades->map(fn($part) => [
-                    'id'         => $part->id,
-                    'part_name'  => $part->coursePart->name,
-                    'percentage' => $part->coursePart->percentage,
-                    'grade'      => $part->credits,
+                'parts' => $allParts->map(fn($part) => [
+                    'id'           => $part->id,
+                    'part_name'    => $part->coursePart->name,
+                    'percentage'   => $part->coursePart->percentage,
+                    'grade'        => $part->credits,
+                    'is_published' => (bool) $part->published,
                 ])->values(),
                 'total'  => $total,
                 'status' => $total >= 60 ? 'passed' : 'failed',
             ];
         });
-
         return [
             'data' => [
                 'course_id'     => $courseId,
