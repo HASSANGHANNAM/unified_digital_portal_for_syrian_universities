@@ -34,7 +34,7 @@ class SendBroadcastChunkJob implements ShouldQueue
         string $message,
         string $type,
         ?int $failedBroadcastJobId = null,
-        ?int $advertisementId = null
+        ?int $advertisementId
     ) {
         $this->userIds = array_values(array_unique(array_map('intval', $userIds)));
         $this->title = $title;
@@ -59,6 +59,10 @@ class SendBroadcastChunkJob implements ShouldQueue
                         'student_id'       => $student->id,
                     ]);
                 }
+            } else {
+                Log::warning('Advertisement ID is null for user.', [
+                    'user_id' => $user->id,
+                ]);
             }
 
             try {
