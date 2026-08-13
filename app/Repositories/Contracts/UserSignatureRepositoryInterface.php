@@ -13,4 +13,5 @@ interface UserSignatureRepositoryInterface
     public function getAllByUserId(int $userId): Collection;
     public function delete(int $id): bool;
     public function findById(int $id): ?UserSignature;
+    public function getLatestForUser(int $userId): ?\App\Models\UserSignature;
 }

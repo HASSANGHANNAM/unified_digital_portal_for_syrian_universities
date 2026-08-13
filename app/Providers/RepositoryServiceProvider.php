@@ -78,6 +78,8 @@ use App\Repositories\StudyPlanCourseRepository;
 use App\Repositories\StudentVerificationRepository;
 use App\Repositories\UserSignatureRepository;
 use App\Repositories\AdvertisementRepository;
+use App\Repositories\CollegeFileRepository;
+use App\Repositories\Contracts\CollegeFileRepositoryInterface;
 
 class RepositoryServiceProvider extends ServiceProvider
 {
@@ -120,6 +122,7 @@ class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(UserSignatureRepositoryInterface::class, UserSignatureRepository::class);
         $this->app->bind(RequestUserRepositoryInterface::class, RequestUserRepository::class);
         $this->app->bind(AdvertisementRepositoryInterface::class, AdvertisementRepository::class);
+        $this->app->bind(CollegeFileRepositoryInterface::class, CollegeFileRepository::class);
     }
     public function boot(): void
     {

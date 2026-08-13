@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\StudyPlanController;
 use App\Http\Controllers\Api\V1\StudentAttachment;
 use App\Http\Controllers\Api\V1\AffairController;
+use App\Http\Controllers\Api\V1\CollegeFileController;
 use App\Http\Controllers\Api\V1\FileStorageController;
 
 // Login and RefreshToken
@@ -163,6 +164,8 @@ Route::prefix('V1')->group(function () {
 
         // Signatures
         Route::post('/signatures', [UserController::class, 'uploadSignature'])->middleware(['permission:upload signature']);
+        Route::get('/my-signature', [UserController::class, 'mySignature']); //->middleware(['permission:get my signature']);
+        Route::get('/signatures/view/{uuid}', [FileStorageController::class, 'viewSignature']); //->middleware(['permission:signature view']);
 
         // Logo
         Route::post('/colleges/{collegeId}/logo', [CollegeController::class, 'uploadLogo'])->middleware(['permission:upload college logo']);
@@ -195,6 +198,12 @@ Route::prefix('V1')->group(function () {
         Route::get('/student-suggestions', [StudentController::class, 'getStudentSuggestions']); //->middleware(['permission:get student suggestions']);
         Route::get('/college/suggestions', [StudentController::class, 'collegeSuggestions']); //->middleware(['permission:get college suggestions']);
         Route::put('/college/suggestion/{id}/status', [StudentController::class, 'updateSuggestionStatus']); //->middleware(['permission:update suggestion status']);
+
+
+        Route::post('/college-files', [CollegeFileController::class, 'upload']); //->middleware(['permission:upload college file']);
+        Route::get('/college-files', [CollegeFileController::class, 'index']); //->middleware(['permission:get college files']);
+        Route::get('/college-files/view/{id}', [FileStorageController::class, 'viewCollegeFile']); //->middleware(['permission:view college file']);
+        Route::get('/staff/college-files/{college_id}', [CollegeFileController::class, 'staff_college_files']); //->middleware(['permission:get college files staff']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

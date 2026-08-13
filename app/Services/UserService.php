@@ -6,6 +6,7 @@ use App\DTOs\PermissionsListDTO;
 use App\DTOs\UserDTO;
 use App\DTOs\UserListDTO;
 use App\DTOs\SignatureDTO;
+use App\DTOs\SignatureDTO2;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\UserSignatureRepositoryInterface;
@@ -211,5 +212,40 @@ class UserService
                 'code' => 400,
             ];
         }
+    }
+
+    public function getMySignature(): array
+    {
+        $userId = auth()->user()->id;
+
+        if (!$userId) {
+            return [
+                'signature' => null,
+                'is_sig'    => false,
+                'message'   => 'يجب تسجيل الدخول أولاً',
+                'code'      => 401,
+            ];
+        }
+
+        $signature = $this->userSignatureRepository->getLatestForUser($userId);
+
+        if (!$signature) {
+            $data['signature'] = null;
+            $data['is_sig'] = false;
+            return [
+                'data'    => $data,
+                'message'   => 'لا يوجد توقيع لهذا المستخدم',
+                'code'      => 200,
+            ];
+        }
+        $data['signature'] = SignatureDTO2::fromModel($signature);
+        $data['is_sig'] = true;
+
+        return [
+
+            'data'    => $data,
+            'message'   => 'تم جلب التوقيع بنجاح',
+            'code'      => 200,
+        ];
     }
 }

@@ -45,4 +45,8 @@ class UserSignatureRepository implements UserSignatureRepositoryInterface
     {
         return $this->model->find($id);
     }
+    public function getLatestForUser(int $userId): ?UserSignature
+    {
+        return $this->model->getLatestForUser($userId);
+    }
 }

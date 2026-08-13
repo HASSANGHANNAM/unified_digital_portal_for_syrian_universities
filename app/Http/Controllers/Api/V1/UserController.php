@@ -92,4 +92,13 @@ class UserController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+    public function mySignature(): JsonResponse
+    {
+        try {
+            $data = $this->userService->getMySignature();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
 }
