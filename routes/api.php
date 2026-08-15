@@ -174,6 +174,8 @@ Route::prefix('V1')->group(function () {
         Route::post('/uploadLecture', [DocumentController::class, 'uploadLecture'])->middleware(['permission:upload lecture']);
         Route::get('/lectures/{coursePartsId}/{filename}', [FileStorageController::class, 'showLecture'])->middleware(['permission:get lecture']);
         Route::get('/course-parts/{coursePartsId}/lectures', [DocumentController::class, 'lecturesByCoursePart'])->middleware(['permission:get lectures by course part']);
+        Route::delete('/lectures/{id}', [DocumentController::class, 'deleteLecture']); //->middleware(['permission:delete lecture']);
+        Route::patch('/updateLectures/{id}', [DocumentController::class, 'updateLecture']); //->middleware(['permission:update lecture']);
 
         // students managment
         Route::get('/student-affairs/students/{personId}', [StudentAttachment::class, 'getStudentAttachments'])->middleware(['permission:get student attachments']);

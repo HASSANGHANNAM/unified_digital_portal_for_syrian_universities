@@ -266,4 +266,10 @@ class MediaService
 
         return Storage::disk($disk)->response($filePath, $fullFilename, $headers);
     }
+    public function deleteLectureFile(string $filePath): void
+    {
+        if (Storage::exists($filePath)) {
+            Storage::delete($filePath);
+        }
+    }
 }
