@@ -33,7 +33,7 @@ class RequestPolicy
                     $q->where('college_id', $collegeId);
                 })
                 ->exists();
-        } elseif (in_array($role, ['doctor'])) {
+        } elseif (in_array($role, ['doctor', 'department_head', 'college_dean'])) {
             if (!$user->person_id) {
                 return false;
             }
