@@ -25,8 +25,8 @@ return new class extends Migration
                 'waiting_department_head',
                 'generating_college_dean_pdf',
                 'waiting_college_dean',
-                'generating_university_director_pdf',
-                'waiting_university_director',
+                'generating_teacher_pdf',
+                'waiting_teacher',
                 'completed',
                 'rejected',
                 'cancelled'

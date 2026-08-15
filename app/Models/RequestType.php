@@ -15,7 +15,7 @@ class RequestType extends Model
         'name',
         'description',
         'requires_course',
-        'university_director_acceptance',
+        'teacher_acceptance',
         'college_dean_acceptance',
         'department_head_acceptance',
         'student_stuff_acceptance',
@@ -25,7 +25,7 @@ class RequestType extends Model
 
     protected $casts = [
         'requires_course' => 'boolean',
-        'university_director_acceptance' => 'boolean',
+        'teacher_acceptance' => 'boolean',
         'college_dean_acceptance' => 'boolean',
         'department_head_acceptance' => 'boolean',
         'student_stuff_acceptance' => 'boolean',

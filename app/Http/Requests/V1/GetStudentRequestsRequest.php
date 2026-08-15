@@ -29,7 +29,7 @@ class GetStudentRequestsRequest extends FormRequest
                     Request::STATUS_GENERATING_STUDENT_STUFF,
                     Request::STATUS_GENERATING_DEPARTMENT_HEAD,
                     Request::STATUS_GENERATING_COLLEGE_DEAN,
-                    Request::STATUS_GENERATING_UNIVERSITY_DIRECTOR,
+                    Request::STATUS_GENERATING_TEACHER,
 
                     // حالات الانتظار (Waiting)
                     Request::STATUS_WAITING_DOCTOR,
@@ -37,7 +37,7 @@ class GetStudentRequestsRequest extends FormRequest
                     Request::STATUS_WAITING_STUDENT_STUFF,
                     Request::STATUS_WAITING_DEPARTMENT_HEAD,
                     Request::STATUS_WAITING_COLLEGE_DEAN,
-                    Request::STATUS_WAITING_UNIVERSITY_DIRECTOR,
+                    Request::STATUS_WAITING_TEACHER,
 
                     // الحالات النهائية
                     Request::STATUS_COMPLETED,

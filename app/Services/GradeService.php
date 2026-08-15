@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use App\DTOs\AllGradesDTO;
+use App\DTOs\CoursePartsWithStudentPartsDTO;
+use App\DTOs\CourseStudentListDTO;
 use App\Imports\StudentMarksImport;
+use App\Models\College;
 use Illuminate\Http\UploadedFile;
 use App\Models\Course;
+use App\Models\StudentCourse;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\StudentCoursePartRepositoryInterface;
@@ -519,6 +523,62 @@ class GradeService
                 'updated_rows' => $count
             ],
             'message' => 'Marks published successfully.',
+            'code' => 200,
+        ];
+    }
+
+    public function getCourseStudents(int $collegeId, int $courseId, array $filters, int $perPage = 15): array
+    {
+
+        $college = College::find($collegeId);
+        if (!$college) {
+            return [
+                'data' => [],
+                'message' => 'الكلية غير موجودة.',
+                'code' => 404,
+            ];
+        }
+        $course = Course::where('id', $courseId)
+            ->where('college_id', $collegeId)
+            ->first();
+        if (!$course) {
+            return [
+                'data' => [],
+                'message' => 'المادة غير موجودة أو لا تنتمي لهذه الكلية.',
+                'code' => 404,
+            ];
+        }
+        $students = $this->studentCourseRepositoryInterface->getCourseStudents(
+            collegeId: $collegeId,
+            courseId: $courseId,
+            filters: $filters,
+            perPage: $perPage
+        );
+
+        return [
+            'data' => CourseStudentListDTO::fromPaginator($students),
+            'message' => 'قائمة الطلاب المسجلين في المادة.',
+            'code' => 200,
+        ];
+    }
+    public function getCoursePartsWithStudentParts(int $studentCourseId): array
+    {
+        $studentCourse = StudentCourse::find($studentCourseId);
+        if (!$studentCourse) {
+            return [
+                'data' => [],
+                'message' => 'تسجيل الطالب في المادة غير موجود.',
+                'code' => 404,
+            ];
+        }
+        $parts = $this->studentCourseRepositoryInterface->getCoursePartsWithStudentParts($studentCourseId);
+        $data = array_map(
+            fn($part) => CoursePartsWithStudentPartsDTO::fromArray($part)->toArray(),
+            $parts
+        );
+        return [
+            'data' => $data,
+            'message' => 'قائمة أجزاء المادة مع علامات الطالب.',
             'code' => 200,
         ];
     }

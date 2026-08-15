@@ -2,6 +2,7 @@
 
 return [
     'hierarchy' => [
+        'teacher',
         'doctor',
         'exams_stuff',
         'student_stuff',

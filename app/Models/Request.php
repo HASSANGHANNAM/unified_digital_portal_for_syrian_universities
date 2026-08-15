@@ -19,7 +19,7 @@ class Request extends Model
     public const STATUS_GENERATING_STUDENT_STUFF = 'generating_student_stuff_pdf';
     public const STATUS_GENERATING_DEPARTMENT_HEAD = 'generating_department_head_pdf';
     public const STATUS_GENERATING_COLLEGE_DEAN = 'generating_college_dean_pdf';
-    public const STATUS_GENERATING_UNIVERSITY_DIRECTOR = 'generating_university_director_pdf';
+    public const STATUS_GENERATING_TEACHER = 'generating_teacher_pdf';
 
     // ===== حالات الانتظار (Waiting) =====
     public const STATUS_WAITING_DOCTOR = 'waiting_doctor';
@@ -27,7 +27,7 @@ class Request extends Model
     public const STATUS_WAITING_STUDENT_STUFF = 'waiting_student_stuff';
     public const STATUS_WAITING_DEPARTMENT_HEAD = 'waiting_department_head';
     public const STATUS_WAITING_COLLEGE_DEAN = 'waiting_college_dean';
-    public const STATUS_WAITING_UNIVERSITY_DIRECTOR = 'waiting_university_director';
+    public const STATUS_WAITING_TEACHER = 'waiting_teacher';
 
     // ===== الحالات النهائية =====
     public const STATUS_COMPLETED = 'completed';

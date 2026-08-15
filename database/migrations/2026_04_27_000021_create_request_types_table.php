@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->boolean('university_director_acceptance')->default(false);
+            $table->boolean('teacher_acceptance')->default(false);
             $table->boolean('college_dean_acceptance')->default(false);
             $table->boolean('department_head_acceptance')->default(false);
             $table->boolean('student_stuff_acceptance')->default(false);

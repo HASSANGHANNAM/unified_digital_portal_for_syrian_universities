@@ -73,17 +73,4 @@ class AcademicService
             'code' => $code,
         ];
     }
-
-    public function getCourseStudents(array $data, int $courseId): array
-    {
-        $message = 'عرض قائمة الطلاب المسجلين في مقرر معين.';
-        $code = 200;
-        $data = array_merge($data, ["courseId" => $courseId]);
-        return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
-        ];
-    }
-
 }

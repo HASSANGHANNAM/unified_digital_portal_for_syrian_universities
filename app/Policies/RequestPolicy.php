@@ -33,6 +33,24 @@ class RequestPolicy
                     $q->where('college_id', $collegeId);
                 })
                 ->exists();
+        } elseif (in_array($role, ['doctor'])) {
+            if (!$user->person_id) {
+                return false;
+            }
+            return $user->person->doctor()
+                ->whereHas('department', function ($q) use ($collegeId) {
+                    $q->where('college_id', $collegeId);
+                })
+                ->exists();
+        } elseif (in_array($role, ['teacher'])) {
+            if (!$user->person_id) {
+                return false;
+            }
+            return $user->person->teachingAssistant()
+                ->whereHas('department', function ($q) use ($collegeId) {
+                    $q->where('college_id', $collegeId);
+                })
+                ->exists();
         }
         return false;
     }

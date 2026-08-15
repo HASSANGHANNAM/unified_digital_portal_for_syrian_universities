@@ -204,6 +204,11 @@ Route::prefix('V1')->group(function () {
         Route::get('/college-files', [CollegeFileController::class, 'index']); //->middleware(['permission:get college files']);
         Route::get('/college-files/view/{id}', [FileStorageController::class, 'viewCollegeFile']); //->middleware(['permission:view college file']);
         Route::get('/staff/college-files/{college_id}', [CollegeFileController::class, 'staff_college_files']); //->middleware(['permission:get college files staff']);
+
+
+        Route::get('/colleges/{college_id}/courses/{course_id}/students', [GradeController::class, 'getCollegescCoursesStudents']); //->middleware(['permission:get colleges courses students']);
+        Route::get('/student-courses/{student_course_id}/parts', [GradeController::class, 'getCoursePartsWithStudentParts']); //->middleware(['permission:get student courses parts']);
+
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

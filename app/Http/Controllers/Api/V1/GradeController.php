@@ -11,6 +11,7 @@ use App\Http\Requests\V1\GetGradeAppealsRequest;
 use App\Http\Requests\V1\ProcessAppealRequest;
 use App\Http\Requests\V1\UpdateGradeRequest;
 use App\Http\Requests\V1\AddGradesforonestudentRequest;
+use App\Http\Requests\V1\GetCourseStudentsRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -125,6 +126,33 @@ class GradeController extends Controller
         try {
             $data = $this->gradeService->publishMarks(auth()->user(), $courseId);
             return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getCollegescCoursesStudents(int $collegeId, int $courseId, GetCourseStudentsRequest $request): JsonResponse
+    {
+        try {
+            $filters = $request->validated();
+            $data = $this->gradeService->getCourseStudents(
+                $collegeId,
+                $courseId,
+                $filters,
+                $filters['per_page'] ?? 15
+            );
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function getCoursePartsWithStudentParts(int $studentCourseId): JsonResponse
+    {
+        try {
+            $result = $this->gradeService->getCoursePartsWithStudentParts($studentCourseId);
+            if ($result['code'] !== 200) {
+                return Response::Error([], $result['message'], $result['code']);
+            }
+            return Response::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }

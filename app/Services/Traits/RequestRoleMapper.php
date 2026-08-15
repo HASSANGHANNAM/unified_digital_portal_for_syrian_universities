@@ -7,8 +7,8 @@ trait RequestRoleMapper
     protected function getRoleMapping(): array
     {
         return [
+            'TeachingAssistant' => 'teacher',
             'Instructor' => 'doctor',
-            'Doctor' => 'doctor',
             'Dean' => 'college_dean',
             'HeadOfDepartment' => 'department_head',
             'Examination' => 'exams_stuff',
