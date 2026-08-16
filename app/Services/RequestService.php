@@ -543,13 +543,13 @@ class RequestService
     {
         $userId = auth()->id();
         abort_if(!$userId, 403, 'يجب تسجيل الدخول أولاً.');
-        $requestUserId = $data['request_user_id'] ?? null;
+        $requestId = $data['request_id'] ?? null;
         $decision = $data['decision'] ?? null;
-        if (!$requestUserId || !$decision) {
+        if (!$requestId || !$decision) {
             abort(422, 'بيانات غير مكتملة.');
         }
         $result = $this->requestRepository->approveRequest(
-            (int) $requestUserId,
+            (int) $requestId,
             $userId,
             $decision
         );

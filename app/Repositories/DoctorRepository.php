@@ -135,4 +135,28 @@ class DoctorRepository implements DoctorRepositoryInterface
             ? $query->paginate($perPage, ['*'], 'page', $page)
             : $query->paginate($perPage);
     }
+    public function getDoctors(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery()
+            ->with(['person', 'department.college'])
+            ->orderBy('id');
+        if (!empty($filters['college_id'])) {
+            $query->whereHas('department', function ($q) use ($filters) {
+                $q->where('college_id', $filters['college_id']);
+            });
+        }
+        if (!empty($filters['department_id'])) {
+            $query->where('department_id', $filters['department_id']);
+        }
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('doctor_id_number', 'LIKE', "%{$search}%")
+                    ->orWhereHas('person', function ($p) use ($search) {
+                        $p->where('full_name', 'LIKE', "%{$search}%");
+                    });
+            });
+        }
+        return $query->paginate($perPage);
+    }
 }

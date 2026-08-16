@@ -25,6 +25,7 @@ use App\Http\Controllers\Api\V1\StudentAttachment;
 use App\Http\Controllers\Api\V1\AffairController;
 use App\Http\Controllers\Api\V1\CollegeFileController;
 use App\Http\Controllers\Api\V1\FileStorageController;
+use App\Http\Controllers\Api\V1\StaffController;
 
 // Login and RefreshToken
 Route::post('/login', [AuthController::class, 'login']);
@@ -122,7 +123,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/allRequests', [RequestController::class, 'getAllRequests'])->middleware(['permission:get all requests']);
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest'])->middleware(['permission:review request']);
         Route::get('/request-type-media/{request_type_id}', [RequestController::class, 'getMediaByRequestTypeId'])->middleware(['permission:get media by request type']);
-        Route::post('/request-user/{requestUserId}/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
+        Route::post('/request-user/{requestId}/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
         Route::get('/request-types', [RequestController::class, 'getRequestTypes'])->middleware(['permission:get request types']);
         Route::get('/requests-list', [RequestController::class, 'getRequestsList'])->middleware(['permission:get requests list']);
         Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails'])->middleware(['permission:get request details']);
@@ -210,6 +211,11 @@ Route::prefix('V1')->group(function () {
 
         Route::get('/colleges/{college_id}/courses/{course_id}/students', [GradeController::class, 'getCollegescCoursesStudents']); //->middleware(['permission:get colleges courses students']);
         Route::get('/student-courses/{student_course_id}/parts', [GradeController::class, 'getCoursePartsWithStudentParts']); //->middleware(['permission:get student courses parts']);
+
+
+        Route::get('/doctors', [DoctorController::class, 'getDoctors']); //->middleware(['permission:get doctors']);
+        Route::get('/teaching-assistants', [TeachingAssistantController::class, 'getTeachingAssistants']); //->middleware(['permission:get teaching-assistants']);
+        Route::get('/staff', [StaffController::class, 'getStaff']); //->middleware(['permission:get staff']);
 
     });
 });

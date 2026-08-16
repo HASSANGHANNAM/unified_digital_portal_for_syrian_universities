@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\DoctorCourseDTO;
+use App\DTOs\DoctorListDTO;
 use App\DTOs\DoctorUniversityDTO;
 use App\Models\Course;
 use App\Repositories\Contracts\DoctorRepositoryInterface;
@@ -90,6 +91,27 @@ class DoctorService
             ],
             'message' => 'تم جلب المواد بنجاح',
             'code'    => 200,
+        ];
+    }
+    public function getDoctors(array $filters, int $perPage = 15): array
+    {
+        $doctors = $this->doctorRepository->getDoctors($filters, $perPage);
+        $data = collect($doctors->items())
+            ->map(fn($doctor) => DoctorListDTO::fromModel($doctor)->toArray())
+            ->values()
+            ->toArray();
+        return [
+            'data' => [
+                'Doctors' => $data,
+                'meta' => [
+                    'current_page' => $doctors->currentPage(),
+                    'per_page' => $doctors->perPage(),
+                    'total' => $doctors->total(),
+                    'last_page' => $doctors->lastPage(),
+                ],
+            ],
+            'message' => 'قائمة الدكاترة.',
+            'code' => 200,
         ];
     }
 }

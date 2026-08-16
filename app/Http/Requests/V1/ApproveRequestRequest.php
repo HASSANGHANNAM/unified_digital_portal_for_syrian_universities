@@ -22,10 +22,10 @@ class ApproveRequestRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'request_user_id' => [
+            'request_id' => [
                 'required',
                 'integer',
-                Rule::exists('request_user', 'id'),
+                Rule::exists('request', 'id'),
             ],
             'decision' => [
                 'required',
@@ -38,8 +38,8 @@ class ApproveRequestRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'request_user_id.required' => 'معرف التعيين مطلوب.',
-            'request_user_id.exists' => 'سجل التعيين غير موجود.',
+            'request_id.required' => 'معرف التعيين مطلوب.',
+            'request_id.exists' => 'سجل التعيين غير موجود.',
             'decision.required' => 'يجب تحديد القرار (approved أو rejected).',
             'decision.in' => 'القرار يجب أن يكون approved أو rejected.',
         ];

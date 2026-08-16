@@ -4,7 +4,7 @@ namespace App\Http\Requests\V1;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetTeachingAssistantsRequest extends FormRequest
+class GetStaffRequest extends FormRequest
 {
     public function authorize(): bool
     {

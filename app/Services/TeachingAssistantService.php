@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\DoctorCourseDTO;
 use App\DTOs\DoctorUniversityDTO;
+use App\DTOs\TaListDTO;
 use App\DTOs\TeachingAssistantCourseDTO;
 use App\DTOs\TeachingAssistantUniversityDTO;
 use App\Repositories\Contracts\TeachingAssistantRepositoryInterface;
@@ -88,6 +89,29 @@ class TeachingAssistantService
                 ],
             ],
             'message' => 'تم جلب المواد بنجاح',
+            'code' => 200,
+        ];
+    }
+    public function getTeachingAssistants(array $filters, int $perPage = 15): array
+    {
+        $tas = $this->teachingAssistantRepository->getTeachingAssistants($filters, $perPage);
+
+        $data = collect($tas->items())
+            ->map(fn($ta) => TaListDTO::fromModel($ta)->toArray())
+            ->values()
+            ->toArray();
+
+        return [
+            'data' => [
+                'teaching-assistants' => $data,
+                'meta' => [
+                    'current_page' => $tas->currentPage(),
+                    'per_page' => $tas->perPage(),
+                    'total' => $tas->total(),
+                    'last_page' => $tas->lastPage(),
+                ],
+            ],
+            'message' => 'قائمة المعيدين.',
             'code' => 200,
         ];
     }

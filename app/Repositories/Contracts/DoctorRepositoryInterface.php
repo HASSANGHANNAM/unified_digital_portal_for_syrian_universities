@@ -21,4 +21,5 @@ interface DoctorRepositoryInterface
         int $perPage = 15,
         ?int $page = null
     ): LengthAwarePaginator;
+    public function getDoctors(array $filters, int $perPage = 15): LengthAwarePaginator;
 }

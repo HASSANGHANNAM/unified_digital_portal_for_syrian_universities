@@ -21,4 +21,5 @@ interface TeachingAssistantRepositoryInterface
         int $perPage = 15,
         ?int $page = null
     ): LengthAwarePaginator;
+    public function getTeachingAssistants(array $filters, int $perPage = 15): LengthAwarePaginator;
 }

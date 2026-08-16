@@ -249,10 +249,10 @@ class RequestRepository
         ];
     }
 
-    public function approveRequest(int $requestUserId, int $userId, string $decision): array
+    public function approveRequest(int $requestId, int $userId, string $decision): array
     {
         $requestUser = RequestUser::with(['request.student', 'request.requestType'])
-            ->where('id', $requestUserId)
+            ->where('request_id', $requestId)
             ->where('user_id', $userId)
             ->first();
 
