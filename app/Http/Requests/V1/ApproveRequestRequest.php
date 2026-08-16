@@ -25,7 +25,7 @@ class ApproveRequestRequest extends FormRequest
             'request_id' => [
                 'required',
                 'integer',
-                Rule::exists('request', 'id'),
+                // Rule::exists('request_user', 'id'),
             ],
             'decision' => [
                 'required',

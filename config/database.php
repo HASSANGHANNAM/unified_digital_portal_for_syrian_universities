@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Str;
-use PDO; // يجب أن يكون هذا السطر موجوداً
 
 return [
     'default' => env('DB_CONNECTION', 'mysql'),
@@ -34,8 +33,7 @@ return [
 
             // 🔑 إعدادات SSL الصحيحة (تم التعديل هنا)
             'options' => [
-                PDO::MYSQL_ATTR_SSL_CA => storage_path('certs/ca.pem'),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true,
+
             ],
 
             // إعدادات mysqldump للنسخ الاحتياطي

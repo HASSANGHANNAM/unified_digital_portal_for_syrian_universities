@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Events\SendLoginSuccessNotification;
 use Throwable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use App\Http\Responses\Response;
 use App\Services\StudyPlanService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class StudyPlanController extends Controller
 {
@@ -50,6 +52,8 @@ class StudyPlanController extends Controller
     public function getCompletedCourses(): JsonResponse
     {
         try {
+            Log::info('controller ' . auth()->user()->id);
+            event(new SendLoginSuccessNotification(auth()->user(), 'Welcome back! You have successfully logged in.'));
             $data = $this->studyPlanService->getCompletedCourses();
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
@@ -101,14 +105,13 @@ class StudyPlanController extends Controller
     public function searchCourses(Request $request): JsonResponse
     {
         try {
-         $request->validate([
-            'search' => 'required|string|min:1',
-        ]);
+            $request->validate([
+                'search' => 'required|string|min:1',
+            ]);
             $data = $this->studyPlanService->searchCourses($request->search);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-
 }

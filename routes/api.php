@@ -30,10 +30,10 @@ use App\Http\Controllers\Api\V1\StaffController;
 // Login and RefreshToken
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
-// add grade 
+// add grade
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
-//  V1 
+//  V1
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
@@ -123,7 +123,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/allRequests', [RequestController::class, 'getAllRequests'])->middleware(['permission:get all requests']);
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest'])->middleware(['permission:review request']);
         Route::get('/request-type-media/{request_type_id}', [RequestController::class, 'getMediaByRequestTypeId'])->middleware(['permission:get media by request type']);
-        Route::post('/request-user/{requestId}/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
+        Route::post('/request-user/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
         Route::get('/request-types', [RequestController::class, 'getRequestTypes'])->middleware(['permission:get request types']);
         Route::get('/requests-list', [RequestController::class, 'getRequestsList'])->middleware(['permission:get requests list']);
         Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails'])->middleware(['permission:get request details']);

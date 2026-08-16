@@ -16,7 +16,7 @@ return [
     */
     'paths' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8000', 'http://localhost:3000'],
+    'allowed_origins' => ['http://localhost:8000', 'http://localhost:3000','http://10.129.103.155:8000', 'http://10.129.103.155:3000'],
 
     'allowed_methods' => ['*'],
 
