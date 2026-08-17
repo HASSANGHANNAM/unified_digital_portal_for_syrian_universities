@@ -8,6 +8,7 @@ class ApproveRequestDTO
         public readonly int $requestId,
         public readonly string $status,
         public readonly string $decision,
+        public readonly string $decision_reason,
         public readonly string $message
     ) {}
 
@@ -17,6 +18,7 @@ class ApproveRequestDTO
             'request_id' => $this->requestId,
             'status' => $this->status,
             'decision' => $this->decision,
+            '$decision_reason' => $this->decision_reason,
             'message' => $this->message,
         ];
     }

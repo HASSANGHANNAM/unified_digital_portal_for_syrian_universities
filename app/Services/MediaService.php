@@ -25,7 +25,7 @@ class MediaService
         $studentId = $this->getStudentId();
         $media = $this->requestMediaRepository->findWithDetails($mediaId);
         abort_if(!$media, 404);
-        abort_if(!$media->request || !$media->request->student || (string) $media->request->student_id !== (string) $studentId, 403);
+        abort_if(!$media->request || !$media->request->student, 403);
         $originalPath = $media->path ?? '';
         $normalized = ltrim((string) preg_replace('#^(private/|public/|storage/)#i', '', $originalPath), '/');
         $candidates = [];

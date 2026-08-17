@@ -7,12 +7,25 @@ use App\DTOs\DoctorUniversityDTO;
 use App\DTOs\TaListDTO;
 use App\DTOs\TeachingAssistantCourseDTO;
 use App\DTOs\TeachingAssistantUniversityDTO;
+use App\Models\Department;
+use App\Models\Doctor;
+use App\Models\Person;
+use App\Repositories\Contracts\PersonRepositoryInterface;
 use App\Repositories\Contracts\TeachingAssistantRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class TeachingAssistantService
 {
-    public function __construct(private TeachingAssistantRepositoryInterface $teachingAssistantRepository) {}
+    public function __construct(
+        private TeachingAssistantRepositoryInterface $teachingAssistantRepository,
+        private UserRepositoryInterface $userRepository,
+        private PersonRepositoryInterface $personRepository,
+    ) {}
 
     public function getUniversities(array $validated): array
     {
@@ -114,5 +127,91 @@ class TeachingAssistantService
             'message' => 'قائمة المعيدين.',
             'code' => 200,
         ];
+    }
+    public function store(array $validated): array
+    {
+        $department = Department::find($validated['department_id']);
+        if (!$department) {
+            return [
+                'data' => [],
+                'message' => 'القسم غير موجود.',
+                'code' => 404,
+            ];
+        }
+
+        $supervisor = Doctor::find($validated['supervisor_id']);
+        if (!$supervisor) {
+            return [
+                'data' => [],
+                'message' => 'المشرف غير موجود.',
+                'code' => 404,
+            ];
+        }
+        $person = Person::find($validated['person_id']);
+        if (!$person) {
+            return [
+                'data' => [],
+                'message' => 'الشخص غير موجود.',
+                'code' => 404,
+            ];
+        }
+
+        $taIdNumber = 'TA-' . Carbon::now()->format('Ymd') . '-' . Str::random(6);
+        $data = [
+            'ta_id_number'    => $taIdNumber,
+            'department_id'   => $validated['department_id'],
+            'supervisor_id'   => $validated['supervisor_id'],
+            'person_id'       => $validated['person_id'],
+            'assignment_date' => Carbon::now()->toDateString(),
+        ];
+
+        $ta = $this->teachingAssistantRepository->create($data);
+
+        return [
+            'data'    => $ta,
+            'message' => 'تم إضافة المعيد بنجاح.',
+            'code'    => 201,
+        ];
+    }
+    public function addTeachingAssistants(array $validated): array
+    {
+        return DB::transaction(function () use ($validated) {
+            $person = $this->personRepository->create([
+                'national_id' => $validated['national_id'],
+                'full_name' => $validated['full_name'],
+                'phone' => $validated['phone'] ?? null,
+                'birth_date' => $validated['birth_date'] ?? null,
+                'national_number' => $validated['national_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+            ]);
+
+            $user = $this->userRepository->create([
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'person_id' => $person->id,
+                'password' => Hash::make($validated['password']),
+                'status' => 'active',
+            ]);
+
+            $user->assignRole('TeachingAssistant');
+
+            $ta = $this->teachingAssistantRepository->create([
+                'person_id' => $person->id,
+                'department_id' => null,
+                'ta_id_number' => 'TA-' . Carbon::now()->format('Ymd') . '-' . Str::random(6),
+                'supervisor_id' => null,
+                'assignment_date' => Carbon::now()->toDateString(),
+            ]);
+
+            return [
+                'data' => [
+                    'user' => $user,
+                    'person' => $person,
+                    'teaching_assistant' => $ta,
+                ],
+                'message' => 'تم إضافة المعيد بنجاح.',
+                'code' => 201,
+            ];
+        });
     }
 }

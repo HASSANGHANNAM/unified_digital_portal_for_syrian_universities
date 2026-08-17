@@ -12,4 +12,5 @@ interface DepartmentRepositoryInterface
     public function update(Department $department, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?Department;
+    public function getDepartments(array $filters): Collection;
 }

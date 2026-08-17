@@ -12,4 +12,5 @@ interface UniversityRepositoryInterface
     public function update(University $university, array $data): bool;
     public function delete(string $id): bool;
     public function findById(string $id): ?University;
+    public function getUniversitiesWithColleges(array $filters): Collection;
 }

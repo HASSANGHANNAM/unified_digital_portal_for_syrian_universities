@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\AddDoctorRequest;
 use App\Http\Requests\V1\GetDoctorCoursesRequest;
 use App\Http\Requests\V1\GetDoctorsRequest;
 use App\Http\Requests\V1\GetDoctorUniversitiesRequest;
+use App\Http\Requests\V1\StoreDoctorRequest;
 use App\Http\Responses\Response;
 use App\Services\DoctorService;
 use Illuminate\Http\JsonResponse;
@@ -44,6 +46,27 @@ class DoctorController extends Controller
             $filters = $request->validated();
             $perPage = $filters['per_page'] ?? 15;
             $result = $this->doctorService->getDoctors($filters, $perPage);
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function store(StoreDoctorRequest $request): JsonResponse
+    {
+
+        try {
+            $validated = $request->validated();
+            $result = $this->doctorService->store($validated);
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function addDoctors(AddDoctorRequest $request): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $result = $this->doctorService->addDoctors($validated);
             return Response::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

@@ -38,4 +38,14 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     {
         return $this->model->find($id);
     }
+    public function getDepartments(array $filters): Collection
+    {
+        $query = $this->model->newQuery()
+            ->orderBy('name', 'asc');
+        if (!empty($filters['college_id'])) {
+            $query->where('college_id', $filters['college_id']);
+        }
+
+        return $query->get(['id', 'name']);
+    }
 }

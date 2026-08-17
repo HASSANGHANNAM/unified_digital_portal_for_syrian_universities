@@ -545,18 +545,21 @@ class RequestService
         abort_if(!$userId, 403, 'يجب تسجيل الدخول أولاً.');
         $requestId = $data['request_id'] ?? null;
         $decision = $data['decision'] ?? null;
-        if (!$requestId || !$decision) {
+        $decision_reason = $data['decision_reason'] ?? null;
+        if (!$requestId || !$decision || !$decision_reason) {
             abort(422, 'بيانات غير مكتملة.');
         }
         $result = $this->requestRepository->approveRequest(
             (int) $requestId,
             $userId,
-            $decision
+            $decision,
+            $decision_reason
         );
         $dto = new ApproveRequestDTO(
             $result['request_id'],
             $result['status'],
             $result['decision'],
+            $result['decision_reason'],
             $decision === 'approved' ? 'تمت الموافقة على الطلب.' : 'تم رفض الطلب.'
         );
         return [

@@ -32,6 +32,10 @@ class ApproveRequestRequest extends FormRequest
                 'string',
                 Rule::in(['approved', 'rejected']),
             ],
+            'decision_reason' => [
+                'required',
+                'string'
+            ],
         ];
     }
 

@@ -6,12 +6,25 @@ use App\DTOs\DoctorCourseDTO;
 use App\DTOs\DoctorListDTO;
 use App\DTOs\DoctorUniversityDTO;
 use App\Models\Course;
+use App\Models\Department;
+use App\Models\Person;
 use App\Repositories\Contracts\DoctorRepositoryInterface;
+use App\Repositories\Contracts\PersonRepositoryInterface;
+use App\Repositories\Contracts\UserRepositoryInterface;
+use Carbon\Carbon;
+use Illuminate\Support\Str;
+
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DoctorService
 {
-    public function __construct(private DoctorRepositoryInterface $doctorRepository) {}
+    public function __construct(
+        private DoctorRepositoryInterface $doctorRepository,
+        private UserRepositoryInterface $userRepository,
+        private PersonRepositoryInterface $personRepository,
+    ) {}
 
     public function getUniversities(array $validated): array
     {
@@ -113,5 +126,80 @@ class DoctorService
             'message' => 'قائمة الدكاترة.',
             'code' => 200,
         ];
+    }
+    public function store(array $validated): array
+    {
+        $department = Department::find($validated['department_id']);
+        if (!$department) {
+            return [
+                'data' => [],
+                'message' => 'القسم غير موجود.',
+                'code' => 404,
+            ];
+        }
+
+        $person = Person::find($validated['person_id']);
+        if (!$person) {
+            return [
+                'data' => [],
+                'message' => 'الشخص غير موجود.',
+                'code' => 404,
+            ];
+        }
+        $doctorIdNumber = 'DOC-' . Carbon::now()->format('Ymd') . '-' . Str::random(6);
+        $data = [
+            'doctor_id_number'   => $doctorIdNumber,
+            'department_id'      => $validated['department_id'],
+            'title'              => $validated['title'] ?? null,
+            'hire_date'          => Carbon::now()->toDateString(),
+            'employment_status'  => 'active',
+            'person_id'          => $validated['person_id'],
+        ];
+        $doctor = $this->doctorRepository->create($data);
+
+        return [
+            'data'    => $doctor,
+            'message' => 'تم إضافة الدكتور بنجاح.',
+            'code'    => 201,
+        ];
+    }
+    public function addDoctors(array $validated): array
+    {
+        return DB::transaction(function () use ($validated) {
+            $person = $this->personRepository->create([
+                'national_id' => $validated['national_id'],
+                'full_name' => $validated['full_name'],
+                'phone' => $validated['phone'] ?? null,
+                'birth_date' => $validated['birth_date'] ?? null,
+                'national_number' => $validated['national_number'] ?? null,
+                'address' => $validated['address'] ?? null,
+            ]);
+            $user = $this->userRepository->create([
+                'username' => $validated['username'],
+                'email' => $validated['email'],
+                'person_id' => $person->id,
+                'password' => Hash::make($validated['password']),
+                'status' => 'active',
+            ]);
+            $user->assignRole('Instructor');
+            $doctor = $this->doctorRepository->create([
+                'person_id' => $person->id,
+                'department_id' => null,
+                'doctor_id_number' => 'DOC-' . Carbon::now()->format('Ymd') . '-' . Str::random(6),
+                'title' => 'دكتور',
+                'hire_date' => Carbon::now()->toDateString(),
+                'employment_status' => 'inactive',
+            ]);
+
+            return [
+                'data' => [
+                    'user' => $user,
+                    'person' => $person,
+                    'doctor' => $doctor,
+                ],
+                'message' => 'تم إضافة الدكتور بنجاح.',
+                'code' => 201,
+            ];
+        });
     }
 }

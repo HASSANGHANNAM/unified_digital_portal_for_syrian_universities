@@ -249,7 +249,7 @@ class RequestRepository
         ];
     }
 
-    public function approveRequest(int $requestId, int $userId, string $decision): array
+    public function approveRequest(int $requestId, int $userId, string $decision, string $decision_reason): array
     {
         $requestUser = RequestUser::with(['request.student', 'request.requestType'])
             ->where('request_id', $requestId)
@@ -286,13 +286,14 @@ class RequestRepository
                 'status' => 'rejected',
                 'decision_date' => now(),
                 'processed_by_staff_id' => $userId,
-                'decision_reason' => 'تم رفض الطلب من قبل الموظف.',
+                'decision_reason' => $decision_reason,
             ]);
 
             return [
                 'request_id' => $request->id,
                 'status' => 'rejected',
                 'decision' => 'rejected',
+                'decision_reason' => $decision_reason,
             ];
         }
 
@@ -314,6 +315,7 @@ class RequestRepository
             $request->update([
                 'status' => $newStatus,
                 'decision_date' => now(),
+                'decision_reason' => $decision_reason,
                 'processed_by_staff_id' => $userId,
             ]);
         } else {
@@ -345,6 +347,7 @@ class RequestRepository
             'request_id' => $request->id,
             'status' => $newStatus,
             'decision' => 'approved',
+            'decision_reason' => $decision_reason,
         ];
     }
     public function canUpdateGrade(User $user, StudentCoursePart $studentCoursePart): array

@@ -38,4 +38,18 @@ class UniversityRepository implements UniversityRepositoryInterface
     {
         return $this->model->find($id);
     }
+    public function getUniversitiesWithColleges(array $filters): Collection
+    {
+        $query = $this->model->newQuery()
+            ->with([
+                'colleges.dean.person',
+            ])
+            ->orderBy('name', 'asc');
+
+        if (!empty($filters['university_id'])) {
+            $query->where('id', $filters['university_id']);
+        }
+
+        return $query->get();
+    }
 }

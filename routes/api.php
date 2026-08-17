@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\DepartmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AcademicController;
@@ -123,7 +124,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/allRequests', [RequestController::class, 'getAllRequests'])->middleware(['permission:get all requests']);
         Route::put('/requests/{requestId}/review', [RequestController::class, 'reviewRequest'])->middleware(['permission:review request']);
         Route::get('/request-type-media/{request_type_id}', [RequestController::class, 'getMediaByRequestTypeId'])->middleware(['permission:get media by request type']);
-        Route::post('/request-user/{requestId}/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
+        Route::post('/request-user/approve', [RequestController::class, 'approveRequest'])->middleware(['permission:approve request']);
         Route::get('/request-types', [RequestController::class, 'getRequestTypes'])->middleware(['permission:get request types']);
         Route::get('/requests-list', [RequestController::class, 'getRequestsList'])->middleware(['permission:get requests list']);
         Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails'])->middleware(['permission:get request details']);
@@ -216,7 +217,17 @@ Route::prefix('V1')->group(function () {
         Route::get('/doctors', [DoctorController::class, 'getDoctors']); //->middleware(['permission:get doctors']);
         Route::get('/teaching-assistants', [TeachingAssistantController::class, 'getTeachingAssistants']); //->middleware(['permission:get teaching-assistants']);
         Route::get('/staff', [StaffController::class, 'getStaff']); //->middleware(['permission:get staff']);
-
+        Route::get('/departxments', [DepartmentController::class, 'getDepartments']); //->middleware(['permission:get departments']);
+        Route::get('/universities', [DepartmentController::class, 'getUniversities']); //->middleware(['permission:get universities']);
+        Route::patch('/universities/{id}', [DepartmentController::class, 'updateUniversity']); //->middleware([ 'permission:update university']);
+        Route::post('/colleges/{college_id}/deans', [DepartmentController::class, 'store']); //->middleware([ 'permission:update university']);
+        Route::post('/departments/{department_id}/heads', [DepartmentController::class, 'storeDepartmentHeads']); //->middleware([ 'permission:store departmentHeads']);
+        Route::post('/doctors', [DoctorController::class, 'store']); //->middleware([ 'permission:store doctors']);
+        Route::post('/teaching-assistants', [TeachingAssistantController::class, 'store']); //->middleware([ 'permission:store teaching-assistants']);
+        Route::post('/staff', [StaffController::class, 'store']); //->middleware([ 'permission:store staff']);
+        Route::post('/addDoctors', [DoctorController::class, 'addDoctors']); //->middleware([ 'permission:add doctors']);
+        Route::post('/addTeachingAssistants', [TeachingAssistantController::class, 'addTeachingAssistants']); //->middleware([ 'permission:add teaching-assistants']);
+        Route::post('/addStaff', [StaffController::class, 'addStaff']); //->middleware([ 'permission:add staff']);
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

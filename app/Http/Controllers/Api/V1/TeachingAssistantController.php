@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\V1\AddTeachingAssistantRequest;
 use App\Http\Requests\V1\GetTeachingAssistantCoursesRequest;
 use App\Http\Requests\V1\GetTeachingAssistantsRequest;
 use App\Http\Requests\V1\GetTeachingAssistantUniversitiesRequest;
+use App\Http\Requests\V1\StoreTeachingAssistantRequest;
 use App\Http\Responses\Response;
 use App\Services\TeachingAssistantService;
 use Illuminate\Http\JsonResponse;
@@ -49,6 +51,26 @@ class TeachingAssistantController extends Controller
                 $filters,
                 $filters['per_page'] ?? 15
             );
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function store(StoreTeachingAssistantRequest $request): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $result = $this->teachingAssistantService->store($validated);
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function addTeachingAssistants(AddTeachingAssistantRequest $request): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $result = $this->teachingAssistantService->addTeachingAssistants($validated);
             return Response::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
