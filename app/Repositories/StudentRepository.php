@@ -5,6 +5,8 @@ namespace App\Repositories;
 use App\Models\Student;
 use App\Models\User;
 use App\Repositories\Contracts\StudentRepositoryInterface;
+use App\Imports\StudentsImport;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Database\Eloquent\Collection;
 
 class StudentRepository implements StudentRepositoryInterface
@@ -110,5 +112,17 @@ class StudentRepository implements StudentRepositoryInterface
         return Student::where('college_id', $collegeId)
             ->with('person')
             ->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    public function importStudents($file,int $universityId,int $collegeId): array {
+        $import = new StudentsImport(
+            $universityId,
+            $collegeId
+        );
+        Excel::import($import, $file);
+        return [
+            'report' => $import->getReport(),
+            'errors' => $import->getErrors(),
+        ];
     }
 }
