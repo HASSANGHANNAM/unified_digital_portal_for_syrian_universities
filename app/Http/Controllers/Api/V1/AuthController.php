@@ -79,10 +79,10 @@ class AuthController extends Controller
             return Response::Error([], $message);
         }
     }
-    public function resendCode(Request $request)
+    public function resendCode()
     {
         try {
-            $data = $this->authServices->resendCode($request->Email);
+            $data = $this->authServices->resendCode(auth()->user()->email);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (\Throwable $th) {
             return Response::Error([], $th->getMessage());
@@ -115,7 +115,7 @@ class AuthController extends Controller
     {
         try {
             $data = $this->authServices->changePassword($request);
-            return Response::success($data['data'],$data['message'],$data['code']);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error([], $message);
@@ -125,7 +125,7 @@ class AuthController extends Controller
     {
         try {
             $data = $this->authServices->forgotPassword();
-            return Response::success($data['data'],$data['message'],$data['code']);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error([], $message);
@@ -135,7 +135,7 @@ class AuthController extends Controller
     {
         try {
             $data = $this->authServices->verifyResetCode($request);
-            return Response::success($data['data'],$data['message'],$data['code']);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error([], $message);
@@ -147,11 +147,10 @@ class AuthController extends Controller
         try {
 
             $data = $this->authServices->resetPassword($request);
-            return Response::success($data['data'],$data['message'],$data['code']);
+            return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
             return Response::Error([], $message);
-
         }
     }
 }
