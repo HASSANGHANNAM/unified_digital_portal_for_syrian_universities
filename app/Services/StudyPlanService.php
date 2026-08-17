@@ -321,8 +321,6 @@ class StudyPlanService
         ];
     }
 
-
-
     //التقدم الأكاديمي
     public function getAcademicProgress(): array
     {

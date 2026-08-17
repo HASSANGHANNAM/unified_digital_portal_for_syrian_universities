@@ -15,4 +15,6 @@ interface StudentRepositoryInterface
     public function findByStudentNumber(string $studentNumber);
     public function getPendingStudents();
     public function getStudentsByCollege(int $collegeId, int $perPage = 15, int $page = 1);
+    public function importStudents($file,int $universityId,int $collegeId): array;
+
 }

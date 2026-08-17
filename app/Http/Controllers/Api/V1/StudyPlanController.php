@@ -97,7 +97,7 @@ class StudyPlanController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
-    // عرض المواد لفصل معين
+    // بحث عن المواد
     public function searchCourses(Request $request): JsonResponse
     {
         try {

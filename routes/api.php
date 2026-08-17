@@ -29,10 +29,10 @@ use App\Http\Controllers\Api\V1\FileStorageController;
 // Login and RefreshToken
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
-// add grade 
+// add grade
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
-//  V1 
+//  V1
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
@@ -93,6 +93,10 @@ Route::prefix('V1')->group(function () {
         Route::get('/remaining-courses', [StudyPlanController::class, 'getRemainingCourses'])->middleware(['permission:get remaining courses']);
         Route::get('/academic-progress', [StudyPlanController::class, 'getAcademicProgress'])->middleware(['permission:get academic progress']);
         Route::get('/study-plan', [StudyPlanController::class, 'getStudyPlan']); //->middleware(['permission:get academic progress']);
+        Route::get('/course-details/{courseId}', [StudyPlanController::class, 'getCourseDetails']);
+        Route::get('/study-plan-year/{year}', [StudyPlanController::class, 'getYearCourses']);
+        Route::get('/search-Courses', [StudyPlanController::class, 'searchCourses']);
+
 
         // Grades
         Route::get('/grades', [AcademicController::class, 'getGrades'])->middleware(['permission:get my grades']);
@@ -210,6 +214,8 @@ Route::prefix('V1')->group(function () {
 
         Route::get('/colleges/{college_id}/courses/{course_id}/students', [GradeController::class, 'getCollegescCoursesStudents']); //->middleware(['permission:get colleges courses students']);
         Route::get('/student-courses/{student_course_id}/parts', [GradeController::class, 'getCoursePartsWithStudentParts']); //->middleware(['permission:get student courses parts']);
+
+        Route::post('/students-import',[StudentController::class, 'importStudents']);
 
     });
 });

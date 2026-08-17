@@ -241,8 +241,8 @@ class SanctionService
     // للطالب
     public function respondToSanction(int $sanctionId, array $data): array
     {
-        $user = Auth::user();
-        $sanction = $this->sanctionRepositoryInterface->getStudentSanctionById($user->id, $sanctionId);
+        $student = Auth::user();
+        $sanction = $this->sanctionRepositoryInterface->getStudentSanctionById($this->getStudentId(), $sanctionId);
 
         if (!$sanction) {
             return [

@@ -8,6 +8,14 @@ use App\DTOs\StudentSuggestionDTO;
 use App\Repositories\Contracts\SuggestionRepositoryInterface;
 use App\Repositories\StudentRepository;
 use App\Services\Traits\TokenDataTrait;
+use App\Models\College;
+use App\Models\Department;
+use App\Models\Staff;
+use App\Models\University;
+use Illuminate\Http\UploadedFile;
+use Maatwebsite\Excel\Exceptions\ValidationException;
+use App\Exceptions\ExcelImportValidationException;
+use Throwable;
 use Illuminate\Support\Facades\Auth;
 
 class StudentService
@@ -170,6 +178,88 @@ class StudentService
             'data'    => $data,
             'message' => 'تم تحديث حالة الاقتراح بنجاح.',
             'code'    => 200,
+        ];
+    }
+    public function importStudents(UploadedFile $file): array
+    {
+        $user = Auth::user();
+        if (!$user->hasRole('StudentAffairs')) {
+            throw new \Exception('غير مصرح لك بالوصول');
+        }
+
+        $staff = Staff::where('person_id',$user->person_id)->first();
+        if (!$staff) {
+            return [
+                'data' => [],
+                'message' => 'Staff member not found.',
+                'code' => 404,
+            ];
+        }
+        $department = Department::find($staff->department_id);
+        if (!$department) {
+            return [
+                'data' => [],
+                'message' => 'Staff department not found.',
+                'code' => 404,
+            ];
+        }
+        $college = College::find($department->college_id);
+        if (!$college) {
+            return [
+                'data' => [],
+                'message' => 'Staff college not found.',
+                'code' => 404,
+            ];
+        }
+        $university = University::find($college->university_id);
+        if (!$university) {
+            return [
+                'data' => [],
+                'message' => 'Staff university not found.',
+                'code' => 404,
+            ];
+        }
+        try {
+            $result = $this->studentRepository->importStudents(
+                $file,
+                $university->id,
+                $college->id
+            );
+
+        } catch (ExcelImportValidationException $exception) {
+
+            return [
+                'data' => [
+                    'errors' => $exception->getErrors(),
+                ],
+                'message' => 'Excel validation failed.',
+                'code' => 422,
+            ];
+
+        } catch (ValidationException $exception) {
+
+            return [
+                'data' => [
+                    'errors' => $exception->errors(),
+                ],
+                'message' => 'Excel validation failed.',
+                'code' => 422,
+            ];
+
+        } catch (Throwable $exception) {
+
+            return [
+                'data' => [
+                    'exception' => $exception->getMessage(),
+                ],
+                'message' => 'Failed importing students.',
+                'code' => 500,
+            ];
+        }
+        return [
+            'data' => $result['report'],
+            'message' => 'تم رفع بيانات الطلاب بنجاح.',
+            'code' => 200,
         ];
     }
 }
