@@ -37,11 +37,14 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 //  V1
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
+        // setup account and verify code
         Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
         Route::post('/complete-profile', [ProfileController::class, 'completeProfile'])->middleware(['permission:complete profile']);
         Route::post('/upload-document', [ProfileController::class, 'uploadDocument'])->middleware(['permission:upload document']);
         Route::post('/submit', [ProfileController::class, 'submit'])->middleware(['permission:submit profile']);
         Route::get('/profile', [AuthController::class, 'getProfile'])->middleware(['permission:get profile']);
+        Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
+        Route::post('/verify-code', [AuthController::class, 'verifyCode'])->middleware(['permission:verify verification code']);
     });
 });
 Route::prefix('V1')->group(function () {
@@ -56,9 +59,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/my-received-advertisements', [NotificationController::class, 'myReceivedAdvertisements']); //->middleware(['permission:get received advertisements']);
         Route::get('/advertisement/{id}', [NotificationController::class, 'advertisement']); //->middleware(['permission:get advertisement detailes']);
 
-        // Auth and verify code and profile
-        Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
-        Route::post('/verify-code', [AuthController::class, 'verifyCode'])->middleware(['permission:verify verification code']);
+        // Auth and profile
         Route::post('/edit-profile', [AuthController::class, 'editProfile'])->middleware(['permission:edit profile']);
         Route::get('/profile-image', [AuthController::class, 'getProfileImage'])->middleware(['permission:get profile image']);
         Route::post('/change-password', [AuthController::class, 'changePassword'])->middleware(['permission:change password']);
