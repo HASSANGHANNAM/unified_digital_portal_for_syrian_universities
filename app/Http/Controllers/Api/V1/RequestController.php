@@ -16,6 +16,8 @@ use App\Http\Requests\V1\GetStudentRequestsRequest;
 use App\Http\Requests\V1\ReviewRequestRequest;
 use App\Http\Requests\V1\RequestsInStudentCollegeRequest;
 use App\Http\Requests\V1\StoreRequestRequest;
+use App\Http\Requests\V1\StoreRequestTypeRequest;
+use App\Http\Requests\V1\UpsertRequestTypeAvailabilityRequest;
 use App\Http\Responses\Response;
 use Throwable;
 use App\Models\Request as StudentRequestModel;
@@ -187,6 +189,24 @@ class RequestController extends Controller
     {
         try {
             $result = $this->requestService->approveRequest($approveRequest->validated());
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function storeRequestType(StoreRequestTypeRequest $request): JsonResponse
+    {
+        try {
+            $result = $this->requestService->storeRequestType($request->validated());
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function requestTypeAvailability(UpsertRequestTypeAvailabilityRequest $request): JsonResponse
+    {
+        try {
+            $result = $this->requestService->upsertRequestTypeAvailability($request->validated());
             return Response::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);

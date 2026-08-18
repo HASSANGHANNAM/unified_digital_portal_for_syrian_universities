@@ -96,4 +96,25 @@ class SanctionRepository implements SanctionRepositoryInterface
             ->with('sanctionType')
             ->paginate($perPage, ['*'], 'page', $page);
     }
+    public function getSanctionsByStudentWithFilters(int $studentId, array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        $query = $this->model->newQuery()
+            ->with([
+                'sanctionType',
+                'staff.person',
+                'course.universalCourse',
+            ])
+            ->where('student_id', $studentId)
+            ->orderBy('issued_date', 'desc');
+        if (!empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+        if (!empty($filters['sanction_type_name'])) {
+            $query->whereHas('sanctionType', function ($q) use ($filters) {
+                $q->where('name', 'LIKE', '%' . $filters['sanction_type_name'] . '%');
+            });
+        }
+
+        return $query->paginate($perPage);
+    }
 }

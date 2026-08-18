@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\Sanction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface SanctionRepositoryInterface
 {
@@ -18,4 +19,5 @@ interface SanctionRepositoryInterface
     public function getSanctionsByStudent(int $studentId, int $perPage = 15, int $page = 1);
     public function getPaginatedWithFilters(array $filters, int $perPage = 15);
     public function createSanctionType(array $data);
+    public function getSanctionsByStudentWithFilters(int $studentId, array $filters, int $perPage = 15): LengthAwarePaginator;
 }

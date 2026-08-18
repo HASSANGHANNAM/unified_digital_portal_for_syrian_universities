@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\SanctionDTO;
+use App\DTOs\SanctionListDTO;
 use App\DTOs\SanctionTypeDTO;
 use App\DTOs\SanctionTypeListDTO;
 use App\DTOs\StudentSanctionDTO;
@@ -47,15 +48,27 @@ class SanctionService
         }
     }
 
-    public function getSanctions(array $data): array
+    public function getSanctions(int $studentId, array $filters, int $perPage = 15): array
     {
-        $message = 'عرض العقوبات المسجلة على الطالب.';
-        $code = 200;
-        $data = $data;
+        $sanctions = $this->sanctionRepositoryInterface->getSanctionsByStudentWithFilters($studentId, $filters, $perPage);
+
+        $data = collect($sanctions->items())
+            ->map(fn($sanction) => SanctionListDTO::fromModel($sanction)->toArray())
+            ->values()
+            ->toArray();
+
         return [
-            'data' => $data,
-            'message' => $message,
-            'code' => $code,
+            'data' => [
+                'data' => $data,
+                'meta' => [
+                    'current_page' => $sanctions->currentPage(),
+                    'per_page' => $sanctions->perPage(),
+                    'total' => $sanctions->total(),
+                    'last_page' => $sanctions->lastPage(),
+                ],
+            ],
+            'message' => 'عرض العقوبات المسجلة على الطالب.',
+            'code' => 200,
         ];
     }
 
@@ -218,7 +231,6 @@ class SanctionService
                 'code' => 200,
             ];
         }
-
         $items = $sanctions->getCollection()->map(function ($sanction) {
             return StudentSanctionDTO::fromModel($sanction)->toArray();
         })->values()->all();

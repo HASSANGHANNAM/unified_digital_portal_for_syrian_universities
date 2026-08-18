@@ -46,8 +46,11 @@ class SanctionController extends Controller
     public function getSanctions(GetSanctionsRequest $getSanctionsRequest): JsonResponse
     {
         try {
-            $data = $this->sanctionService->getSanctions($getSanctionsRequest->validated());
-            return Response::success($data['data'], $data['message'], $data['code']);
+            $filters = $getSanctionsRequest->validated();
+            $studentId = $filters['student_id'];
+            $perPage = $filters['per_page'] ?? 15;
+            $result = $this->sanctionService->getSanctions($studentId, $filters, $perPage);
+            return Response::success($result['data'], $result['message'], $result['code']);
         } catch (Throwable $th) {
             return Response::Error([], $th->getMessage(), 400);
         }

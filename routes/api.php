@@ -133,7 +133,8 @@ Route::prefix('V1')->group(function () {
         Route::get('/request-types', [RequestController::class, 'getRequestTypes'])->middleware(['permission:get request types']);
         Route::get('/requests-list', [RequestController::class, 'getRequestsList'])->middleware(['permission:get requests list']);
         Route::get('/request-details/{requestId}', [RequestController::class, 'RequestDetails'])->middleware(['permission:get request details']);
-
+        Route::post('/request-types', [RequestController::class, 'storeRequestType']); //->middleware(['permission:add request types']);
+        Route::post('/request-type-availability', [RequestController::class, 'requestTypeAvailability']); //->middleware(['permission:add request types']);
 
         // View filse
         Route::get('/media/{id}', [\App\Http\Controllers\Api\V1\FileStorageController::class, 'viewMedia'])->middleware(['permission:view media']);

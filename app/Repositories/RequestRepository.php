@@ -159,6 +159,12 @@ class RequestRepository
             ->where('id', $requestId)
             ->first();
     }
+    public function getRequestUser(int $userId, int $requestId): ?RequestUser
+    {
+        return RequestUser::where('user_id', $userId)
+            ->where('request_id', $requestId)
+            ->first();
+    }
     public function updateStatus(int $requestId, string $status): ?Request
     {
         $r = $this->model->find($requestId);

@@ -15,9 +15,11 @@ use App\Services\Traits\TokenDataTrait;
 use App\Repositories\RequestRepository;
 use App\Repositories\RequestMediaRepository;
 use App\DTOs\RequestResponseDTO;
+use App\DTOs\RequestTypeWithMediaDTO;
 use App\Services\Traits\RequestMediaValidationTrait;
 use Illuminate\Http\Request;
 use App\Models\Request as RequestModel;
+use App\Models\RequestTypeAvailability;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -139,7 +141,12 @@ class RequestService
         } else {
             $request->pdf_url = null;
         }
-        $data = [
+        $checkUser = $this->requestRepository->getRequestUser(auth()->user()->id, $requestId);
+        $assign = false;
+        if ($checkUser) {
+            $assign = true;
+        }
+        $$data = [
             'request_id' => $request->id,
             'reason' => $request->reason,
             'submission_date' => $request->submission_date,
@@ -156,7 +163,7 @@ class RequestService
                 : null,
 
             'status' => $request->status,
-
+            'assign' => $assign,
             'staff' => $request->processedBy
                 ? [
                     'id' => $request->processedBy->id ?? '',
@@ -566,6 +573,45 @@ class RequestService
             'data' => $dto->toArray(),
             'message' => $dto->message,
             'code' => 200,
+        ];
+    }
+    public function storeRequestType(array $validated): array
+    {
+        return DB::transaction(function () use ($validated) {
+            $mediaItems = $validated['media'] ?? [];
+            unset($validated['media']);
+            $requestType = $this->requestTypeRepository->create($validated);
+            $createdMedia = [];
+            foreach ($mediaItems as $media) {
+                $media['request_type_id'] = $requestType->id;
+                $createdMedia[] = $this->requestTypeMediaRepository->create($media);
+            }
+            $data = RequestTypeWithMediaDTO::fromModel($requestType, $createdMedia)->toArray();
+            return [
+                'data' => $data,
+                'message' => 'تم إضافة نوع الطلب بنجاح مع مرفقاته.',
+                'code' => 201,
+            ];
+        });
+    }
+    public function upsertRequestTypeAvailability(array $validated): array
+    {
+        $availability = RequestTypeAvailability::updateOrCreate(
+            [
+                'request_type_id' => $validated['request_type_id'],
+                'college_id' => $validated['college_id'],
+            ],
+            [
+                'is_available' => $validated['is_available'],
+            ]
+        );
+        $wasRecentlyCreated = $availability->wasRecentlyCreated;
+        return [
+            'data' => $availability,
+            'message' => $wasRecentlyCreated
+                ? 'تم إضافة توفر نوع الطلب للكلية بنجاح.'
+                : 'تم تحديث توفر نوع الطلب للكلية بنجاح.',
+            'code' => $wasRecentlyCreated ? 201 : 200,
         ];
     }
 }
