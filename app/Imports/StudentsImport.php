@@ -4,9 +4,12 @@ namespace App\Imports;
 
 use App\Exceptions\ExcelImportValidationException;
 use App\Models\College;
+use App\Models\Course;
 use App\Models\Department;
 use App\Models\Person;
 use App\Models\Student;
+use App\Models\StudentCourse;
+use App\Models\StudyPlanCourse;
 use App\Models\University;
 use App\Models\User;
 use Carbon\Carbon;
@@ -42,44 +45,80 @@ class StudentsImport implements
      */
     public function collection(Collection $rows)
     {
+        /*
+        |--------------------------------------------------------------------------
+        | Phase 1: Validate the complete Excel file
+        |--------------------------------------------------------------------------
+        */
 
         $this->validateDuplicateRows($rows);
+
         $this->validateExistingNationalNumbers($rows);
+
         $this->validateRows($rows);
+
+        /*
+        |--------------------------------------------------------------------------
+        | If there are any errors, stop the import completely.
+        |--------------------------------------------------------------------------
+        */
 
         if (!empty($this->errors)) {
             throw new ExcelImportValidationException(
                 $this->errors
             );
         }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Phase 2: Create students
+        |--------------------------------------------------------------------------
+        */
+
         DB::transaction(function () use ($rows) {
 
             foreach ($rows as $index => $row) {
 
                 $rowNumber = $index + 2;
+
+
                 $nationalNumber = trim(
                     (string) ($row['national_number'] ?? '')
                 );
+
                 $fullName = trim(
                     (string) ($row['full_name'] ?? '')
                 );
+
                 $birthDate = $this->parseBirthDate(
                     $row['birth_date'] ?? null,
                     $rowNumber
                 );
+
                 $universityName = trim(
                     (string) ($row['university_name'] ?? '')
                 );
+
                 $collegeName = trim(
                     (string) ($row['college_name'] ?? '')
                 );
+
                 $departmentName = trim(
                     (string) ($row['department_name'] ?? '')
                 );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Get University
+                |--------------------------------------------------------------------------
+                */
+
                 $university = University::where(
                     'name',
                     $universityName
                 )->first();
+
+
                 $college = College::where(
                     'name',
                     $collegeName
@@ -89,6 +128,7 @@ class StudentsImport implements
                         $university->id
                     )
                     ->first();
+
                 $department = Department::where(
                     'name',
                     $departmentName
@@ -100,13 +140,29 @@ class StudentsImport implements
                     ->first();
 
 
+
                 $username = $fullName . '-' . $nationalNumber;
+
                 $enrollmentYear = now()->year;
+
                 $serialNumber = $this->getNextSerialNumber(
                     $enrollmentYear,
                     $university->id,
                     $college->id
                 );
+
+                /*
+                |--------------------------------------------------------------------------
+                | Generate student ID number
+                |--------------------------------------------------------------------------
+                |
+                | Example:
+                |
+                | 2024 + 1 + 14 + 00105
+                |
+                | = 202411400105
+                |
+                */
 
                 $studentIdNumber =
                     $enrollmentYear .
@@ -118,6 +174,8 @@ class StudentsImport implements
                         '0',
                         STR_PAD_LEFT
                     );
+
+
                 $person = Person::create([
                     'national_id' => $nationalNumber,
                     'full_name' => $fullName,
@@ -129,18 +187,15 @@ class StudentsImport implements
 
                 User::create([
                     'username' => $username,
-
-                    // Default password = national number
                     'password' => Hash::make($nationalNumber),
-
                     'status' => 'inactive',
-
                     'email' => null,
                     'last_login' => null,
                     'person_id' => $person->id,
                     'email_verified_at' => null,
                     'new_password' => null,
                 ]);
+
                 $student = Student::create([
                     'student_id_number' => $studentIdNumber,
                     'academic_status' => 'مستمر',
@@ -152,6 +207,13 @@ class StudentsImport implements
                     'college_id' => $college->id,
                     'department_id' => $department->id,
                 ]);
+
+                $this->assignFirstSemesterCourses(
+                    $student,
+                    $department->id,
+                    $enrollmentYear
+                );
+
                 $this->report['imported']++;
 
                 $this->report['students'][] = [
@@ -163,11 +225,58 @@ class StudentsImport implements
             }
         });
     }
+
+    /**
+     * Assign first-year / first-semester courses to the student.
+     */
+    private function assignFirstSemesterCourses(
+        Student $student,
+        int $departmentId,
+        int $enrollmentYear
+    ): void {
+
+        $studyPlanCourses = StudyPlanCourse::where(
+            'department_id',
+            $departmentId
+        )
+            ->where('year', 1)
+            ->where('semester', 1)
+            ->get();
+
+        foreach ($studyPlanCourses as $studyPlanCourse) {
+
+            $course = Course::find(
+                $studyPlanCourse->course_id
+            );
+
+            if (!$course) {
+                throw new \Exception(
+                    "Course with ID {$studyPlanCourse->course_id} " .
+                    "was not found."
+                );
+            }
+
+            StudentCourse::create([
+                'course_id' => $course->id,
+                'credits' => $course->credits,
+                'status'        => 'pass',
+
+                'academic_year' => $enrollmentYear,
+                'semester' => 1,
+                'student_id' => $student->id,
+            ]);
+        }
+    }
+
+    /**
+     * Validate all rows.
+     */
     private function validateRows(Collection $rows): void
     {
         foreach ($rows as $index => $row) {
 
             $rowNumber = $index + 2;
+
             $universityName = trim(
                 (string) ($row['university_name'] ?? '')
             );
@@ -179,6 +288,13 @@ class StudentsImport implements
             $departmentName = trim(
                 (string) ($row['department_name'] ?? '')
             );
+
+            /*
+            |--------------------------------------------------------------------------
+            | University
+            |--------------------------------------------------------------------------
+            */
+
             $university = University::where(
                 'name',
                 $universityName
@@ -196,6 +312,12 @@ class StudentsImport implements
                 continue;
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | Check staff university permission
+            |--------------------------------------------------------------------------
+            */
+
             if ($university->id !== $this->allowedUniversityId) {
 
                 $this->addError(
@@ -208,6 +330,11 @@ class StudentsImport implements
                 continue;
             }
 
+            /*
+            |--------------------------------------------------------------------------
+            | College
+            |--------------------------------------------------------------------------
+            */
 
             $college = College::where(
                 'name',
@@ -266,12 +393,6 @@ class StudentsImport implements
                 ->first();
 
             if (!$department) {
-
-                /*
-                |--------------------------------------------------------------------------
-                | Check if department exists but belongs to another college
-                |--------------------------------------------------------------------------
-                */
 
                 $existingDepartment = Department::where(
                     'name',
@@ -461,21 +582,9 @@ class StudentsImport implements
             ->lockForUpdate()
             ->first();
 
-        /*
-        |--------------------------------------------------------------------------
-        | First student
-        |--------------------------------------------------------------------------
-        */
-
         if (!$lastStudent) {
             return 1;
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Extract previous serial
-        |--------------------------------------------------------------------------
-        */
 
         $lastSerial = (int) substr(
             $lastStudent->student_id_number,
@@ -483,12 +592,6 @@ class StudentsImport implements
         );
 
         $nextSerial = $lastSerial + 1;
-
-        /*
-        |--------------------------------------------------------------------------
-        | Maximum serial = 99999
-        |--------------------------------------------------------------------------
-        */
 
         if ($nextSerial > 99999) {
 
