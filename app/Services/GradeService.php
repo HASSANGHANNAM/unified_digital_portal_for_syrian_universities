@@ -18,6 +18,7 @@ use App\Repositories\Contracts\StudyPlanCourseRepositoryInterface;
 use App\Repositories\Contracts\StudentRepositoryInterface;
 use App\Repositories\Contracts\CoursePartRepositoryInterface;
 use App\Repositories\Contracts\CourseRepositoryInterface;
+use App\Repositories\Contracts\CourseStaffRepositoryInterface;
 use App\Repositories\RequestRepository;
 use App\Services\Traits\TokenDataTrait;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +38,8 @@ class GradeService
         private StudentRepositoryInterface $studentRepositoryInterface,
         private CourseRepositoryInterface $courseRepository,
         private CoursePartRepositoryInterface $coursePartRepositoryInterface,
-        private RequestRepository $requestRepository
+        private RequestRepository $requestRepository,
+        private CourseStaffRepositoryInterface $repository
     ) {}
 
     public function getAllGrades(array $data): array
@@ -580,6 +582,24 @@ class GradeService
             'data' => $data,
             'message' => 'قائمة أجزاء المادة مع علامات الطالب.',
             'code' => 200,
+        ];
+    }
+    public function store(array $validated): array
+    {
+        $data = [
+            'course_id'   => $validated['course_id'],
+            'is_advisor'  => $validated['is_advisor'],
+            'doctor_id'   => $validated['doctor_id'] ?? null,
+            'ta_id'       => $validated['ta_id'] ?? null,
+            'staff_id'    => null,
+        ];
+        $courseStaff = $this->repository->create($data);
+        $courseStaff->load(['course', 'doctor.person', 'ta.person']);
+        $type = !empty($data['doctor_id']) ? 'الدكتور' : 'المعيد';
+        return [
+            'data' => $courseStaff,
+            'message' => "تم تعيين {$type} للمادة بنجاح.",
+            'code' => 201,
         ];
     }
 }

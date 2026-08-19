@@ -234,7 +234,9 @@ Route::prefix('V1')->group(function () {
         Route::post('/addDoctors', [DoctorController::class, 'addDoctors']); //->middleware([ 'permission:add doctors']);
         Route::post('/addTeachingAssistants', [TeachingAssistantController::class, 'addTeachingAssistants']); //->middleware([ 'permission:add teaching-assistants']);
         Route::post('/addStaff', [StaffController::class, 'addStaff']); //->middleware([ 'permission:add staff']);
-        Route::post('/students-import', [StudentController::class, 'importStudents']);
+        Route::post('/students-import', [StudentController::class, 'importStudents']); //->middleware([ 'permission:students import']);
+        Route::post('/course-staff', [GradeController::class, 'store']); //->middleware([ 'permission:add course staff']);
+
     });
 });
 Route::middleware(['auth:sanctum'])->group(function () {});

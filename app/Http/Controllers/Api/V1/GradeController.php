@@ -12,6 +12,7 @@ use App\Http\Requests\V1\ProcessAppealRequest;
 use App\Http\Requests\V1\UpdateGradeRequest;
 use App\Http\Requests\V1\AddGradesforonestudentRequest;
 use App\Http\Requests\V1\GetCourseStudentsRequest;
+use App\Http\Requests\V1\StoreCourseStaffRequest;
 use App\Http\Responses\Response;
 use Throwable;
 
@@ -149,6 +150,18 @@ class GradeController extends Controller
     {
         try {
             $result = $this->gradeService->getCoursePartsWithStudentParts($studentCourseId);
+            if ($result['code'] !== 200) {
+                return Response::Error([], $result['message'], $result['code']);
+            }
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
+    public function store(StoreCourseStaffRequest $request): JsonResponse
+    {
+        try {
+            $result = $this->gradeService->store($request->validated());
             if ($result['code'] !== 200) {
                 return Response::Error([], $result['message'], $result['code']);
             }

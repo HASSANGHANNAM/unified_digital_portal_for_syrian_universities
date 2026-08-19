@@ -216,7 +216,8 @@ class UserService
 
     public function getMySignature(): array
     {
-        $userId = auth()->user()->id;
+        $user = auth()->user();
+        $userId = $user->id;
 
         if (!$userId) {
             return [
@@ -228,10 +229,20 @@ class UserService
         }
 
         $signature = $this->userSignatureRepository->getLatestForUser($userId);
-
+        $college_id = null;
+        if ($user->hasRole('StudentAffairs') || $user->hasRole('Examination')) {
+            $staff = \App\Models\Staff::where('person_id', $user->person_id)->first();
+            if ($staff && $staff->department_id) {
+                $department = \App\Models\Department::find($staff->department_id);
+                if ($department && $department->college_id) {
+                    $college_id = $department->college_id;
+                }
+            }
+        }
         if (!$signature) {
             $data['signature'] = null;
             $data['is_sig'] = false;
+            $data['college_id'] = $college_id;
             return [
                 'data'    => $data,
                 'message'   => 'لا يوجد توقيع لهذا المستخدم',
@@ -240,7 +251,7 @@ class UserService
         }
         $data['signature'] = SignatureDTO2::fromModel($signature);
         $data['is_sig'] = true;
-
+        $data['college_id'] = $college_id;
         return [
 
             'data'    => $data,

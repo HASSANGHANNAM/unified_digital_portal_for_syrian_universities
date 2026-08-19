@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\StaffListDTO;
 use App\Models\Department;
 use App\Models\Person;
+use App\Models\User;
 use App\Repositories\Contracts\PersonRepositoryInterface;
 use App\Repositories\Contracts\StaffRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
@@ -70,7 +71,8 @@ class StaffService
             'hire_date'         => Carbon::now()->toDateString(),
             'employment_status' => 'active',
         ];
-
+        $user = User::where('persone_id', $validated['person_id']);
+        $user->assignRole($validated['role']);
         $staff = $this->staffRepositoryInterface->create($data);
 
         return [
@@ -98,7 +100,6 @@ class StaffService
                 'password' => Hash::make($validated['password']),
                 'status' => 'active',
             ]);
-            $user->assignRole($validated['role']);
             $staff = $this->staffRepositoryInterface->create([
                 'person_id' => $person->id,
                 'department_id' => null,
@@ -106,7 +107,6 @@ class StaffService
                 'hire_date' => Carbon::now()->toDateString(),
                 'employment_status' => 'inactive',
             ]);
-
             return [
                 'data' => [
                     'user' => $user,
