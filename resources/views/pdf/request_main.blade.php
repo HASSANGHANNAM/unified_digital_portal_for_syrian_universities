@@ -130,7 +130,7 @@
         'request' => $request,
         'requestTypeName' => $requestTypeName ?? 'غير محدد',
         'appLogo' => $appLogo ?? null,
-        'universityLogo' => $universityLogo ?? null, // 🔥 تم التعديل: universityLogo بدلاً من collegeLogo
+        'universityLogo' => $universityLogo ?? null,
     ])
 
     <!-- ========================================================= -->
@@ -219,18 +219,101 @@
                 </tbody>
             </table>
 
-        @elseif(($requestTypeName ?? '') === 'حياة جامعية')
-            <h3>📚 الحياة الجامعية</h3>
-            <table>
-                <thead><tr><th>السنة</th><th>المعدل التراكمي</th><th>عدد الساعات</th><th>الحالة</th></tr></thead>
-                <tbody>
-                    @forelse($academicYears ?? [] as $year)
-                        <tr><td>{{ $year['year'] ?? '' }}</td><td>{{ $year['gpa'] ?? '' }}</td><td>{{ $year['hours'] ?? '' }}</td><td>{{ $year['status'] ?? '' }}</td></tr>
-                    @empty
-                        <tr><td colspan="4" class="empty-message">لا توجد سنوات دراسية مسجلة</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
+        @elseif(($requestTypeName ?? '') === 'حياة جامعية أو تسلسل دراسي أو بيان وضع')
+            <h3>📚 الحياة الجامعية - تسلسل دراسي / بيان وضع</h3>
+
+            <!-- ========================================================= -->
+            <!-- 1. حالة الطالب الحالية (يتم تمريرها من الـ Job)          -->
+            <!-- ========================================================= -->
+            @if(!empty($studentStatus))
+                <div style="background-color: #e8f4fd; padding: 8px 15px; border-radius: 6px; margin-bottom: 15px; border-right: 4px solid #3498db;">
+                    <strong>حالة الطالب الحالية:</strong>
+                    <span style="font-weight: bold; color: #2c3e50;">{{ $studentStatus }}</span>
+                </div>
+            @endif
+
+            <!-- ========================================================= -->
+            <!-- 2. السنوات الدراسية وحالتها                              -->
+            <!-- ========================================================= -->
+            <h4 style="color: #2c3e50; border-right: 3px solid #3498db; padding-right: 10px; margin-top: 15px; margin-bottom: 10px;">السنوات الدراسية</h4>
+            @if(!empty($academicYears) && count($academicYears) > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">السنة</th>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($academicYears as $year)
+                            <tr>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">{{ $year['year'] ?? '' }}</td>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">{{ $year['status'] ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div style="text-align: center; color: #888; padding: 10px; font-size: 13px;">
+                    لا توجد سنوات دراسية مسجلة
+                </div>
+            @endif
+
+            <!-- ========================================================= -->
+            <!-- 3. العقوبات (Sanctions)                                   -->
+            <!-- ========================================================= -->
+            <h4 style="color: #2c3e50; border-right: 3px solid #3498db; padding-right: 10px; margin-top: 20px; margin-bottom: 10px;">العقوبات</h4>
+            @if(!empty($sanctions) && count($sanctions) > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">اسم العقوبة</th>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">تاريخ البدء</th>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">تاريخ الانتهاء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($sanctions as $sanction)
+                            <tr>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">{{ $sanction['name'] ?? '' }}</td>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">{{ $sanction['start_date'] ?? '' }}</td>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">{{ $sanction['end_date'] ?? '' }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div style="text-align: center; color: #888; padding: 10px; font-size: 13px;">
+                    لا توجد عقوبات مسجلة
+                </div>
+            @endif
+
+            <!-- ========================================================= -->
+            <!-- 4. طلبات إيقاف التسجيل (Suspension Requests)             -->
+            <!-- ========================================================= -->
+            <h4 style="color: #2c3e50; border-right: 3px solid #3498db; padding-right: 10px; margin-top: 20px; margin-bottom: 10px;">طلبات إيقاف التسجيل</h4>
+            @if(!empty($suspensionRequests) && count($suspensionRequests) > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="background-color: #2c3e50; color: #fff; padding: 6px 10px; text-align: center; font-size: 12px;">تاريخ التقديم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($suspensionRequests as $requestDate)
+                            <tr>
+                                <td style="border: 1px solid #dee2e6; padding: 5px 10px; text-align: center; font-size: 12px;">
+                                    {{ is_array($requestDate) ? ($requestDate['date'] ?? '') : $requestDate }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div style="text-align: center; color: #888; padding: 10px; font-size: 13px;">
+                    لا توجد طلبات إيقاف تسجيل
+                </div>
+            @endif
 
         @elseif(($requestTypeName ?? '') === 'شهادة تخرج')
             <h3>🎓 شهادة التخرج</h3>
@@ -257,6 +340,18 @@
                     @endforelse
                 </tbody>
             </table>
+
+        @elseif(($requestTypeName ?? '') === 'وثيقة دوام')
+            <h3 style="text-align: center;">📄 وثيقة دوام</h3>
+            <div style="border: 2px solid #2c3e50; border-radius: 10px; padding: 30px 25px; background: #fefefe; margin-top: 15px; line-height: 2;">
+                <p style="font-size: 16px; text-align: right;">
+                    سجل الطالب/الطالبة <strong>{{ $fullName }}</strong>
+                    بالسنة <strong>{{ $currentYear }}</strong>
+                    في قسم <strong>{{ $major }}</strong>
+                    للعام الدراسي <strong>{{ $academicYear ?? '2024-2025' }}</strong>
+                    وبناءً على طلبه رقم <strong>{{ $request->id }}</strong>، أعطي هذه الوثيقة.
+                </p>
+            </div>
 
         @else
             <h3>📄 تفاصيل الطلب</h3>

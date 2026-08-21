@@ -33,8 +33,6 @@ class GenerateRequestPdfJob implements ShouldQueue
 
         // ============================================================
         // 1. التحقق من أن الطلب في حالة تسمح بتوليد PDF
-        //    - pending: أول توليد (بدون توقيعات)
-        //    - generating_...: توليد بعد كل توقيع (مع التواقيع المسجلة)
         // ============================================================
         $allowedStatuses = ['pending'];
         $isGenerating = str_starts_with($request->status, 'generating_');
@@ -55,7 +53,6 @@ class GenerateRequestPdfJob implements ShouldQueue
             'student.college',
             'student.college.university',
             'requestType',
-            // جلب التواقيع المسجلة فقط (approved)
             'requestUsers' => function ($query) {
                 $query->where('status', 'approved')
                     ->with(['user.person', 'userSignature']);
@@ -98,18 +95,29 @@ class GenerateRequestPdfJob implements ShouldQueue
         // 6. البيانات حسب نوع الطلب
         // ============================================================
         $grades = null;
-        $academicYears = null;
+        $academicYears = [];
+        $sanctions = [];
+        $suspensionRequests = [];
+        $studentStatus = 'غير محدد';
         $certificateData = null;
         $equivalencyData = null;
+        $academicYear = '2024-2025'; // القيمة الافتراضية
 
         if (str_contains($requestTypeName, 'كشف علامات')) {
             $grades = $this->getStudentGrades($request->student_id);
-        } elseif ($requestTypeName === 'حياة جامعية') {
-            $academicYears = $this->getStudentAcademicYears($request->student_id);
+        } elseif ($requestTypeName === 'حياة جامعية أو تسلسل دراسي أو بيان وضع') {
+            $academicData = $this->getStudentAcademicData($request->student_id);
+            $academicYears = $academicData['academicYears'] ?? [];
+            $sanctions = $academicData['sanctions'] ?? [];
+            $suspensionRequests = $academicData['suspensionRequests'] ?? [];
+            $studentStatus = $academicData['studentStatus'] ?? 'غير محدد';
         } elseif ($requestTypeName === 'شهادة تخرج') {
             $certificateData = $this->getGraduationData($request->student_id);
         } elseif ($requestTypeName === 'طلب معادلة') {
             $equivalencyData = $this->getEquivalencyData($request->id);
+        } elseif ($requestTypeName === 'وثيقة دوام') {
+            $attendanceData = $this->getAttendanceCertificateData($request->student_id);
+            $academicYear = $attendanceData['academicYear'] ?? '2024-2025';
         }
 
         // ============================================================
@@ -122,9 +130,13 @@ class GenerateRequestPdfJob implements ShouldQueue
             'universityLogo' => $universityLogo,
             'grades' => $grades,
             'academicYears' => $academicYears,
+            'sanctions' => $sanctions,
+            'suspensionRequests' => $suspensionRequests,
+            'studentStatus' => $studentStatus,
             'certificateData' => $certificateData,
             'equivalencyData' => $equivalencyData,
-            'signatures' => $signatures, // تمرير التواقيع المسجلة فقط
+            'academicYear' => $academicYear, // 🔥 المتغير الجديد
+            'signatures' => $signatures,
             'submissionDate' => $request->submission_date ?? $request->created_at ?? now(),
         ])->render();
 
@@ -204,14 +216,73 @@ class GenerateRequestPdfJob implements ShouldQueue
     }
 
     // ================================================================
-    // دوال مساعدة (لم تتغير)
+    // ============= دوال مساعدة لجلب البيانات حسب النوع =============
     // ================================================================
+
+    /**
+     * جلب العلامات الدراسية (كشف علامات)
+     */
     protected function getStudentGrades(int $studentId): array
     {
         $repository = app(\App\Repositories\Contracts\StudentCourseRepositoryInterface::class);
         return $repository->getStudentCoursesWithGradesArray($studentId);
     }
 
+    /**
+     * جلب جميع بيانات الحياة الجامعية (السنوات، العقوبات، طلبات الإيقاف، حالة الطالب)
+     * 🔥 هذه الدالة جاهزة لاستبدال البيانات الوهمية ببيانات حقيقية من الـ Repository
+     * 
+     * @param int $studentId
+     * @return array
+     */
+    protected function getStudentAcademicData(int $studentId): array
+    {
+        // ✅ TODO: استبدل هذا الكود باستدعاء الـ Repository الخاص بك
+        // $repository = app(\App\Repositories\Contracts\StudentAcademicRepositoryInterface::class);
+        // return $repository->getStudentAcademicData($studentId);
+
+        // 👇 بيانات وهمية للتجربة (سيتم استبدالها لاحقاً)
+        return [
+            'studentStatus' => 'مستمر',
+            'academicYears' => [
+                ['year' => 'السنة الأولى', 'status' => 'ناجح'],
+                ['year' => 'السنة الثانية', 'status' => 'منقول'],
+                ['year' => 'السنة الثالثة', 'status' => 'راسب'],
+                ['year' => 'السنة الرابعة', 'status' => 'ناجح'],
+            ],
+            'sanctions' => [
+                ['name' => 'إنذار', 'start_date' => '2025-01-01', 'end_date' => '2025-06-01'],
+                ['name' => 'فصل مؤقت', 'start_date' => '2025-07-01', 'end_date' => '2025-09-01'],
+            ],
+            'suspensionRequests' => [
+                ['date' => '2025-01-10'],
+                ['date' => '2025-03-15'],
+            ],
+        ];
+    }
+
+    /**
+     * جلب بيانات وثيقة الدوام (بيانات ثابتة حالياً)
+     * 🔥 هذه الدالة جاهزة لاستبدال البيانات الوهمية ببيانات حقيقية من الـ Repository
+     * 
+     * @param int $studentId
+     * @return array
+     */
+    protected function getAttendanceCertificateData(int $studentId): array
+    {
+        // ✅ TODO: استبدل هذا الكود باستدعاء الـ Repository الخاص بك
+        // $repository = app(\App\Repositories\Contracts\AttendanceCertificateRepositoryInterface::class);
+        // return $repository->getAttendanceCertificateData($studentId);
+
+        // 👇 بيانات وهمية للتجربة (سيتم استبدالها لاحقاً)
+        return [
+            'academicYear' => '2024-2025',
+        ];
+    }
+
+    /**
+     * جلب السنوات الدراسية (للحياة الجامعية) - احتفظ بها للتوافق مع الكود القديم
+     */
     protected function getStudentAcademicYears(int $studentId): array
     {
         return [
@@ -222,6 +293,9 @@ class GenerateRequestPdfJob implements ShouldQueue
         ];
     }
 
+    /**
+     * جلب بيانات التخرج (شهادة تخرج)
+     */
     protected function getGraduationData(int $studentId): array
     {
         return [
@@ -232,6 +306,9 @@ class GenerateRequestPdfJob implements ShouldQueue
         ];
     }
 
+    /**
+     * جلب مواد المعادلة (طلب معادلة)
+     */
     protected function getEquivalencyData(int $requestId): array
     {
         return [
@@ -241,6 +318,9 @@ class GenerateRequestPdfJob implements ShouldQueue
         ];
     }
 
+    /**
+     * جلب شعار الكلية (Base64)
+     */
     protected function getCollegeLogoBase64(?int $collegeId): ?string
     {
         if (!$collegeId) {
@@ -261,6 +341,9 @@ class GenerateRequestPdfJob implements ShouldQueue
         return 'data:image/png;base64,' . base64_encode($binary);
     }
 
+    /**
+     * جلب شعار الجامعة (Base64)
+     */
     protected function getUniversityLogoBase64(?int $universityId): ?string
     {
         if (!$universityId) {

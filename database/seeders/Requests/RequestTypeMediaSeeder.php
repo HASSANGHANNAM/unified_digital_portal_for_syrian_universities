@@ -15,6 +15,7 @@ class RequestTypeMediaSeeder extends Seeder
                 // 1. حياة جامعية أو تسلسل دراسي أو بيان وضع
                 ['request_type_name' => 'حياة جامعية أو تسلسل دراسي أو بيان وضع', 'name' => 'صورة هوية', 'type' => 'image'],
                 ['request_type_name' => 'حياة جامعية أو تسلسل دراسي أو بيان وضع', 'name' => 'تبرع بالدم', 'type' => 'image'],
+                ['request_type_name' => 'حياة جامعية أو تسلسل دراسي أو بيان وضع', 'name' => 'بطاقة جامعية', 'type' => 'image'],
 
                 // 2. وثيقة دوام
                 ['request_type_name' => 'وثيقة دوام', 'name' => 'صورة هوية', 'type' => 'image'],
