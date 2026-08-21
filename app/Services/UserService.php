@@ -238,6 +238,15 @@ class UserService
                     $college_id = $department->college_id;
                 }
             }
+        } elseif ($user->hasRole('Dean')) {
+            $collegeId = DB::table('college_deans')
+                ->join('doctors', 'college_deans.doctor_id', '=', 'doctors.id')
+                ->join('users', 'doctors.person_id', '=', 'users.person_id')
+                ->where('users.id', auth()->id())
+                ->value('college_deans.college_id');
+            if ($collegeId) {
+                $college_id = $collegeId;
+            }
         }
         if (!$signature) {
             $data['signature'] = null;

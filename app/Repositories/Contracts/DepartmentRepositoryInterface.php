@@ -13,4 +13,5 @@ interface DepartmentRepositoryInterface
     public function delete(string $id): bool;
     public function findById(string $id): ?Department;
     public function getDepartments(array $filters): Collection;
+    public function getDepartmentsWithHead(array $filters): Collection;
 }

@@ -44,8 +44,9 @@ class StaffRepository implements StaffRepositoryInterface
         $query = $this->model->newQuery()
             ->with(['person', 'department.college'])
             ->orderBy('id');
-
-        if (!empty($filters['college_id'])) {
+        if ($filters['college_id'] == null) {
+            $filters['department_id'] = null;
+        } elseif (!empty($filters['college_id'])) {
             $query->whereHas('department', function ($q) use ($filters) {
                 $q->where('college_id', $filters['college_id']);
             });

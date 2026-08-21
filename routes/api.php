@@ -35,6 +35,8 @@ Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
 
 //  V1
+// Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
+
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // setup account and verify code
@@ -202,6 +204,7 @@ Route::prefix('V1')->group(function () {
 
         // student affairs courses
         Route::get('/student-affairs/courses', [AffairController::class, 'getCollegeCourses'])->middleware(['permission:get college courses']);
+        Route::get('/department_head/courses/{departmentId}', [AffairController::class, 'getDepartmentCourses']); //->middleware(['permission:get college courses']);
 
         // suggestion
         Route::post('/student-suggestion', [StudentController::class, 'addStudentSuggestion']); //->middleware(['permission:add student suggestion']);
@@ -223,7 +226,7 @@ Route::prefix('V1')->group(function () {
         Route::get('/doctors', [DoctorController::class, 'getDoctors']); //->middleware(['permission:get doctors']);
         Route::get('/teaching-assistants', [TeachingAssistantController::class, 'getTeachingAssistants']); //->middleware(['permission:get teaching-assistants']);
         Route::get('/staff', [StaffController::class, 'getStaff']); //->middleware(['permission:get staff']);
-        Route::get('/departxments', [DepartmentController::class, 'getDepartments']); //->middleware(['permission:get departments']);
+        Route::get('/departments', [DepartmentController::class, 'getDepartments']); //->middleware(['permission:get departments']);
         Route::get('/universities', [DepartmentController::class, 'getUniversities']); //->middleware(['permission:get universities']);
         Route::patch('/universities/{id}', [DepartmentController::class, 'updateUniversity']); //->middleware([ 'permission:update university']);
         Route::post('/colleges/{college_id}/deans', [DepartmentController::class, 'store']); //->middleware([ 'permission:update university']);
@@ -236,6 +239,7 @@ Route::prefix('V1')->group(function () {
         Route::post('/addStaff', [StaffController::class, 'addStaff']); //->middleware([ 'permission:add staff']);
         Route::post('/students-import', [StudentController::class, 'importStudents']); //->middleware([ 'permission:students import']);
         Route::post('/course-staff', [GradeController::class, 'store']); //->middleware([ 'permission:add course staff']);
+        Route::get('/departmentsWithHead', [DepartmentController::class, 'getDepartmentsWithHead']); //->middleware(['permission:get departments']);
 
     });
 });

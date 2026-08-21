@@ -32,6 +32,16 @@ class DepartmentController extends Controller
             return Response::Error([], $th->getMessage(), 400);
         }
     }
+    public function getDepartmentsWithHead(GetDepartmentsRequest $request): JsonResponse
+    {
+        try {
+            $filters = $request->validated();
+            $result = $this->service->getDepartmentsWithHead($filters);
+            return Response::success($result['data'], $result['message'], $result['code']);
+        } catch (Throwable $th) {
+            return Response::Error([], $th->getMessage(), 400);
+        }
+    }
     public function getUniversities(GetUniversitiesRequest $request): JsonResponse
     {
         try {

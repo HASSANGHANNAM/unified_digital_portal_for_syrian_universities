@@ -114,7 +114,8 @@ class StudentRepository implements StudentRepositoryInterface
             ->paginate($perPage, ['*'], 'page', $page);
     }
 
-    public function importStudents($file,int $universityId,int $collegeId): array {
+    public function importStudents($file, int $universityId, int $collegeId): array
+    {
         $import = new StudentsImport(
             $universityId,
             $collegeId

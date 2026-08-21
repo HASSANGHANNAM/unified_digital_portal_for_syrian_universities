@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\DepartmentListDTO;
+use App\DTOs\DepartmentListWithHeadDTO;
 use App\DTOs\UniversityWithCollegesDTO;
 use App\Models\College;
 use App\Models\CollegeDean;
@@ -36,6 +37,20 @@ class DepartmentService
         return [
             'data' => $data,
             'message' => 'قائمة الأقسام.',
+            'code' => 200,
+        ];
+    }
+    public function getDepartmentsWithHead(array $filters): array
+    {
+        $departments = $this->repository->getDepartmentsWithHead($filters);
+
+        $data = $departments->map(fn($dept) => DepartmentListWithHeadDTO::fromModel($dept)->toArray())
+            ->values()
+            ->toArray();
+
+        return [
+            'data' => $data,
+            'message' => 'قائمة الأقسام مع رؤسائها.',
             'code' => 200,
         ];
     }
@@ -135,7 +150,7 @@ class DepartmentService
             'hired_date' => $request['hired_dat'],
             'expire_date' => null,
         ]);
-
+        $college->update(['dean_id' => $dean->id]);
         return [
             'data'   => $dean,
             'message' => 'تم تعيين العميد للكلية بنجاح.',

@@ -26,5 +26,14 @@ class AffairController extends Controller
             return Response::Error([], $message, 500);
         }
     }
-
+    public function getDepartmentCourses($departmentId): JsonResponse
+    {
+        try {
+            $data = $this->AffairsService->getDepartmentCourses($departmentId);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message, 500);
+        }
+    }
 }
