@@ -58,7 +58,9 @@ class AuthServices
         //     'تم جلب الملف الشخصي بنجاح',
         //     'WARNING'
         // ));
-        $student = Student::where('person_id', $user->person_id)->first();
+        $student = Student::with('department')
+            ->where('person_id', $user->person_id)
+            ->first();
 
         return [
             'data' => [
@@ -68,7 +70,7 @@ class AuthServices
                 'email' => $user->email,
                 'phone' => $user->person?->phone,
                 'address' => $user->person?->address,
-                'study_info' => 'السنة ' . $student?->current_year . ' - ' . $student?->major,
+                'study_info' => 'السنة ' . $student?->current_year . ' - ' . $student?->department?->name,  // التعديل هنا
             ],
             'message' => 'User profile retrieved successfully',
             'code' => 200,
