@@ -14,7 +14,7 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
-        // اتصال MySQL الرئيسي (تم تعديل SSL هنا)
+        // اتصال MySQL الرئيسي
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
@@ -31,17 +31,25 @@ return [
             'strict' => true,
             'engine' => null,
 
+<<<<<<< Updated upstream
             // 🔑 إعدادات SSL الصحيحة (تم التعديل هنا)
             'options' => [
 
             ],
+=======
+            // إعدادات SSL - مهمة جداً
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('MYSQL_ATTR_SSL_VERIFY_SERVER_CERT', false),
+            ]) : [],
+>>>>>>> Stashed changes
 
             // إعدادات mysqldump للنسخ الاحتياطي
             'dump' => [
                 'dump_binary_path' => '/usr/bin/',
                 'use_single_transaction' => true,
                 'timeout' => 60,
-                'add_extra_option' => '--ssl=0',
+                'add_extra_option' => '--ssl=0', // هذا هو الحل
             ],
         ],
 

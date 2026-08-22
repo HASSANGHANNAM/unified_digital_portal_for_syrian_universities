@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('course_id')->constrained('courses')->cascadeOnDelete();
             $table->float('credits')->default(0);
-            $table->enum('status', ['pass', 'fail', 'helped pass']);
+            $table->enum('status', ['pass', 'fail', 'helped pass',"in_progress"]);
             $table->string('academic_year', 9)
                 ->nullable();
             $table->unsignedTinyInteger('semester')
