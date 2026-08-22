@@ -10,6 +10,7 @@ use App\Http\Requests\V1\VerifyEmailRequest;
 use App\Http\Requests\V1\UploadDocumentRequest;
 use App\Http\Requests\V1\CompleteProfileRequest;
 use App\Http\Requests\V1\ChangePasswordRequest;
+use App\Http\Requests\V1\CheckEmailRequest;
 use App\Http\Requests\V1\ResetPasswordRequest;
 use App\Http\Requests\V1\EditProfileRequest;
 use Illuminate\Http\Request;
@@ -88,6 +89,20 @@ class AuthController extends Controller
             return Response::Error([], $th->getMessage());
         }
     }
+    public function resendCodeWithoutToken(CheckEmailRequest $checkEmailRequest)
+    {
+        try {
+            $request = $checkEmailRequest->validated();
+            $user = User::where('email', $request['email'])->first();
+            if (!$user) {
+                throw new \Exception('User not found.');
+            }
+            $data = $this->authServices->resendCode($user->email);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (\Throwable $th) {
+            return Response::Error([], $th->getMessage());
+        }
+    }
 
     public function verifyCode(VerifyEmailRequest $request)
     {
@@ -125,6 +140,16 @@ class AuthController extends Controller
     {
         try {
             $data = $this->authServices->forgotPassword();
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+        }
+    }
+    public function forgotPasswordWithoutToken(CheckEmailRequest $checkEmailRequest): JsonResponse
+    {
+        try {
+            $data = $this->authServices->forgotPasswordWithoutToken($checkEmailRequest->validated());
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();

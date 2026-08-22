@@ -15,6 +15,7 @@ use App\Models\Student;
 use App\DTOs\LoginDTO;
 use App\DTOs\UserDTO;
 use App\Events\SendCustomNotification;
+use App\Models\User;
 
 class AuthServices
 {
@@ -209,6 +210,19 @@ class AuthServices
         }
         if (!$user->email) {
             throw new \Exception('No email is associated with this account.');
+        }
+        $this->emailRepo->sendCode($user);
+        return [
+            'data' => [],
+            'message' => 'A verification code has been sent to your email.',
+            'code' => 200,
+        ];
+    }
+    public function forgotPasswordWithoutToken($request): array
+    {
+        $user = User::where('email', $request['email'])->first();
+        if (!$user) {
+            throw new \Exception('User not found.');
         }
         $this->emailRepo->sendCode($user);
         return [

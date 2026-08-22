@@ -66,7 +66,7 @@ class SendBroadcastChunkJob implements ShouldQueue
             }
 
             try {
-                event(new SendCustomNotification($user, $this->title, $this->message, $this->type));
+                event(new SendCustomNotification($user, 'إعلان جديد', $this->title, $this->type));
             } catch (Throwable $exception) {
                 $failedUserIds[] = $user->id;
 

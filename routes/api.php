@@ -33,10 +33,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/refreshToken', [AuthController::class, 'refreshToken']);
 // add grade
 Route::post('/addGrade', [GradeController::class, 'addGrade']);
-
+Route::prefix('V1')->group(function () {
+    Route::post('/forgot-password-withoutToken', [AuthController::class, 'forgotPasswordWithoutToken'])->middleware(['permission:forgot password']);
+    Route::post('/resend-code-withoutToken', [AuthController::class, 'resendCodeWithoutToken'])->middleware(['permission:resend verification code']);
+});
 //  V1
-// Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
-
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // setup account and verify code
