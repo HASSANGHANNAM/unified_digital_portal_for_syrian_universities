@@ -9,16 +9,19 @@ class DepartmentListWithHeadDTO
     public function __construct(
         public readonly int $id,
         public readonly string $name,
-        public readonly ?array $head = null, // كائن رئيس القسم
+        public readonly ?array $head = null,
     ) {}
 
     public static function fromModel(Department $department): self
     {
         $headData = null;
-        if ($department->head && $department->head->doctor && $department->head->doctor->person) {
+
+        $firstHead = $department->heads->first();
+
+        if ($firstHead && $firstHead->doctor && $firstHead->doctor->person) {
             $headData = [
-                'id' => $department->head->id,
-                'full_name' => $department->head->doctor->person->full_name,
+                'id' => $firstHead->id,
+                'full_name' => $firstHead->doctor->person->full_name,
             ];
         }
 

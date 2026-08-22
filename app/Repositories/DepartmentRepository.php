@@ -51,7 +51,7 @@ class DepartmentRepository implements DepartmentRepositoryInterface
     public function getDepartmentsWithHead(array $filters): Collection
     {
         $query = $this->model->newQuery()
-            ->with(['head.doctor.person'])
+            ->with(['heads.doctor.person'])
             ->orderBy('name', 'asc');
 
         if (!empty($filters['college_id'])) {

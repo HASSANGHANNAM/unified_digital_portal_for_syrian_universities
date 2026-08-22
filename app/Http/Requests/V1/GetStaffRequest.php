@@ -16,7 +16,7 @@ class GetStaffRequest extends FormRequest
         return [
             'search' => 'nullable|string|max:255',
             'department_id' => 'nullable|integer|exists:departments,id',
-            'college_id' => 'nullable|integer|exists:colleges,id',
+            'college_id' => 'nullable',
             'per_page' => 'nullable|integer|min:1|max:100',
             'page' => 'nullable|integer|min:1',
         ];
