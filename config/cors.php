@@ -16,7 +16,7 @@ return [
     */
     'paths' => ['*'],
 
-    'allowed_origins' => ['http://localhost:8000', 'http://localhost:3000', 'http://10.129.103.155:8000', 'http://10.129.103.155:3000', 'https://digital-portal-for-syrian-universities-dnqf8amgh.vercel.app'],
+    'allowed_origins' => ['http://localhost:8000', 'http://localhost:3000', 'http://10.129.103.155:8000', 'http://10.129.103.155:3000', 'https://digital-portal-for-syrian-universities-dnqf8amgh.vercel.app','https://digital-portal-for-syrian-universit.vercel.app'],
 
     'allowed_methods' => ['*'],
 
