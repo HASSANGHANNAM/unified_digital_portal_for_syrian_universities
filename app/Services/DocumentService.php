@@ -84,7 +84,7 @@ class DocumentService
                 'code' => 404,
             ];
         }
-        $this->mediaService->deleteLectureFile($lecture->file_path);
+        // $this->mediaService->deleteLectureFile($lecture->file_path);
         $this->lectureRepository->delete($id);
 
         return [
