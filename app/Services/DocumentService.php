@@ -114,7 +114,7 @@ class DocumentService
         }
 
         if (isset($validated['file'])) {
-            $this->mediaService->deleteLectureFile($lecture->file_path);
+            // $this->mediaService->deleteLectureFile($lecture->file_path);
             $uploaded = $this->mediaService->uploadLectureFile($validated['file'], $lecture->course_parts_id);
             $data['file_url'] = $uploaded['file_url'];
             $data['type'] = $uploaded['type'];
