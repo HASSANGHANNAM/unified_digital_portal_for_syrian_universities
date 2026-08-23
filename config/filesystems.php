@@ -6,14 +6,12 @@ return [
 
     'disks' => [
 
-        // 🔵 التخزين المحلي الأساسي (جميع الملفات المؤقتة والعامة والخاصة)
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app'),
             'throw' => false,
         ],
 
-        // 🟢 الملفات العامة (التي يمكن الوصول إليها عبر الرابط)
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -22,7 +20,6 @@ return [
             'throw' => false,
         ],
 
-        // 🔒 الملفات الخاصة (غير قابلة للوصول المباشر عبر الرابط)
         'private' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
