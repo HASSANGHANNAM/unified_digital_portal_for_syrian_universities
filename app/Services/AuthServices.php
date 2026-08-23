@@ -288,7 +288,7 @@ class AuthServices
 
         $this->userRepo->changePassword(
             $user,
-            $request->new_password
+            $request['new_password']
         );
         $this->emailRepo->clearResetCode($user);
         return [
@@ -307,7 +307,7 @@ class AuthServices
 
         $this->userRepo->changePassword(
             $user,
-            $request->new_password
+            $request['new_password']
         );
         $this->emailRepo->clearResetCode($user);
         return [

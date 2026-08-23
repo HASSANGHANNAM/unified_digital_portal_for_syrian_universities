@@ -27,7 +27,7 @@ class UsersSeederV2 extends Seeder
         $users = [
             [
                 // 'id'=>1,
-                'username' => 'dean.ahmed.nooraldeen',
+                'username' => 'deanahmednooraldeen',
                 'email' => 'deanahmednooraldeen@university.edu',
                 'password' => 'Dean@123456',
                 'new_password' => null,
@@ -114,10 +114,10 @@ class UsersSeederV2 extends Seeder
             ],
             [
                 // 'id'=>7,
-                'username' => 'student.omar',
-                'email' => 'student1@university.edu',
-                'password' => 'Student@123456',
-                'new_password' => 'Dean@123456',
+                'username' => 'HASSANGHANAM',
+                'email' => 'ite.hassang@gmail.com',
+                'password' => '12345678',
+                'new_password' => '12345678',
                 'role' => 'Student',
                 'status' => 'active',
                 'person_id' => 7,

@@ -20,17 +20,17 @@ class StudentSeederV2 extends Seeder
 
         $students = [
             [
-                'student_id_number' => '2024001',
+                'student_id_number' => '52187',
                 'academic_status'   => 'مستمر',
                 'major'             => 'هندسة برمجيات',
                 'enrollment_year'   => 2021,
-                'current_year'      => 1,
-                'current_semester'  => 1,
+                'current_year'      => 5,
+                'current_semester'  => 2,
                 'current_gpa'       => 3.5,
                 'advisor_id'        => null,
                 'person_id'         => 7,
                 'college_id'        => 1,
-                'department_id'     => 4,
+                'department_id'     => 1,
             ],
             [
                 'student_id_number' => '2024002',

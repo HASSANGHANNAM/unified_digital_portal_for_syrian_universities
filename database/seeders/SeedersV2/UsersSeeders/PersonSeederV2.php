@@ -85,13 +85,13 @@ class PersonSeederV2 extends Seeder
             [
                 // 'id'=> 7,
 
-                'national_id' => '01012345684',
-                'full_name' => 'خالد وليد السيد',
-                'phone' => '0931123462',
-                'birth_date' => '1982-01-18',
-                'national_number' => '01012345684',
-                'address' => 'دمشق، ركن الدين، شارع ابن النفيس',
-                'profile_image' => 'https://example.com/images/khaled.jpg',
+                'national_id' => '03180071861',
+                'full_name' => 'حسان محمد غنام',
+                'phone' => '0934519102',
+                'birth_date' => '2003-05-29',
+                'national_number' => '03180071861',
+                'address' => 'ريف دمشق، النبك شارع المشفى',
+                'profile_image' => 'profile-images/hCvVhnX7K0TWVcNtE7dCNG6RPQAm3NyLo7fySCgL.jpg',
             ],
             [
                 // 'id'=> 8,
