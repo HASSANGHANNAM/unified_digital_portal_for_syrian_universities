@@ -297,6 +297,25 @@ class AuthServices
             'code' => 200,
         ];
     }
+    public function resetPasswordWithoutToken($request): array
+    {
+        $user = User::where('email', $request['email'])->first();
+
+        if (!$this->emailRepo->canResetPassword($user)) {
+            throw new \Exception('You must verify the OTP first.');
+        }
+
+        $this->userRepo->changePassword(
+            $user,
+            $request->new_password
+        );
+        $this->emailRepo->clearResetCode($user);
+        return [
+            'data' => [],
+            'message' => 'Password reset successfully.',
+            'code' => 200,
+        ];
+    }
 
 
 
