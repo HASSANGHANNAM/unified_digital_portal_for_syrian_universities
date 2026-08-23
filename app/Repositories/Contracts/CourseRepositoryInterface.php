@@ -16,5 +16,5 @@ interface CourseRepositoryInterface
     public function hasCourseAccess(User $user, int $courseId): array;
     public function getCourseWithParts(int $courseId, int $perPage = 15);
     public function getCollegeCourses(int $collegeId): Collection;
-    public function getDepartmentCourses(int $collegeId, int $departmentId): Collection;
+    // public function getDepartmentCourses(int $collegeId, int $departmentId): Collection;
 }

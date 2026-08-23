@@ -43,7 +43,7 @@ class CourseRepository implements CourseRepositoryInterface
         return $this->model->find($id);
     }
 
-    public function getCollegeCourses(int $collegeId)
+    public function getCollegeCourses(int $collegeId): Collection
     {
         return Course::with('universalCourse')
             ->where('college_id', $collegeId)
@@ -51,7 +51,7 @@ class CourseRepository implements CourseRepositoryInterface
             ->get();
     }
 
-    public function getCourseWithParts(int $courseId, int $perPage = 15)
+    public function getCourseWithParts(int $courseId, int $perPage = 15): ?Course
     {
         return $this->model->with(['courseParts', 'universalCourse'])->find($courseId);
     }
