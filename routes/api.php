@@ -43,13 +43,13 @@ Route::prefix('V1')->group(function () {
 Route::prefix('V1')->group(function () {
     Route::middleware(['auth:sanctum'])->group(function () {
         // setup account and verify code
-        Route::post('/setup-account', [ProfileController::class, 'setupAccount'])->middleware(['permission:setup account']);
-        Route::post('/complete-profile', [ProfileController::class, 'completeProfile'])->middleware(['permission:complete profile']);
-        Route::post('/upload-document', [ProfileController::class, 'uploadDocument'])->middleware(['permission:upload document']);
-        Route::post('/submit', [ProfileController::class, 'submit'])->middleware(['permission:submit profile']);
+        Route::post('/setup-account', [ProfileController::class, 'setupAccount']); //->middleware(['permission:setup account']);
+        Route::post('/complete-profile', [ProfileController::class, 'completeProfile']); //>middleware(['permission:complete profile']);
+        Route::post('/upload-document', [ProfileController::class, 'uploadDocument']); //->middleware(['permission:upload document']);
+        Route::post('/submit', [ProfileController::class, 'submit']); //->middleware(['permission:submit profile']);
         Route::get('/profile', [AuthController::class, 'getProfile']); //->middleware(['permission:get profile']);
-        Route::post('/resend-code', [AuthController::class, 'resendCode'])->middleware(['permission:resend verification code']);
-        Route::post('/verify-code', [AuthController::class, 'verifyCode'])->middleware(['permission:verify verification code']);
+        Route::post('/resend-code', [AuthController::class, 'resendCode']); //->middleware(['permission:resend verification code']);
+        Route::post('/verify-code', [AuthController::class, 'verifyCode']); //->middleware(['permission:verify verification code']);
     });
 });
 Route::prefix('V1')->group(function () {
