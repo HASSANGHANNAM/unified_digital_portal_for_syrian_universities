@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Str;
-use PDO; // يجب أن يكون هذا السطر موجوداً
 
 return [
     'default' => env('DB_CONNECTION', 'mysql'),
@@ -15,7 +14,6 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
-        // اتصال MySQL الرئيسي (تم تعديل SSL هنا)
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DATABASE_URL'),
@@ -32,19 +30,8 @@ return [
             'strict' => true,
             'engine' => null,
 
-            // 🔑 إعدادات SSL الصحيحة (تم التعديل هنا)
-            'options' => [
-                PDO::MYSQL_ATTR_SSL_CA => storage_path('certs/ca.pem'),
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true,
-            ],
-
-            // إعدادات mysqldump للنسخ الاحتياطي
-            'dump' => [
-                'dump_binary_path' => '/usr/bin/',
-                'use_single_transaction' => true,
-                'timeout' => 60,
-                'add_extra_option' => '--ssl=0',
-            ],
+            // ✅ إزالة إعدادات SSL لأننا على Hostinger (بيئة محلية)
+            'options' => [],
         ],
 
         'pgsql' => [
