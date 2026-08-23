@@ -146,7 +146,7 @@ class RequestService
         if ($checkUser) {
             $assign = true;
         }
-        $$data = [
+        $data = [
             'request_id' => $request->id,
             'reason' => $request->reason,
             'submission_date' => $request->submission_date,
