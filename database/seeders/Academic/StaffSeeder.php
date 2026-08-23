@@ -19,9 +19,8 @@ class StaffSeeder extends Seeder
     {
 
         $newStaffData = [
-            // ========== StudentAffairs (شؤون الطلاب) ==========
             [
-                'person_id'         => 4,   // نورا علي حسين (affairs.khaled)
+                'person_id'         => 4,
                 'department_id'     => 1,   // قسم هندسة البرمجيات ونظم المعلومات
                 'hire_date'         => '2021-09-01',
                 'employment_status' => 'active',
@@ -30,18 +29,11 @@ class StaffSeeder extends Seeder
 
             // ========== Examination (شؤون الامتحانات) ==========
             [
-                'person_id'         => 3,   // يوسف سامر الحموي (exam.omar)
-                'department_id'     => 2,   // قسم الذكاء الاصطناعي
+                'person_id'         => 3,
+                'department_id'     => 1,   // قسم الذكاء الاصطناعي
                 'hire_date'         => '2020-03-15',
                 'employment_status' => 'active',
                 'staff_id_number'   => 'STF-12-002',
-            ],
-            [
-                'person_id'         => 12,  // هبة الله مصطفى (hiba.mustafa)
-                'department_id'     => 3,   // قسم النظم والشبكات الحاسوبية
-                'hire_date'         => '2022-06-01',
-                'employment_status' => 'active',
-                'staff_id_number'   => 'STF-12-003',
             ],
 
         ];

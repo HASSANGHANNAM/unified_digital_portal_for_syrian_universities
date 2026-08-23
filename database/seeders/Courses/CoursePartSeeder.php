@@ -17,17 +17,13 @@ class CoursePartSeeder extends Seeder
     {
         $staticParts = [
             // المادة 1: اللغة الانكليزية 1
-            ['course_id' => 1, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 1, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 1, 'name' => 'نظري', 'percentage' => 100],
             // المادة 2: اللغة الانكليزية 2
-            ['course_id' => 2, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 2, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 2, 'name' => 'نظري', 'percentage' => 100],
             // المادة 3: اللغة الانكليزية 3
-            ['course_id' => 3, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 3, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 3, 'name' => 'نظري', 'percentage' => 100],
             // المادة 4: اللغة الانكليزية 4
-            ['course_id' => 4, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 4, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 4, 'name' => 'نظري', 'percentage' => 100],
             // المادة 5: البرمجة 1
             ['course_id' => 5, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 5, 'name' => 'نظري', 'percentage' => 70],
@@ -38,29 +34,29 @@ class CoursePartSeeder extends Seeder
             ['course_id' => 7, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 7, 'name' => 'نظري', 'percentage' => 70],
             // المادة 8: الجبر العام
-            ['course_id' => 8, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 8, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 8, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 8, 'name' => 'نظري', 'percentage' => 80],
             // المادة 9: الجبر الخطي
-            ['course_id' => 9, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 9, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 9, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 9, 'name' => 'نظري', 'percentage' => 80],
             // المادة 10: تحليل 1
-            ['course_id' => 10, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 10, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 10, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 10, 'name' => 'نظري', 'percentage' => 80],
             // المادة 11: تحليل 2
-            ['course_id' => 11, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 11, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 11, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 11, 'name' => 'نظري', 'percentage' => 80],
             // المادة 12: تحليل 3
-            ['course_id' => 12, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 12, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 12, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 12, 'name' => 'نظري', 'percentage' => 80],
             // المادة 13: تحليل عددي
-            ['course_id' => 13, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 13, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 13, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 13, 'name' => 'نظري', 'percentage' => 80],
             // المادة 14: الاحتمالات و الإحصاء
-            ['course_id' => 14, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 14, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 14, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 14, 'name' => 'نظري', 'percentage' => 80],
             // المادة 15: مبادئ عمل الحاسوب
-            ['course_id' => 15, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 15, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 15, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 15, 'name' => 'نظري', 'percentage' => 80],
             // المادة 16: بنيان الحواسيب 1
             ['course_id' => 16, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 16, 'name' => 'نظري', 'percentage' => 70],
@@ -80,17 +76,16 @@ class CoursePartSeeder extends Seeder
             ['course_id' => 21, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 21, 'name' => 'نظري', 'percentage' => 70],
             // المادة 22: الفيزياء
-            ['course_id' => 22, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 22, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 22, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 22, 'name' => 'نظري', 'percentage' => 80],
             // المادة 23: اللغة العربية
-            ['course_id' => 23, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 23, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 23, 'name' => 'نظري', 'percentage' => 100],
             // المادة 24: الدارات الكهربائية
-            ['course_id' => 24, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 24, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 24, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 24, 'name' => 'نظري', 'percentage' => 80],
             // المادة 25: الدارات المطقية
-            ['course_id' => 25, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 25, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 25, 'name' => 'عملي', 'percentage' => 20],
+            ['course_id' => 25, 'name' => 'نظري', 'percentage' => 80],
             // المادة 26: الخوارزميات وبنى المعطيات 1
             ['course_id' => 26, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 26, 'name' => 'نظري', 'percentage' => 70],
@@ -101,8 +96,7 @@ class CoursePartSeeder extends Seeder
             ['course_id' => 28, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 28, 'name' => 'نظري', 'percentage' => 70],
             // المادة 29: مهارات التواصل
-            ['course_id' => 29, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 29, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 29, 'name' => 'نظري', 'percentage' => 100],
             // المادة 30: بحوث العمليات
             ['course_id' => 30, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 30, 'name' => 'نظري', 'percentage' => 70],
@@ -122,17 +116,13 @@ class CoursePartSeeder extends Seeder
             ['course_id' => 35, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 35, 'name' => 'نظري', 'percentage' => 70],
             // المادة 36: حسابات علمية
-            ['course_id' => 36, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 36, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 36, 'name' => 'مشروع', 'percentage' => 100],
             // المادة 37: المشروع 1
-            ['course_id' => 37, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 37, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 37, 'name' => 'مشروع', 'percentage' => 100],
             // المادة 38: المشروع 2
-            ['course_id' => 38, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 38, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 38, 'name' => 'مشروع', 'percentage' => 100],
             // المادة 39: المشروع 3
-            ['course_id' => 39, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 39, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 39, 'name' => 'مشروع', 'percentage' => 100],
             // المادة 40: بروتوكولات الاتصال الحاسوبية
             ['course_id' => 40, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 40, 'name' => 'نظري', 'percentage' => 70],
@@ -179,8 +169,7 @@ class CoursePartSeeder extends Seeder
             ['course_id' => 54, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 54, 'name' => 'نظري', 'percentage' => 70],
             // المادة 55: مشروع المترجمات
-            ['course_id' => 55, 'name' => 'عملي', 'percentage' => 30],
-            ['course_id' => 55, 'name' => 'نظري', 'percentage' => 70],
+            ['course_id' => 55, 'name' => 'مشروع', 'percentage' => 100],
             // المادة 56: نظم قواعد المعرفة
             ['course_id' => 56, 'name' => 'عملي', 'percentage' => 30],
             ['course_id' => 56, 'name' => 'نظري', 'percentage' => 70],

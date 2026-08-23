@@ -12,7 +12,6 @@ class DoctorSeeder extends Seeder
     public function run(): void
     {
         $doctorsData = [
-            // ========== Dean ==========
             [
                 'person_name' => 'نور الدين أحمد', // person_id = 1
                 'department_id' => 1, // هندسة البرمجيات ونظم المعلومات
@@ -21,65 +20,65 @@ class DoctorSeeder extends Seeder
                 'employment_status' => 'active',
             ],
             [
-                'person_name' => 'غسان نبيل الحافظ', // person_id = 19
+                'person_name' => 'هود محمد محمد',
                 'department_id' => 2, // الذكاء الاصطناعي
                 'title' => 'دكتور',
                 'hire_date' => '2003-02-15',
                 'employment_status' => 'active',
             ],
             [
-                'person_name' => 'نانسي رائف صالح', // person_id = 20
+                'person_name' => 'أحمد نور الدين',
                 'department_id' => 3, // النظم والشبكات الحاسوبية
                 'title' => 'دكتور',
                 'hire_date' => '2010-11-20',
                 'employment_status' => 'active',
             ],
 
-            // ========== HeadOfDepartment ==========
-            [
-                'person_name' => 'هود محمد', // person_id = 2
-                'department_id' => 4, // العلوم الأساسية
-                'title' => 'دكتور',
-                'hire_date' => '2008-06-10',
-                'employment_status' => 'active',
-            ],
+            // // ========== HeadOfDepartment ==========
+            // [
+            //     'person_name' => 'هود محمد', // person_id = 2
+            //     'department_id' => 4, // العلوم الأساسية
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2008-06-10',
+            //     'employment_status' => 'active',
+            // ],
 
-            // ========== Instructor ==========
-            [
-                'person_name' => 'محمد نور الدين', // person_id = 5
-                'department_id' => 1, // هندسة البرمجيات ونظم المعلومات
-                'title' => 'دكتور',
-                'hire_date' => '2015-03-01',
-                'employment_status' => 'active',
-            ],
-            [
-                'person_name' => 'سامر فؤاد العبد', // person_id = 13
-                'department_id' => 2, // الذكاء الاصطناعي
-                'title' => 'دكتور',
-                'hire_date' => '2017-09-15',
-                'employment_status' => 'active',
-            ],
-            [
-                'person_name' => 'دعاء إبراهيم الشيخ', // person_id = 14
-                'department_id' => 3, // النظم والشبكات الحاسوبية
-                'title' => 'دكتور',
-                'hire_date' => '2019-01-20',
-                'employment_status' => 'active',
-            ],
-            [
-                'person_name' => 'حسام تيسير الحلبي', // person_id = 15
-                'department_id' => 4, // العلوم الأساسية
-                'title' => 'دكتور',
-                'hire_date' => '2014-12-05',
-                'employment_status' => 'active',
-            ],
-            [
-                'person_name' => 'خالد يوسف', // person_id = 23
-                'department_id' => 1, // هندسة البرمجيات ونظم المعلومات
-                'title' => 'دكتور',
-                'hire_date' => '2020-08-25',
-                'employment_status' => 'active',
-            ],
+            // // ========== Instructor ==========
+            // [
+            //     'person_name' => 'محمد نور الدين', // person_id = 5
+            //     'department_id' => 1, // هندسة البرمجيات ونظم المعلومات
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2015-03-01',
+            //     'employment_status' => 'active',
+            // ],
+            // [
+            //     'person_name' => 'سامر فؤاد العبد', // person_id = 13
+            //     'department_id' => 2, // الذكاء الاصطناعي
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2017-09-15',
+            //     'employment_status' => 'active',
+            // ],
+            // [
+            //     'person_name' => 'دعاء إبراهيم الشيخ', // person_id = 14
+            //     'department_id' => 3, // النظم والشبكات الحاسوبية
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2019-01-20',
+            //     'employment_status' => 'active',
+            // ],
+            // [
+            //     'person_name' => 'حسام تيسير الحلبي', // person_id = 15
+            //     'department_id' => 4, // العلوم الأساسية
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2014-12-05',
+            //     'employment_status' => 'active',
+            // ],
+            // [
+            //     'person_name' => 'خالد يوسف', // person_id = 23
+            //     'department_id' => 1, // هندسة البرمجيات ونظم المعلومات
+            //     'title' => 'دكتور',
+            //     'hire_date' => '2020-08-25',
+            //     'employment_status' => 'active',
+            // ],
         ];
 
         foreach ($doctorsData as $data) {

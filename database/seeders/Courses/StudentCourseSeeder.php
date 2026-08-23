@@ -12,20 +12,16 @@ class StudentCourseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. جلب جميع الأقسام
         $departments = Department::all();
         $departmentsByName = $departments->keyBy('name');
 
-        // الحصول على قسم العلوم الأساسية (للسنوات 1-3)
         $basicDept = $departmentsByName['العلوم الأساسية'] ?? null;
 
         if (!$basicDept) {
             $this->command->error('❌ قسم العلوم الأساسية غير موجود!');
             return;
         }
-
-        // 2. جلب جميع الطلاب
-        $students = Student::with(['person', 'department', 'college'])->get();
+        $students = Student::with(['person', 'college'])->get();
 
         if ($students->isEmpty()) {
             $this->command->warn('⚠️ لا يوجد طلاب لتسجيلهم.');

@@ -17,22 +17,22 @@ class CollegeDeanSeeder extends Seeder
                 'college_id'   => 1,  // كلية الهندسة المعلوماتية - جامعة دمشق
                 'doctor_id'    => 1,  // person_id لنور الدين أحمد
                 'hired_date'   => '2020-09-01',
-                'expire_date'  => '2025-09-01',
+                'expire_date'  => '2028-09-01',
             ],
             // 2. غسان نبيل الحافظ - عميد كلية الطب البشري (college_id = 2)
-            [
-                'college_id'   => 2,  // كلية الطب البشري - جامعة دمشق
-                'doctor_id'    => 2, // person_id لغسان نبيل الحافظ
-                'hired_date'   => '2018-03-15',
-                'expire_date'  => '2024-03-15',
-            ],
-            // 3. نانسي رائف صالح - عميدة كلية الآداب (college_id = 5)
-            [
-                'college_id'   => 5,  // كلية الآداب - جامعة دمشق
-                'doctor_id'    => 3, // person_id لنانسي رائف صالح
-                'hired_date'   => '2021-11-01',
-                'expire_date'  => '2026-11-01',
-            ],
+            // [
+            //     'college_id'   => 2,  // كلية الطب البشري - جامعة دمشق
+            //     'doctor_id'    => 2, // person_id لغسان نبيل الحافظ
+            //     'hired_date'   => '2018-03-15',
+            //     'expire_date'  => '2024-03-15',
+            // ],
+            // // 3. نانسي رائف صالح - عميدة كلية الآداب (college_id = 5)
+            // [
+            //     'college_id'   => 5,  // كلية الآداب - جامعة دمشق
+            //     'doctor_id'    => 3, // person_id لنانسي رائف صالح
+            //     'hired_date'   => '2021-11-01',
+            //     'expire_date'  => '2026-11-01',
+            // ],
         ];
 
         foreach ($deansData as $data) {

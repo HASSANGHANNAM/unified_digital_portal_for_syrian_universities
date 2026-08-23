@@ -24,7 +24,7 @@ class CollegeSeederV2 extends Seeder
             ],
             [
                 'name' => 'كلية الطب البشري',
-                'dean_id' => 2,
+                'dean_id' => null,
                 'university_id' => 1,
             ],
             [
@@ -39,7 +39,7 @@ class CollegeSeederV2 extends Seeder
             ],
             [
                 'name' => 'كلية الآداب ',
-                'dean_id' => 3,
+                'dean_id' => null,
                 'university_id' => 1,
             ],
             [

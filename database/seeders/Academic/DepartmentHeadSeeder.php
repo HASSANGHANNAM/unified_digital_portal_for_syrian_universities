@@ -15,14 +15,14 @@ class DepartmentHeadSeeder extends Seeder
 
             [
                 'department_id' => 1,  // id الخاص بقسم "هندسة البرمجيات ونظم المعلومات" في كلية الهندسة بجامعة دمشق
-                'doctor_name'   => 'هود محمد',
+                'full_name' => 'هود محمد محمد',
                 'hired_date'    => '2020-09-01',
-                'expire_date'   => '2025-09-01',
+                'expire_date'   => '2027-09-01',
             ],
         ];
 
         foreach ($headsData as $data) {
-            $doctor = Doctor::whereHas('person', fn($q) => $q->where('full_name', $data['doctor_name']))->first();
+            $doctor = Doctor::whereHas('person', fn($q) => $q->where('full_name', $data['full_name']))->first();
             if (!$doctor) continue;
 
             $exists = DepartmentHead::where('department_id', $data['department_id'])

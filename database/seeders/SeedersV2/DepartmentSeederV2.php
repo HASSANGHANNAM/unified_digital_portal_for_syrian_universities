@@ -10,11 +10,12 @@ class DepartmentSeederV2 extends Seeder
     public function run(): void
     {
         $departments = [
-            //                كلية الهندسة المعلوماتية جامعة دمشق
             ['name' => 'هندسة البرمجيات ونظم المعلومات', 'college_id' => 1],
             ['name' => 'الذكاء الاصطناعي', 'college_id' => 1],
             ['name' => 'النظم والشبكات الحاسوبية', 'college_id' => 1],
             ['name' => 'العلوم الأساسية', 'college_id' => 1],
+
+
             //                كلية الطب البشري جامعة دمشق
             ['name' => 'الطب العام', 'college_id' => 2],
             //                كلية طب الأسنان جامعة دمشق

@@ -20,7 +20,7 @@ class UniversitySeederV2 extends Seeder
                 'logo_path' => 'private/logos/1/8741ec1f-8b54-4dab-95c2-f88d0aa626ed.png',
                 'address' => 'دمشق',
                 'accreditation' => 'حكومي',
-                'university_director_id' => null,
+                'university_director_id' => 8,
             ],
             [
                 'name' => 'جامعة حمص',

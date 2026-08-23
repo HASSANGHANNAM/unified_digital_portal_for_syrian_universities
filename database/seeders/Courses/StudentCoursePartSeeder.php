@@ -70,7 +70,7 @@ class StudentCoursePartSeeder extends Seeder
 
         // ==================== 2. (اختياري) بيانات مخصصة من المصفوفة ====================
         $this->command->info("📝 جاري معالجة البيانات المخصصة...");
-        $this->seedCustomData();
+        // $this->seedCustomData();
 
         $this->command->info("✅ تم الانتهاء من تشغيل السيدر بالكامل!");
     }
@@ -78,84 +78,84 @@ class StudentCoursePartSeeder extends Seeder
     /**
      * بيانات مخصصة من المصفوفة (لحالات خاصة)
      */
-    private function seedCustomData(): void
-    {
-        $specificStudentCourseParts = [
-            [
-                'student_name' => 'أحمد محمد العلي',
-                'course_code' => 'CS101',
-                'course_part_name' => 'أساسيات C++',
-                'credits' => 1,
-                'published' => true,
-            ],
-            [
-                'student_name' => 'أحمد محمد العلي',
-                'course_code' => 'CS101',
-                'course_part_name' => 'التعامل مع المصفوفات',
-                'credits' => 1,
-                'published' => true,
-            ],
-            [
-                'student_name' => 'أحمد محمد العلي',
-                'course_code' => 'CS101',
-                'course_part_name' => 'البرمجة غرضية التوجه',
-                'credits' => 1,
-                'published' => true,
-            ],
-            [
-                'student_name' => 'أحمد محمد العلي',
-                'course_code' => 'CS201',
-                'course_part_name' => 'القوائم المترابطة',
-                'credits' => 2,
-                'published' => true,
-            ],
-            [
-                'student_name' => 'أحمد محمد العلي',
-                'course_code' => 'CS201',
-                'course_part_name' => 'الأشجار والرسوم البيانية',
-                'credits' => 2,
-                'published' => false,
-            ],
-        ];
+    // private function seedCustomData(): void
+    // {
+    //     $specificStudentCourseParts = [
+    //         [
+    //             'student_name' => 'أحمد محمد العلي',
+    //             'course_code' => 'CS101',
+    //             'course_part_name' => 'أساسيات C++',
+    //             'credits' => 1,
+    //             'published' => true,
+    //         ],
+    //         [
+    //             'student_name' => 'أحمد محمد العلي',
+    //             'course_code' => 'CS101',
+    //             'course_part_name' => 'التعامل مع المصفوفات',
+    //             'credits' => 1,
+    //             'published' => true,
+    //         ],
+    //         [
+    //             'student_name' => 'أحمد محمد العلي',
+    //             'course_code' => 'CS101',
+    //             'course_part_name' => 'البرمجة غرضية التوجه',
+    //             'credits' => 1,
+    //             'published' => true,
+    //         ],
+    //         [
+    //             'student_name' => 'أحمد محمد العلي',
+    //             'course_code' => 'CS201',
+    //             'course_part_name' => 'القوائم المترابطة',
+    //             'credits' => 2,
+    //             'published' => true,
+    //         ],
+    //         [
+    //             'student_name' => 'أحمد محمد العلي',
+    //             'course_code' => 'CS201',
+    //             'course_part_name' => 'الأشجار والرسوم البيانية',
+    //             'credits' => 2,
+    //             'published' => false,
+    //         ],
+    //     ];
 
-        foreach ($specificStudentCourseParts as $data) {
-            // جلب الطالب
-            $student = Student::whereHas('person', function ($q) use ($data) {
-                $q->where('full_name', $data['student_name']);
-            })->first();
+    //     foreach ($specificStudentCourseParts as $data) {
+    //         // جلب الطالب
+    //         $student = Student::whereHas('person', function ($q) use ($data) {
+    //             $q->where('full_name', $data['student_name']);
+    //         })->first();
 
-            // جلب المادة
-            $course = Course::where('code', $data['course_code'])->first();
+    //         // جلب المادة
+    //         $course = Course::where('code', $data['course_code'])->first();
 
-            if ($student && $course) {
-                $studentCourse = StudentCourse::where('student_id', $student->id)
-                    ->where('course_id', $course->id)
-                    ->first();
+    //         if ($student && $course) {
+    //             $studentCourse = StudentCourse::where('student_id', $student->id)
+    //                 ->where('course_id', $course->id)
+    //                 ->first();
 
-                if ($studentCourse) {
-                    $coursePart = CoursePart::where('course_id', $course->id)
-                        ->where('name', $data['course_part_name'])
-                        ->first();
+    //             if ($studentCourse) {
+    //                 $coursePart = CoursePart::where('course_id', $course->id)
+    //                     ->where('name', $data['course_part_name'])
+    //                     ->first();
 
-                    if ($coursePart) {
-                        $exists = \App\Models\StudentCoursePart::where('student_course_id', $studentCourse->id)
-                            ->where('course_part_id', $coursePart->id)
-                            ->exists();
+    //                 if ($coursePart) {
+    //                     $exists = \App\Models\StudentCoursePart::where('student_course_id', $studentCourse->id)
+    //                         ->where('course_part_id', $coursePart->id)
+    //                         ->exists();
 
-                        if (!$exists) {
-                            DB::transaction(function () use ($studentCourse, $coursePart, $data) {
-                                $this->studentCoursePartRepo->create([
-                                    'student_course_id' => $studentCourse->id,
-                                    'course_part_id' => $coursePart->id,
-                                    'credits' => $data['credits'],
-                                    'published' => $data['published'],
-                                ]);
-                            });
-                            $this->command->info("✅ تم إضافة جزء مخصص: {$data['course_part_name']} للطالب {$data['student_name']}");
-                        }
-                    }
-                }
-            }
-        }
-    }
+    //                     if (!$exists) {
+    //                         DB::transaction(function () use ($studentCourse, $coursePart, $data) {
+    //                             $this->studentCoursePartRepo->create([
+    //                                 'student_course_id' => $studentCourse->id,
+    //                                 'course_part_id' => $coursePart->id,
+    //                                 'credits' => $data['credits'],
+    //                                 'published' => $data['published'],
+    //                             ]);
+    //                         });
+    //                         $this->command->info("✅ تم إضافة جزء مخصص: {$data['course_part_name']} للطالب {$data['student_name']}");
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }
