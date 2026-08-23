@@ -36,6 +36,7 @@ Route::post('/addGrade', [GradeController::class, 'addGrade']);
 Route::prefix('V1')->group(function () {
     Route::post('/forgot-password-withoutToken', [AuthController::class, 'forgotPasswordWithoutToken'])->middleware(['permission:forgot password']);
     Route::post('/resend-code-withoutToken', [AuthController::class, 'resendCodeWithoutToken'])->middleware(['permission:resend verification code']);
+    Route::post('/verify-reset-code-withoutToken', [AuthController::class, 'verifyResetCodeWithoutToken'])->middleware(['permission:verify reset code']);
 });
 //  V1
 Route::prefix('V1')->group(function () {

@@ -256,7 +256,28 @@ class AuthServices
             'code' => 200,
         ];
     }
-    // يضع كلمة السر الجديدة هنا بعد التحقق من الكود
+    public function verifyResetCodeWithoutToken($request): array
+    {
+        $user = User::where('email', $request['email'])->first();
+        if (!$user->email) {
+            throw new \Exception('No email is associated with this account.');
+        }
+        $ok = $this->emailRepo->verifyResetCode(
+            $user,
+            $request->code
+        );
+
+        if (!$ok) {
+            throw new \Exception('Invalid or expired verification code.');
+        }
+        return [
+            'data' => [
+                'verified' => true,
+            ],
+            'message' => 'Verification code is valid.',
+            'code' => 200,
+        ];
+    }
     public function resetPassword($request): array
     {
         $user = auth()->user();

@@ -13,6 +13,7 @@ use App\Http\Requests\V1\ChangePasswordRequest;
 use App\Http\Requests\V1\CheckEmailRequest;
 use App\Http\Requests\V1\ResetPasswordRequest;
 use App\Http\Requests\V1\EditProfileRequest;
+use App\Http\Requests\V1\VerifyEmailRequestWithOutToken;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Responses\Response;
@@ -160,6 +161,16 @@ class AuthController extends Controller
     {
         try {
             $data = $this->authServices->verifyResetCode($request);
+            return Response::success($data['data'], $data['message'], $data['code']);
+        } catch (Throwable $th) {
+            $message = $th->getMessage();
+            return Response::Error([], $message);
+        }
+    }
+    public function verifyResetCodeWithoutToken(VerifyEmailRequestWithOutToken $request): JsonResponse
+    {
+        try {
+            $data = $this->authServices->verifyResetCodeWithoutToken($request);
             return Response::success($data['data'], $data['message'], $data['code']);
         } catch (Throwable $th) {
             $message = $th->getMessage();
