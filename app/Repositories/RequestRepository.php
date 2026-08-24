@@ -337,7 +337,7 @@ class RequestRepository
             // نغير الحالة إلى generating_... ثم نطلق الـ Job
             // لأن الـ Job هو المسؤول عن توليد PDF وتغيير الحالة إلى waiting_... أو completed
             if ($currentIndex === false || $currentIndex === count($requiredRoles) - 1) {
-                $generatingStatus = 'generating_final_pdf';
+                $generatingStatus = 'completed';
             } else {
                 $nextRole = $requiredRoles[$currentIndex + 1];
                 $generatingStatus = 'generating_' . $nextRole . '_pdf';

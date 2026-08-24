@@ -193,7 +193,7 @@ class GenerateRequestPdfJob implements ShouldQueue
         // 11. إعادة الحالة النهائية بعد اكتمال التوليد
         //     - pending => waiting_{first_role}
         //     - generating_{role}_pdf => waiting_{next_role} أو completed
-        //     - generating_final_pdf => completed
+        //     - completed يبقى completed عندما لا يوجد دور تالٍ
         // ============================================================
         $finalStatus = $this->resolveFinalStatusAfterGeneration($request, $initialStatus);
 
@@ -329,7 +329,6 @@ class GenerateRequestPdfJob implements ShouldQueue
      * هذا يحافظ على تسلسل الحالات نفسه الموجود في الـ Repository:
      * pending -> waiting_{first_role}
      * generating_{role}_pdf -> waiting_{next_role} أو completed
-     * generating_final_pdf -> completed
      */
     protected function resolveFinalStatusAfterGeneration(Request $request, string $initialStatus): ?string
     {
@@ -341,7 +340,7 @@ class GenerateRequestPdfJob implements ShouldQueue
             return $firstRole ? 'waiting_' . $firstRole : null;
         }
 
-        if ($initialStatus === 'generating_final_pdf') {
+        if ($initialStatus === 'completed') {
             return 'completed';
         }
 
