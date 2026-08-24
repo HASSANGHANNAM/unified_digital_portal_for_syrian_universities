@@ -460,7 +460,7 @@ class RequestService
                 'code' => 404,
             ];
         }
-        if ($request->pdf_path != null && $request->status !== 'completed') {
+        if ($request->pdf_path != null && $request->status === 'completed') {
             $request->pdf_url = $request->id ? 'pdf/' . $request->id : '';
         } else {
             $request->pdf_url = null;
