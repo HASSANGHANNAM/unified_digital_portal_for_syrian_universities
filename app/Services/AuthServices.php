@@ -161,7 +161,7 @@ class AuthServices
             if (Storage::disk('public')->exists($user->person->profile_image)) {
                 return [
                     'data' => [
-                        'profile_image' => Storage::disk('public')->temporaryUrl(
+                        'profile_image' => Storage::disk('public')->url(
                             $user->person->profile_image,
                             now()->addDays(7)
                         )
