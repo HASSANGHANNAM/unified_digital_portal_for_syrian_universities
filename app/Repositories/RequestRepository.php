@@ -291,7 +291,7 @@ class RequestRepository
             $request->update([
                 'status' => 'rejected',
                 'decision_date' => now(),
-                'processed_by_staff_id' => $userId,
+                // 'processed_by_staff_id' => $userId,
                 'decision_reason' => $decision_reason,
             ]);
 
@@ -322,7 +322,7 @@ class RequestRepository
                 'status' => $newStatus,
                 'decision_date' => now(),
                 'decision_reason' => $decision_reason,
-                'processed_by_staff_id' => $userId,
+                // 'processed_by_staff_id' => $userId,
             ]);
         } else {
             $nextRole = $requiredRoles[$currentIndex + 1];
