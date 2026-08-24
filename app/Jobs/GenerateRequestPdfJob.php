@@ -30,6 +30,7 @@ class GenerateRequestPdfJob implements ShouldQueue
     {
         ini_set('memory_limit', '512M');
         $request = $this->request;
+        $initialStatus = $request->status;
 
         // ============================================================
         // 1. التحقق من أن الطلب في حالة تسمح بتوليد PDF
@@ -189,18 +190,22 @@ class GenerateRequestPdfJob implements ShouldQueue
         $request->save();
 
         // ============================================================
-        // 11. 🔥 تغيير الحالة إلى waiting_{first_role} إذا كانت pending
+        // 11. إعادة الحالة النهائية بعد اكتمال التوليد
+        //     - pending => waiting_{first_role}
+        //     - generating_{role}_pdf => waiting_{next_role} أو completed
+        //     - generating_final_pdf => completed
         // ============================================================
-        if ($request->status === 'pending') {
-            $firstRole = $request->requestType?->getRequiredRoles()[0] ?? null;
-            if ($firstRole) {
-                $request->status = 'waiting_' . $firstRole;
-                $request->save();
+        $finalStatus = $this->resolveFinalStatusAfterGeneration($request, $initialStatus);
 
-                Log::info('تم تغيير حالة الطلب إلى waiting_' . $firstRole, [
-                    'request_id' => $request->id,
-                ]);
-            }
+        if ($finalStatus !== null && $request->status !== $finalStatus) {
+            $request->status = $finalStatus;
+            $request->save();
+
+            Log::info('تم تحديث حالة الطلب بعد توليد PDF', [
+                'request_id' => $request->id,
+                'from_status' => $initialStatus,
+                'to_status' => $finalStatus,
+            ]);
         }
 
         // ============================================================
@@ -316,6 +321,53 @@ class GenerateRequestPdfJob implements ShouldQueue
             ['name' => 'فيزياء 1', 'source_university' => 'جامعة حلب', 'mark' => 78, 'hours' => 3],
             ['name' => 'برمجة 1', 'source_university' => 'جامعة تشرين', 'mark' => 92, 'hours' => 4],
         ];
+    }
+
+    /**
+     * تحديد الحالة النهائية بعد انتهاء توليد PDF.
+     *
+     * هذا يحافظ على تسلسل الحالات نفسه الموجود في الـ Repository:
+     * pending -> waiting_{first_role}
+     * generating_{role}_pdf -> waiting_{next_role} أو completed
+     * generating_final_pdf -> completed
+     */
+    protected function resolveFinalStatusAfterGeneration(Request $request, string $initialStatus): ?string
+    {
+        $requiredRoles = $request->requestType?->getRequiredRoles() ?? [];
+
+        if ($initialStatus === 'pending') {
+            $firstRole = $requiredRoles[0] ?? null;
+
+            return $firstRole ? 'waiting_' . $firstRole : null;
+        }
+
+        if ($initialStatus === 'generating_final_pdf') {
+            return 'completed';
+        }
+
+        if (! preg_match('/^generating_(.+)_pdf$/', $initialStatus, $matches)) {
+            return null;
+        }
+
+        $currentRole = $matches[1] ?? null;
+
+        if ($currentRole === null || $requiredRoles === []) {
+            return null;
+        }
+
+        $currentIndex = array_search($currentRole, $requiredRoles, true);
+
+        if ($currentIndex === false) {
+            return null;
+        }
+
+        $nextIndex = $currentIndex + 1;
+
+        if ($nextIndex >= count($requiredRoles)) {
+            return 'completed';
+        }
+
+        return 'waiting_' . $requiredRoles[$nextIndex];
     }
 
     /**
