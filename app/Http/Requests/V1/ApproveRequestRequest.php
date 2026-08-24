@@ -25,7 +25,8 @@ class ApproveRequestRequest extends FormRequest
             'request_id' => [
                 'required',
                 'integer',
-                Rule::exists('request', 'id'),
+                // اسم الجدول الحقيقي في قاعدة البيانات هو requests، وليس request.
+                Rule::exists('requests', 'id'),
             ],
             'decision' => [
                 'required',
