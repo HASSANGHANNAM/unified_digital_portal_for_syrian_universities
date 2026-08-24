@@ -156,7 +156,7 @@ class MediaService
     }
     public function viewPdf($requestId)
     {
-        $request = Request::findOrFail($requestId);
+        $request = Request::findOrFail((int)$requestId);
 
         Gate::authorize('viewPdf', $request);
 
