@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Mpdf\Mpdf;
+use App\Events\SendCustomNotification; // 🔥 استيراد حدث الإشعار
 
 class GenerateRequestPdfJob implements ShouldQueue
 {
@@ -136,7 +137,7 @@ class GenerateRequestPdfJob implements ShouldQueue
             'studentStatus' => $studentStatus,
             'certificateData' => $certificateData,
             'equivalencyData' => $equivalencyData,
-            'academicYear' => $academicYear, // 🔥 المتغير الجديد
+            'academicYear' => $academicYear,
             'signatures' => $signatures,
             'submissionDate' => $request->submission_date ?? $request->created_at ?? now(),
         ])->render();
@@ -191,15 +192,24 @@ class GenerateRequestPdfJob implements ShouldQueue
 
         // ============================================================
         // 11. إعادة الحالة النهائية بعد اكتمال التوليد
-        //     - pending => waiting_{first_role}
-        //     - generating_{role}_pdf => waiting_{next_role} أو completed
-        //     - completed يبقى completed عندما لا يوجد دور تالٍ
         // ============================================================
         $finalStatus = $this->resolveFinalStatusAfterGeneration($request, $initialStatus);
 
         if ($finalStatus !== null && $request->status !== $finalStatus) {
             $request->status = $finalStatus;
             $request->save();
+
+            // 🔥 إرسال إشعار للمستخدم الطالب
+            $student = $request->student;
+            if ($student && $student->user) {
+                $user = $student->user;
+                event(new SendCustomNotification(
+                    $user,
+                    'تحديث حالة الطلب',
+                    'تم تحديث حالة طلبك إلى: ' . $finalStatus,
+                    'WARNING'
+                ));
+            }
 
             Log::info('تم تحديث حالة الطلب بعد توليد PDF', [
                 'request_id' => $request->id,
@@ -235,10 +245,6 @@ class GenerateRequestPdfJob implements ShouldQueue
 
     /**
      * جلب جميع بيانات الحياة الجامعية (السنوات، العقوبات، طلبات الإيقاف، حالة الطالب)
-     * 🔥 هذه الدالة جاهزة لاستبدال البيانات الوهمية ببيانات حقيقية من الـ Repository
-     * 
-     * @param int $studentId
-     * @return array
      */
     protected function getStudentAcademicData(int $studentId): array
     {
@@ -268,10 +274,6 @@ class GenerateRequestPdfJob implements ShouldQueue
 
     /**
      * جلب بيانات وثيقة الدوام (بيانات ثابتة حالياً)
-     * 🔥 هذه الدالة جاهزة لاستبدال البيانات الوهمية ببيانات حقيقية من الـ Repository
-     * 
-     * @param int $studentId
-     * @return array
      */
     protected function getAttendanceCertificateData(int $studentId): array
     {
@@ -325,10 +327,6 @@ class GenerateRequestPdfJob implements ShouldQueue
 
     /**
      * تحديد الحالة النهائية بعد انتهاء توليد PDF.
-     *
-     * هذا يحافظ على تسلسل الحالات نفسه الموجود في الـ Repository:
-     * pending -> waiting_{first_role}
-     * generating_{role}_pdf -> waiting_{next_role} أو completed
      */
     protected function resolveFinalStatusAfterGeneration(Request $request, string $initialStatus): ?string
     {
