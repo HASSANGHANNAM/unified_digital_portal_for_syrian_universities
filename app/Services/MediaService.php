@@ -10,6 +10,7 @@ use App\Repositories\Contracts\RequestMediaRepositoryInterface;
 use App\Services\Traits\TokenDataTrait;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
@@ -156,7 +157,7 @@ class MediaService
     }
     public function viewPdf($requestId)
     {
-        $request = Request::findOrFail((int)$requestId);
+        $request = Request::findOrFail($requestId);
 
         Gate::authorize('viewPdf', $request);
 
@@ -164,11 +165,23 @@ class MediaService
             abort(404, 'لم يتم إنشاء ملف PDF لهذا الطلب بعد.');
         }
 
-        if (!Storage::disk('private')->exists($request->pdf_path)) {
+        $pdfPath = ltrim($request->pdf_path, '/');
+
+        if (!Storage::disk('local')->exists($pdfPath)) {
+            Log::warning('طلب PDF لمسار غير موجود على القرص', [
+                'request_id' => $request->id,
+                'pdf_path' => $pdfPath,
+                'disk_root' => storage_path('app'),
+            ]);
+
             abort(404, 'ملف PDF غير موجود على الخادم.');
         }
 
-        return Storage::disk('private')->response($request->pdf_path);
+        $absolutePath = Storage::disk('local')->path($pdfPath);
+
+        return response()->file($absolutePath, [
+            'Content-Type' => 'application/pdf',
+        ]);
     }
     public function uploadLectureFile($file, int $coursePartsId): array
     {
