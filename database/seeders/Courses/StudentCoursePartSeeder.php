@@ -40,9 +40,9 @@ class StudentCoursePartSeeder extends Seeder
             foreach ($courseParts as $part) {
                 // تحديد الدرجة الافتراضية حسب اسم الجزء
                 $credits = match ($part->name) {
-                    'practical' => rand(15, 20),   // العملي من 15 إلى 20
-                    'theoretical' => rand(40, 60), // النظري من 40 إلى 60
-                    default => rand(10, 50),       // أي جزء آخر
+                    'عملي' => rand(18, 20),   // العملي من 15 إلى 20
+                    'نظري' => rand(45, 60), // النظري من 40 إلى 60
+                    default => rand(60, 100),       // أي جزء آخر
                 };
 
                 // تجنب التكرار

@@ -345,7 +345,7 @@
             <h3 style="text-align: center;">📄 وثيقة دوام</h3>
             <div style="border: 2px solid #2c3e50; border-radius: 10px; padding: 30px 25px; background: #fefefe; margin-top: 15px; line-height: 2;">
                 <p style="font-size: 16px; text-align: right;">
-                    سجل الطالب/الطالبة <strong>{{ $fullName }}</strong>
+                    داوم الطالب/الطالبة <strong>{{ $fullName }}</strong>
                     بالسنة <strong>{{ $currentYear }}</strong>
                     في قسم <strong>{{ $major }}</strong>
                     للعام الدراسي <strong>{{ $academicYear ?? '2024-2025' }}</strong>

@@ -250,9 +250,9 @@ class GenerateRequestPdfJob implements ShouldQueue
         return [
             'studentStatus' => 'مستمر',
             'academicYears' => [
-                ['year' => 'السنة الأولى', 'status' => 'ناجح'],
+                ['year' => 'السنة الأولى', 'status' => 'منقول'],
                 ['year' => 'السنة الثانية', 'status' => 'منقول'],
-                ['year' => 'السنة الثالثة', 'status' => 'راسب'],
+                ['year' => 'السنة الثالثة', 'status' => 'منقول'],
                 ['year' => 'السنة الرابعة', 'status' => 'ناجح'],
             ],
             'sanctions' => [
