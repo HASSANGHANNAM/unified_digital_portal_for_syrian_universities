@@ -60,15 +60,15 @@ class GradeService
 
         $user = Auth::user();
 
-        $permission = $this->courseRepository->hasCourseAccess($user, $courseId);
-        if (!$permission['status']) {
+        // $permission = $this->courseRepository->hasCourseAccess($user, $courseId);
+        // if (!$permission['status']) {
 
-            return [
-                'data' => [],
-                'message' => $permission['message'],
-                'code' => $permission['code'],
-            ];
-        }
+        //     return [
+        //         'data' => [],
+        //         'message' => $permission['message'],
+        //         'code' => $permission['code'],
+        //     ];
+        // }
         $course = Course::find($courseId);
 
         if (!$course) {
@@ -362,16 +362,16 @@ class GradeService
     // إضافة علامات لطالب معين في مادة معينة (للامتحانات)
     public function addGradesforonestudent(User $user, int $courseId, string $academicYear, int $semester, array $request): array
     {
-        $coursePermission = $this->courseRepository
-            ->hasCourseAccess($user, $courseId);
+        // $coursePermission = $this->courseRepository
+        //     ->hasCourseAccess($user, $courseId);
 
-        if (!$coursePermission['status']) {
-            return [
-                'data' => [],
-                'message' => $coursePermission['message'],
-                'code' => $coursePermission['code'],
-            ];
-        }
+        // if (!$coursePermission['status']) {
+        //     return [
+        //         'data' => [],
+        //         'message' => $coursePermission['message'],
+        //         'code' => $coursePermission['code'],
+        //     ];
+        // }
 
         $student = $this->studentRepositoryInterface
             ->findByStudentNumber($request['student_number']);

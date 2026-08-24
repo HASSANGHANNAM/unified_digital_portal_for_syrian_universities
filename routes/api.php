@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\DepartmentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AcademicController;
@@ -25,6 +24,7 @@ use App\Http\Controllers\Api\V1\StudyPlanController;
 use App\Http\Controllers\Api\V1\StudentAttachment;
 use App\Http\Controllers\Api\V1\AffairController;
 use App\Http\Controllers\Api\V1\CollegeFileController;
+use App\Http\Controllers\Api\V1\DepartmentController;
 use App\Http\Controllers\Api\V1\FileStorageController;
 use App\Http\Controllers\Api\V1\StaffController;
 

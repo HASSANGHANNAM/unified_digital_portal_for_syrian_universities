@@ -21,14 +21,14 @@ class DoctorSeeder extends Seeder
             ],
             [
                 'person_name' => 'هود محمد محمد',
-                'department_id' => 2, // الذكاء الاصطناعي
+                'department_id' => 1, // الذكاء الاصطناعي
                 'title' => 'دكتور',
                 'hire_date' => '2003-02-15',
                 'employment_status' => 'active',
             ],
             [
                 'person_name' => 'أحمد نور الدين',
-                'department_id' => 3, // النظم والشبكات الحاسوبية
+                'department_id' => 1, // النظم والشبكات الحاسوبية
                 'title' => 'دكتور',
                 'hire_date' => '2010-11-20',
                 'employment_status' => 'active',

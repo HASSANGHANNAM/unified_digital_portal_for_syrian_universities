@@ -12,12 +12,12 @@ class ApproveRequestRequest extends FormRequest
         return true;
     }
 
-    protected function prepareForValidation(): void
-    {
-        $this->merge([
-            'request_user_id' => $this->route('requestUserId'),
-        ]);
-    }
+    // protected function prepareForValidation(): void
+    // {
+    //     $this->merge([
+    //         'request_user_id' => $this->route('requestUserId'),
+    //     ]);
+    // }
 
     public function rules(): array
     {
